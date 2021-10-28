@@ -1,38 +1,205 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-size: 1.15rem;
+}
+
+:root {
+  --primary-color: #282c34;
+  --secondary-color: #7b8081;
+  --header-color: #fff;
+  --item-container-color: #f8f8f8;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-weight: 300;
+}
+
+input,
+button {
+  margin: 0.5em;
+  filter: brightness(100%);
+  cursor: pointer;
+}
+
+p {
+  font-size: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: var(--secondary-color);
+}
+
+#header-container {
+  background-color: var(--header-color);
+  background-repeat: no-repeat;
+  height: 20vh;
+  background-position: center center;
+  background-size: cover;
+  filter: brightness(70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#search-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#input-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#price-categ-container {
+  display: flex;
+}
+
+#categories-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#result-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+#item-result-container {
+  cursor: pointer;
+}
+
+#element-container {
+  background-color: var(--item-container-color);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  padding: 0.75em;
+  margin-bottom: 0.5em;
+}
+
+#element-info {
+  text-align: left;
+  padding-right: 1em;
+}
+
+#element-img {
+  margin-right: 1em;
+}
+
+#main-img-container img {
+  width: 350px;
+  height: 350px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+#img-carousel {
+  object-fit: cover;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#img-carousel img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+#icon-container img {
+  width: 25px;
+  height: auto;
+}
+
+#possib-lang {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+#possib-lang p {
+  margin: 0.5em;
+}
+
+#open-hours-el {
+  cursor: pointer;
+}
+
+.rating {
+  justify-content: center;
+  display: flex;
+}
+
+.review-user img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.review-text {
+  text-align: left;
+  margin: 0.5em 1em;
+}
+
+.review-user {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: left;
+}
+
+.rating-time-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.rating-time-container p {
+  margin-left: 1em;
+}
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.img-res-container-item {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  cursor: pointer;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.price {
+  margin-right: 0.5em;
+}
+
+.show {
+  display: contents;
+}
+
+.hide {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  #item-result-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
-}
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+  #element-container {
+    margin: 1em auto;
+    width: 500px;
   }
-  to {
-    transform: rotate(360deg);
+
+  #header-container {
+    height: 40vh;
   }
 }
