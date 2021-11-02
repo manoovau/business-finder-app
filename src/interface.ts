@@ -1,3 +1,8 @@
+export interface FilterInputType {
+  openFilter: string;
+  priceFilter: string;
+}
+
 export interface ItemInfoChildrenType {
   selectedBusiness: ItemInfoType;
   reviewData: reviewMainType;
@@ -61,10 +66,6 @@ export interface categoriesType {
   title: string;
 }
 
-export interface updateSearchInputsType {
-  updateSearchInputs: (objectIn: InputType) => void;
-}
-
 export interface reviewMainType {
   possible_languages?: string[];
   reviews?: reviewsType[];
@@ -85,4 +86,9 @@ export interface UserType {
   profile_url?: string | null;
   image_url?: string | null;
   name: string;
+}
+
+export interface pageInfoType {
+  currentPage: number;
+  totalPage: number;
 }

@@ -7,6 +7,7 @@ import {
   reviewMainType,
   ApiResponseType,
   ItemInfoChildrenType,
+  FilterInputType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
 import { Switch, Route } from "react-router-dom";
@@ -21,6 +22,11 @@ const requestHeaders: HeadersInit = {
   withCredentials: "true",
 };
 
+/**
+ * fetch function. Get YELP API data from API url
+ * @param url YELP API URL
+ * @returns YELP API data
+ */
 const useFetchYELP = async (fetchParameter: string) => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
@@ -35,11 +41,22 @@ function App() {
   const DEFAULT_VALUE = null;
   const DEFAULT_STRING = "default_string";
   const DEFAULT_NUMBER = 0;
+
   const [searchInputs, setSearchInputs] = useState<InputType>({
     business: DEFAULT_VALUE,
     where: DEFAULT_VALUE,
   });
 
+  // YELP API LIMIT is 50
+  const LIMIT = 50;
+  const [term, setTerm] = useState<string>(
+    `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}`,
+  );
+  const [filterValue, setFilterValue] = useState<FilterInputType>({
+    openFilter: ``,
+    priceFilter: ``,
+  });
+  const PATH = "/businesses/search";
   const [resultYELP, setResultYELP] = useState<ApiResponseType>({
     businesses: [],
     region: {},
@@ -54,19 +71,16 @@ function App() {
   const [idReviewData, setIdReviewData] = useState<string>();
   const [reviewData, setReviewData] = useState<reviewMainType>({ total: DEFAULT_NUMBER });
 
-  const LIMIT = 20;
-  const [term, setTerm] = useState<string>(
-    `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}`,
-  );
-  const PATH = "/businesses/search";
-
   const [itemInfoChildren, setItemInfoChildren] = useState<ItemInfoChildrenType>({
     selectedBusiness: { id: DEFAULT_STRING, name: DEFAULT_STRING },
     reviewData: { total: DEFAULT_NUMBER },
   });
-
+  // open_now=true
   useEffect(
-    () => setTerm(`?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}`),
+    () =>
+      setTerm(
+        `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}`,
+      ),
     [searchInputs],
   );
 
@@ -103,7 +117,7 @@ function App() {
     setItemInfoChildren({ ...itemInfoChildren, reviewData: reviewData });
   }, [reviewData]);
 
-  const updateSearchInputs = (objectIn: InputType) => {
+  const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
     if (!searchInputs.where) {
       (document.getElementById("where") as HTMLInputElement).placeholder =
@@ -116,13 +130,16 @@ function App() {
   console.log("resultYELP");
   console.log(resultYELP);
   console.log(selectedBusiness);
+  console.log(term);
 
   return (
     <div className="App">
       <Switch>
         <Route exact path="/">
           <div>
-            <Header updateSearchInputs={updateSearchInputs} />
+            <Header updateSearchInputs={updateSearchInputs} setFilterValue={setFilterValue}>
+              {filterValue}
+            </Header>
             <div id="result-container">
               <ItemContainer setIdSelected={setIdSelected}>{resultYELP}</ItemContainer>
             </div>
