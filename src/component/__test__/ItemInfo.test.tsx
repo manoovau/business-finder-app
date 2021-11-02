@@ -1,4 +1,4 @@
-import { ItemInfo, setDay, getOpenHours } from "../ItemInfo";
+import { ItemInfo, getDay, getOpenHours, getAddress } from "../ItemInfo";
 import { BrowserRouter } from "react-router-dom";
 import { render, screen } from "@testing-library/react";
 
@@ -109,9 +109,9 @@ describe(`ItemInfo and BasicInfoProd components test`, () => {
   });
 });
 
-describe("setDay function", () => {
+describe("getDay function", () => {
   test("return day of week <string> wiht a day<number> input", () => {
-    expect(setDay(3)).toEqual("Thursday");
+    expect(getDay(3)).toEqual("Thursday");
   });
 });
 
@@ -140,5 +140,28 @@ describe("getOpenHours function", () => {
     expect(text).toEqual(
       "Monday 09:00 - 05:00Tuesday 09:00 - 05:00Wednesday 09:00 - 05:00Thursday 09:00 - 05:00Friday 09:00 - 05:00Saturday 09:00 - 05:00Sunday 09:00 - 05:00",
     );
+  });
+});
+
+describe("getAddress function", () => {
+  test("return p element with address string", () => {
+    const selectedBusiness = {
+      id: "1SSqz0bluenaujqRzZwxew",
+      name: "Brandenburg Gate",
+      location: {
+        address1: "Pariser Platz",
+        address2: null,
+        address3: null,
+        city: "Berlin",
+        country: "DE",
+        cross_streets: null,
+        display_address: ["Pariser Platz", "10117 Berlin", "Germany"],
+        state: "BE",
+        zip_code: "10117",
+      },
+    };
+    const result = getAddress(selectedBusiness.location.display_address);
+
+    expect(result).toEqual(<p>Pariser Platz 10117 Berlin Germany</p>);
   });
 });

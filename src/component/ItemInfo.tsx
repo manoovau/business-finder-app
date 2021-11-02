@@ -9,7 +9,7 @@ type Props = {
 };
 
 /**
- * set url inside main image element
+ * Set url inside main image element
  * @param srcValue image url string
  */
 export const setMainImg = (srcValue: string): void => {
@@ -18,11 +18,11 @@ export const setMainImg = (srcValue: string): void => {
 };
 
 /**
- * set Week day
+ * Get Week day
  * @param index number (week day)
  * @returns Week day string
  */
-export const setDay = (index: number): string => {
+export const getDay = (index: number): string => {
   switch (index) {
     case 0:
       return "Monday";
@@ -53,7 +53,7 @@ export const getOpenHours = (children: ItemInfoType | undefined) => {
   if (children?.hours) {
     children.hours[0].open.map((item: OpenType, index: number) => {
       openHoursArr.push(
-        <p key={index}>{`${setDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
+        <p key={index}>{`${getDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
           2,
         )} - ${item.end.substring(0, 2)}:${item.end.slice(2)}`}</p>,
       );
@@ -66,9 +66,9 @@ export const getOpenHours = (children: ItemInfoType | undefined) => {
 /**
  * collect items inside display_address array
  * @param data display_address array
- * @returns address string
+ * @returns p element with address inside display_address array
  */
-const getAddress = (data: string[]): JSX.Element => {
+export const getAddress = (data: string[]): JSX.Element => {
   let htmlText = "";
   if (data) {
     data.map((item: string, index: number) => {
@@ -148,6 +148,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
 
           <img
             src="/img/review.png"
+            id="review-icon-img"
             alt="review icon"
             onClick={() => {
               setIdReviewData(children.selectedBusiness.id);
@@ -159,7 +160,14 @@ export const ItemInfo = (props: Props): JSX.Element => {
       <div id="images-container">
         <div id="main-img-container">
           {selectedBusiness?.photos ? (
-            <img id="main-img" src={selectedBusiness.photos[0]} />
+            <img
+              id="main-img"
+              src={
+                selectedBusiness.photos.length === 0
+                  ? `/img/nullPicture.png`
+                  : selectedBusiness.photos[0]
+              }
+            />
           ) : (
             DEFAULT_VALUE
           )}
