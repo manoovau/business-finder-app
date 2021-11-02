@@ -6,6 +6,11 @@ type Props = {
   children: ItemInfoChildrenType;
 };
 
+/**
+ *Get language string after provide language code string
+ * @param possibLanguage language code
+ * @returns language string
+ */
 export const getLanguage = (possibLanguage: string): string => {
   switch (possibLanguage) {
     case "cs":
@@ -55,7 +60,6 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
   return (
     <div id="id-review-container">
       <h4>Available languages</h4>
-
       {reviewData?.possible_languages ? (
         <div id="possib-lang" data-testid="possib-lang-test-id">
           {reviewData?.possible_languages.map((item: string, index: number) => {
@@ -65,7 +69,6 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
       ) : (
         DEFAULT_VALUE
       )}
-
       <div id="reviews-container">
         <h5>Review Highlights</h5>
         {reviewData?.reviews
@@ -90,9 +93,15 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
                     {createIconReview(item.rating)}
                     <p>{item.time_created}</p>
                   </div>
-
-                  <p className="review-text">{item.text}</p>
-                  {item?.text ? console.log(item.text.charAt(1)) : null}
+                  <div id="review-text-container">
+                    <p className="review-text">{item.text}</p>
+                    {item?.text?.substr(item?.text?.length - 3) === "..." &&
+                    selectedBusiness.url ? (
+                      <a href={selectedBusiness.url}>See more</a>
+                    ) : (
+                      DEFAULT_VALUE
+                    )}
+                  </div>
                 </div>
               );
             })
@@ -106,4 +115,3 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
     </div>
   );
 };
-// console.log(str.substring(str.length - 3) === "...");

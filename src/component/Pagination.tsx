@@ -23,7 +23,7 @@ export const Pagination = (props: Props): JSX.Element => {
 
       {children.totalPage > DEFAULT_CURRENT_PAGE ? (
         <p data-testid="pagination-info">
-          `${children.currentPage} of ${children.totalPage}`{" "}
+          {children.currentPage} of {children.totalPage}
         </p>
       ) : null}
 
