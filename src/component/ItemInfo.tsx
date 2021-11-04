@@ -107,7 +107,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
     <div id="item-info-container">
       <div id="info-container">
         <Link to="/" id="title">
-          <h1>{`< Go Back `}</h1>
+          <h3>{`< Go Back `}</h3>
         </Link>
         <BasicInfoProd>{selectedBusiness}</BasicInfoProd>
         {selectedBusiness?.hours ? (

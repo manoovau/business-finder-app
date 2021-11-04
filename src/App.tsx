@@ -11,6 +11,7 @@ import {
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
 import { Switch, Route } from "react-router-dom";
+
 // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 // url image not found
 // <div>Icons made by <a href="https://www.flaticon.com/authors/payungkead" title="Payungkead">Payungkead</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
@@ -23,7 +24,7 @@ const requestHeaders: HeadersInit = {
 };
 
 /**
- * fetch function. Get YELP API data from API url
+ * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
  * @returns YELP API data
  */
@@ -55,6 +56,8 @@ function App() {
   const [filterValue, setFilterValue] = useState<FilterInputType>({
     openFilter: ``,
     priceFilter: ``,
+    sortByFilter: ``,
+    attrFilter: ``,
   });
   const PATH = "/businesses/search";
   const [resultYELP, setResultYELP] = useState<ApiResponseType>({
@@ -75,11 +78,11 @@ function App() {
     selectedBusiness: { id: DEFAULT_STRING, name: DEFAULT_STRING },
     reviewData: { total: DEFAULT_NUMBER },
   });
-  // open_now=true
+
   useEffect(
     () =>
       setTerm(
-        `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}`,
+        `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
       ),
     [searchInputs],
   );
@@ -92,14 +95,9 @@ function App() {
   }, [term]);
 
   useEffect(() => {
-    console.log(idSelected);
-    console.log(idSelected !== undefined);
     if (idSelected !== undefined)
       Promise.resolve(useFetchYELP(`/businesses/${idSelected}`))
-        .then((resp) => {
-          console.log("SelectBus");
-          setSelectedBusiness(resp);
-        })
+        .then((resp) => setSelectedBusiness(resp))
         .catch((err) => console.error(err));
   }, [idSelected]);
 
@@ -113,10 +111,15 @@ function App() {
   useEffect(() => {
     setItemInfoChildren({ ...itemInfoChildren, selectedBusiness: selectedBusiness });
   }, [selectedBusiness]);
+
   useEffect(() => {
     setItemInfoChildren({ ...itemInfoChildren, reviewData: reviewData });
   }, [reviewData]);
 
+  /**
+   * set searchInputs values and check if where field is not filled.
+   * @param objectIn Object with business and where input fields.
+   */
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
     if (!searchInputs.where) {
@@ -127,10 +130,14 @@ function App() {
     }
   };
 
-  console.log("resultYELP");
+  console.log("response");
   console.log(resultYELP);
-  console.log(selectedBusiness);
+  console.log("sort by");
+  console.log(filterValue.sortByFilter);
+  console.log("term");
   console.log(term);
+  console.log("item");
+  console.log(selectedBusiness);
 
   return (
     <div className="App">

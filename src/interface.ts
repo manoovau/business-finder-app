@@ -1,6 +1,8 @@
 export interface FilterInputType {
   openFilter: string;
   priceFilter: string;
+  sortByFilter: string;
+  attrFilter: string;
 }
 
 export interface ItemInfoChildrenType {

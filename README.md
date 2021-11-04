@@ -1,10 +1,16 @@
 # Business finder App
 
-Welcome to Business finder App
+Project: Business finder App using YELP API.
+
+## Restrictions:
+
+- open at filter only supports 2 days after or before the current day.
+- maximum number of business results retruns by YELP API is 50.
+- sort by filter: rating sort is not strictly sorted by the rating value, but by an adjusted rating value that takes into account the number of ratings, similar to a Bayesian average. This is to prevent skewing results to businesses with a single review.
 
 ## Download project.
 
-Clone home-test-crealytics folder. It includes all dependencies.
+Clone business-finder-app folder. It includes all dependencies.
 
 ## Get Cookies to make API work.
 

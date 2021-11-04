@@ -1,7 +1,7 @@
 * {
   margin: 0;
   padding: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
 }
 
 :root {
@@ -32,6 +32,24 @@ a {
   color: var(--secondary-color);
 }
 
+h1 {
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: var(--header-color);
+}
+
+select {
+  font-size: 0.95rem;
+}
+
+#title h3 {
+  font-weight: 300;
+  color: var(--primary-color);
+  border-bottom: solid var(--primary-color);
+  border-width: 1px;
+  justify-content: left;
+}
+
 i,
 #review-icon-img,
 #open-hours-el,
@@ -40,13 +58,15 @@ i,
 }
 
 #header-container {
-  background-color: var(--header-color);
+  padding: 1em;
+  background-color: var(--secondary-color);
   background-repeat: no-repeat;
-  height: 20vh;
+  height: 35vh;
   background-position: center center;
   background-size: cover;
   filter: brightness(70%);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -59,6 +79,10 @@ i,
 #input-container {
   display: flex;
   flex-direction: column;
+}
+
+#price-input-container {
+  color: var(--header-color);
 }
 
 #price-categ-container {
@@ -83,6 +107,11 @@ i,
   justify-content: space-between;
   padding: 0.75em;
   margin-bottom: 0.5em;
+}
+
+#attributes-input-container label {
+  color: var(--header-color);
+  font-size: 1rem;
 }
 
 #element-info {
@@ -197,7 +226,8 @@ i,
   display: contents;
 }
 
-.hide {
+.hide,
+#att-in-big-screen {
   display: none;
 }
 
@@ -215,5 +245,9 @@ i,
 
   #header-container {
     height: 40vh;
+  }
+
+  #att-in-big-screen {
+    display: contents;
   }
 }
