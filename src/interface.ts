@@ -1,6 +1,14 @@
 export interface MapPageChildrenType {
   region?: CenterType;
-  markers?: CenterType[];
+  markers?: MarkerType[];
+}
+
+export interface MarkerType {
+  coord: CenterType;
+  idCoord: string;
+  nameCoord: string;
+  imgCoord: string;
+  ratingCoord?: number;
 }
 
 export interface RegionType {

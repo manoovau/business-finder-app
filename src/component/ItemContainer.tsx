@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ApiResponseType, ItemInfoType, pageInfoType, CenterType } from "../interface";
+import { ApiResponseType, ItemInfoType, pageInfoType, MarkerType } from "../interface";
 import { BasicInfoProd, Pagination } from "./index";
 import { Link } from "react-router-dom";
 
 type Props = {
   children: ApiResponseType;
   setIdSelected: (id: string) => void;
-  setMarkerResArr: (arr: CenterType[]) => void;
+  setMarkerResArr: (arr: MarkerType[]) => void;
 };
 
 /**
@@ -68,36 +68,35 @@ export const ItemContainer = (props: Props): JSX.Element => {
 
   const [minItemsPage, setMInitemsPage] = useState<number>(DEFAULT_NUMBER_VALUE);
   const [maxItemsPage, setMaxItemsPage] = useState<number>(ITEMS_BY_PAGE);
-  let coordinatesResArr: CenterType[] = [];
+  let coordinatesResArr: MarkerType[] = [];
 
   useEffect(() => {
-    console.log("ARRAY RESULT BUSINESS");
-    console.log(arrayResult.businesses);
-    {
-      arrayResult.businesses !== []
-        ? arrayResult.businesses.map((item: ItemInfoType, index: number) => {
-            if (index >= minItemsPage && index < maxItemsPage) {
-              {
-                item?.coordinates ? coordinatesResArr.push(item.coordinates) : console.log("no");
-              }
-            }
-          })
-        : console.log("array result is undefined");
-    }
-    console.log("ITEM CONTAINER UseEffect minitemPage and children");
-    console.log("min item");
-    console.log(minItemsPage);
-    console.log("max item");
-    console.log(maxItemsPage);
-    console.log("coordinatesResArr");
-    console.log(coordinatesResArr);
+    if (arrayResult.businesses !== [])
+      arrayResult.businesses.map((item: ItemInfoType, index: number) => {
+        if (index >= minItemsPage && index < maxItemsPage) {
+          let url = "";
+          if (!item?.image_url) {
+            url = `/img/nullPicture.png`;
+          } else {
+            url = item.image_url;
+          }
+
+          if (item?.coordinates)
+            coordinatesResArr.push({
+              coord: item.coordinates,
+              idCoord: item.id,
+              nameCoord: item.name,
+              imgCoord: url,
+              ratingCoord: item.rating,
+            });
+        }
+      });
+
     setMarkerResArr([...coordinatesResArr]);
     coordinatesResArr = [];
   }, [minItemsPage, children, arrayResult]);
 
   useEffect(() => {
-    console.log("API YELP");
-    console.log(arrayResult);
     children.total > 50
       ? setArrayResult({
           ...arrayResult,

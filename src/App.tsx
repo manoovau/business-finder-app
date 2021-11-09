@@ -8,7 +8,7 @@ import {
   ApiResponseType,
   ItemInfoChildrenType,
   FilterInputType,
-  CenterType,
+  MarkerType,
   MapPageChildrenType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
@@ -87,24 +87,20 @@ function App() {
     reviewData: { total: DEFAULT_NUMBER },
   });
 
-  const [markerResArr, setMarkerResArr] = useState<CenterType[]>([]);
+  const [markerResArr, setMarkerResArr] = useState<MarkerType[]>([]);
   const [mapPageChildren, setMapPageChildren] = useState<MapPageChildrenType>({});
 
   const [isMapView, setIsMapView] = useState<boolean>(false);
 
   useEffect(() => {
-    markerResArr !== undefined
-      ? setMapPageChildren({ ...mapPageChildren, markers: [...markerResArr] })
-      : null;
+    if (markerResArr !== undefined)
+      setMapPageChildren({ ...mapPageChildren, markers: [...markerResArr] });
   }, [markerResArr]);
   useEffect(() => {
-    resultYELP?.region?.center
-      ? setMapPageChildren({ ...mapPageChildren, region: resultYELP.region.center })
-      : null;
+    if (resultYELP?.region?.center)
+      setMapPageChildren({ ...mapPageChildren, region: resultYELP.region.center });
   }, [resultYELP]);
 
-  console.log("markerResArr");
-  console.log(markerResArr);
   useEffect(
     () =>
       setTerm(
@@ -156,13 +152,6 @@ function App() {
     }
   };
 
-  console.log("mapPageChildren");
-  console.log(mapPageChildren);
-  console.log("resultYELP");
-  console.log(resultYELP);
-  console.log("Click");
-  console.log(isMapView);
-
   return (
     <div className="App">
       <Switch>
@@ -177,7 +166,7 @@ function App() {
 
             <div id="result-container">
               <div className={isMapView ? "show" : "hide"}>
-                <MapPage>{mapPageChildren}</MapPage>
+                <MapPage setIdSelected={setIdSelected}>{mapPageChildren}</MapPage>
               </div>
               <div className={isMapView ? "hide" : "show"}>
                 <ItemContainer setIdSelected={setIdSelected} setMarkerResArr={setMarkerResArr}>

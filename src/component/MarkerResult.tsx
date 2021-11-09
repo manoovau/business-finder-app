@@ -1,11 +1,14 @@
 import React from "react";
-import { Marker } from "react-leaflet";
+import { Marker, Popup } from "react-leaflet";
 import Leaflet from "leaflet";
 import markerMap from "../assets/markerMap.png";
-import { CenterType } from "../interface";
+import { MarkerType } from "../interface";
+import { Link } from "react-router-dom";
+import { createIconReview } from "../hooks/useReview";
 
 type prop = {
-  children: CenterType;
+  children: MarkerType;
+  setIdSelected: (id: string) => void;
 };
 
 const IconLocation = Leaflet.icon({
@@ -19,6 +22,26 @@ const IconLocation = Leaflet.icon({
   className: "leaflet-venue-icon",
 });
 
-export const MarkerResult = ({ children }: prop): JSX.Element => {
-  return <Marker position={[children.latitude, children.longitude]} icon={IconLocation} />;
+export const MarkerResult = (props: prop): JSX.Element => {
+  const { children, setIdSelected } = props;
+  return (
+    <Marker position={[children.coord.latitude, children.coord.longitude]} icon={IconLocation}>
+      <Popup>
+        <Link
+          id="marker"
+          to={`/${children.idCoord}`}
+          onClick={() => setIdSelected(children.idCoord)}
+        >
+          {children.nameCoord}
+        </Link>
+        <div className="rating">
+          {children?.ratingCoord ? <div>{createIconReview(children.ratingCoord)}</div> : null}{" "}
+          {children?.ratingCoord}
+        </div>
+        <div id="element-img">
+          <img className="img-popup-container-item" src={children.imgCoord} />
+        </div>
+      </Popup>
+    </Marker>
+  );
 };

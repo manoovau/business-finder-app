@@ -139,7 +139,8 @@ i,
   justify-content: center;
 }
 
-#img-carousel img {
+#img-carousel img,
+.img-popup-container-item {
   width: 100px;
   height: 100px;
   object-fit: cover;
