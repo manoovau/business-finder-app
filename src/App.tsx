@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Header, ItemContainer, ItemInfo } from "./component/index";
+import { Header, ItemContainer, ItemInfo, MapPage } from "./component/index";
 import {
   InputType,
   ItemInfoType,
@@ -8,6 +8,8 @@ import {
   ApiResponseType,
   ItemInfoChildrenType,
   FilterInputType,
+  CenterType,
+  MapPageChildrenType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
 import { Switch, Route } from "react-router-dom";
@@ -17,6 +19,7 @@ import { Switch, Route } from "react-router-dom";
 // <div>Icons made by <a href="https://www.flaticon.com/authors/payungkead" title="Payungkead">Payungkead</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 // icon rating
 // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
   Origin: "localhost",
@@ -62,7 +65,12 @@ function App() {
   const PATH = "/businesses/search";
   const [resultYELP, setResultYELP] = useState<ApiResponseType>({
     businesses: [],
-    region: {},
+    region: {
+      center: {
+        latitude: 0,
+        longitude: 0,
+      },
+    },
     total: DEFAULT_NUMBER,
   });
 
@@ -79,6 +87,24 @@ function App() {
     reviewData: { total: DEFAULT_NUMBER },
   });
 
+  const [markerResArr, setMarkerResArr] = useState<CenterType[]>([]);
+  const [mapPageChildren, setMapPageChildren] = useState<MapPageChildrenType>({});
+
+  const [isMapView, setIsMapView] = useState<boolean>(false);
+
+  useEffect(() => {
+    markerResArr !== undefined
+      ? setMapPageChildren({ ...mapPageChildren, markers: [...markerResArr] })
+      : null;
+  }, [markerResArr]);
+  useEffect(() => {
+    resultYELP?.region?.center
+      ? setMapPageChildren({ ...mapPageChildren, region: resultYELP.region.center })
+      : null;
+  }, [resultYELP]);
+
+  console.log("markerResArr");
+  console.log(markerResArr);
   useEffect(
     () =>
       setTerm(
@@ -130,25 +156,34 @@ function App() {
     }
   };
 
-  console.log("response");
+  console.log("mapPageChildren");
+  console.log(mapPageChildren);
+  console.log("resultYELP");
   console.log(resultYELP);
-  console.log("sort by");
-  console.log(filterValue.sortByFilter);
-  console.log("term");
-  console.log(term);
-  console.log("item");
-  console.log(selectedBusiness);
+  console.log("Click");
+  console.log(isMapView);
 
   return (
     <div className="App">
       <Switch>
         <Route exact path="/">
-          <div>
+          <div id="home-container">
             <Header updateSearchInputs={updateSearchInputs} setFilterValue={setFilterValue}>
               {filterValue}
             </Header>
+            <button onClick={() => setIsMapView(!isMapView)}>
+              {isMapView ? `See Results view` : `See Map View`}{" "}
+            </button>
+
             <div id="result-container">
-              <ItemContainer setIdSelected={setIdSelected}>{resultYELP}</ItemContainer>
+              <div className={isMapView ? "show" : "hide"}>
+                <MapPage>{mapPageChildren}</MapPage>
+              </div>
+              <div className={isMapView ? "hide" : "show"}>
+                <ItemContainer setIdSelected={setIdSelected} setMarkerResArr={setMarkerResArr}>
+                  {resultYELP}
+                </ItemContainer>
+              </div>
             </div>
           </div>
         </Route>

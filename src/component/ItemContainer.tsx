@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ApiResponseType, ItemInfoType, pageInfoType } from "../interface";
+import { ApiResponseType, ItemInfoType, pageInfoType, CenterType } from "../interface";
 import { BasicInfoProd, Pagination } from "./index";
 import { Link } from "react-router-dom";
 
 type Props = {
   children: ApiResponseType;
   setIdSelected: (id: string) => void;
+  setMarkerResArr: (arr: CenterType[]) => void;
 };
 
 /**
@@ -44,14 +45,19 @@ export function getTotalPages(totalItem: number, itemByPage: number): number {
 }
 
 export const ItemContainer = (props: Props): JSX.Element => {
-  const { children, setIdSelected } = props;
+  const { children, setIdSelected, setMarkerResArr } = props;
 
   const ITEMS_BY_PAGE = 10;
   const DEFAULT_NUMBER_VALUE = 0;
   const DEFAULT_CURRENT_PAGE = 1;
   const [arrayResult, setArrayResult] = useState<ApiResponseType>({
     businesses: [],
-    region: {},
+    region: {
+      center: {
+        latitude: 50.5,
+        longitude: 30.5,
+      },
+    },
     total: DEFAULT_NUMBER_VALUE,
   });
 
@@ -62,8 +68,36 @@ export const ItemContainer = (props: Props): JSX.Element => {
 
   const [minItemsPage, setMInitemsPage] = useState<number>(DEFAULT_NUMBER_VALUE);
   const [maxItemsPage, setMaxItemsPage] = useState<number>(ITEMS_BY_PAGE);
+  let coordinatesResArr: CenterType[] = [];
 
   useEffect(() => {
+    console.log("ARRAY RESULT BUSINESS");
+    console.log(arrayResult.businesses);
+    {
+      arrayResult.businesses !== []
+        ? arrayResult.businesses.map((item: ItemInfoType, index: number) => {
+            if (index >= minItemsPage && index < maxItemsPage) {
+              {
+                item?.coordinates ? coordinatesResArr.push(item.coordinates) : console.log("no");
+              }
+            }
+          })
+        : console.log("array result is undefined");
+    }
+    console.log("ITEM CONTAINER UseEffect minitemPage and children");
+    console.log("min item");
+    console.log(minItemsPage);
+    console.log("max item");
+    console.log(maxItemsPage);
+    console.log("coordinatesResArr");
+    console.log(coordinatesResArr);
+    setMarkerResArr([...coordinatesResArr]);
+    coordinatesResArr = [];
+  }, [minItemsPage, children, arrayResult]);
+
+  useEffect(() => {
+    console.log("API YELP");
+    console.log(arrayResult);
     children.total > 50
       ? setArrayResult({
           ...arrayResult,
@@ -96,7 +130,7 @@ export const ItemContainer = (props: Props): JSX.Element => {
   };
 
   return (
-    <div>
+    <div id="item-pagin-result-container">
       <div id="item-result-container">
         {arrayResult?.businesses
           ? arrayResult.businesses.map((item: ItemInfoType, index: number) => {

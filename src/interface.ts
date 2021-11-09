@@ -1,3 +1,17 @@
+export interface MapPageChildrenType {
+  region?: CenterType;
+  markers?: CenterType[];
+}
+
+export interface RegionType {
+  center: CenterType;
+}
+
+export interface CenterType {
+  latitude: number;
+  longitude: number;
+}
+
 export interface FilterInputType {
   openFilter: string;
   priceFilter: string;
@@ -17,7 +31,7 @@ export interface InputType {
 
 export interface ApiResponseType {
   businesses: ItemInfoType[];
-  region: Object;
+  region: RegionType;
   total: number;
 }
 
@@ -37,6 +51,7 @@ export interface ItemInfoType {
   transactions?: string[];
   url?: string | null;
   image_url?: string | null;
+  coordinates?: CenterType;
 }
 
 export interface HoursType {

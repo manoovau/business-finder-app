@@ -222,6 +222,12 @@ i,
   margin-right: 0.5em;
 }
 
+.leaflet-container {
+  margin: 1em;
+  width: 90vw;
+  height: 50vh;
+}
+
 .show {
   display: contents;
 }
