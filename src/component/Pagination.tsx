@@ -10,6 +10,7 @@ type Props = {
 export const Pagination = (props: Props): JSX.Element => {
   const { children, incrementPage, decrementPage } = props;
   const DEFAULT_CURRENT_PAGE = 1;
+  const DEFAULT_VALUE = null;
 
   return (
     <div id="pagination-container">
@@ -19,13 +20,17 @@ export const Pagination = (props: Props): JSX.Element => {
           className="pagination-btn"
           onClick={decrementPage}
         >{` < `}</button>
-      ) : null}
+      ) : (
+        DEFAULT_VALUE
+      )}
 
       {children.totalPage > DEFAULT_CURRENT_PAGE ? (
         <p data-testid="pagination-info">
           {children.currentPage} of {children.totalPage}
         </p>
-      ) : null}
+      ) : (
+        DEFAULT_VALUE
+      )}
 
       {children.currentPage !== children.totalPage && children.totalPage > DEFAULT_CURRENT_PAGE ? (
         <button
@@ -33,7 +38,9 @@ export const Pagination = (props: Props): JSX.Element => {
           className="pagination-btn"
           onClick={incrementPage}
         >{` > `}</button>
-      ) : null}
+      ) : (
+        DEFAULT_VALUE
+      )}
     </div>
   );
 };

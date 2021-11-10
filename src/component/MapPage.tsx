@@ -11,6 +11,7 @@ type prop = {
 
 export const MapPage = (props: prop): JSX.Element => {
   const { children, setIdSelected } = props;
+  const DEFAULT_VALUE = null;
   // leaflet resize issue
   window.dispatchEvent(new Event("resize"));
 
@@ -34,9 +35,11 @@ export const MapPage = (props: prop): JSX.Element => {
                   </MarkerResult>
                 );
               })
-            : null}
+            : DEFAULT_VALUE}
         </MapContainer>
-      ) : null}
+      ) : (
+        DEFAULT_VALUE
+      )}
     </div>
   );
 };
