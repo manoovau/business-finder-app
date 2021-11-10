@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Header, ItemContainer, ItemInfo, MapPage } from "./component/index";
+import { Header, ItemContainer, ItemInfo, MapPage, Footer } from "./component/index";
 import {
   InputType,
   ItemInfoType,
@@ -13,12 +13,6 @@ import {
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
 import { Switch, Route } from "react-router-dom";
-
-// <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-// url image not found
-// <div>Icons made by <a href="https://www.flaticon.com/authors/payungkead" title="Payungkead">Payungkead</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-// icon rating
-// <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -67,8 +61,8 @@ function App() {
     businesses: [],
     region: {
       center: {
-        latitude: 0,
-        longitude: 0,
+        latitude: DEFAULT_NUMBER,
+        longitude: DEFAULT_NUMBER,
       },
     },
     total: DEFAULT_NUMBER,
@@ -182,6 +176,7 @@ function App() {
           </div>
         </Route>
       </Switch>
+      <Footer />
     </div>
   );
 }

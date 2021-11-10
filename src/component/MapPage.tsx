@@ -11,6 +11,8 @@ type prop = {
 
 export const MapPage = (props: prop): JSX.Element => {
   const { children, setIdSelected } = props;
+  // leaflet resize issue
+  window.dispatchEvent(new Event("resize"));
 
   return (
     <div id="map-container">
