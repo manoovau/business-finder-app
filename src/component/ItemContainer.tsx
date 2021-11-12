@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ApiResponseType, ItemInfoType, pageInfoType, MarkerType } from "../interface";
+import { ApiResponseType, ItemInfoType, MarkerType } from "../interface";
 import { BasicInfoProd, Pagination } from "./index";
 import { Link } from "react-router-dom";
 
@@ -7,6 +7,11 @@ type Props = {
   children: ApiResponseType;
   setIdSelected: (id: string) => void;
   setMarkerResArr: (arr: MarkerType[]) => void;
+};
+
+type pageInfoType = {
+  currentPage: number;
+  totalPage: number;
 };
 
 /**
@@ -50,7 +55,7 @@ export const ItemContainer = (props: Props): JSX.Element => {
   const ITEMS_BY_PAGE = 10;
   const DEFAULT_NUMBER_VALUE = 0;
   const DEFAULT_CURRENT_PAGE = 1;
-  const [arrayResult, setArrayResult] = useState<ApiResponseType>({
+  const [result, setResult] = useState<ApiResponseType>({
     businesses: [],
     region: {
       center: {
@@ -71,8 +76,8 @@ export const ItemContainer = (props: Props): JSX.Element => {
   let coordinatesResArr: MarkerType[] = [];
 
   useEffect(() => {
-    if (arrayResult.businesses !== [])
-      arrayResult.businesses.map((item: ItemInfoType, index: number) => {
+    if (result.businesses !== [])
+      result.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= minItemsPage && index < maxItemsPage) {
           let url = "";
           if (!item?.image_url) {
@@ -94,24 +99,24 @@ export const ItemContainer = (props: Props): JSX.Element => {
 
     setMarkerResArr([...coordinatesResArr]);
     coordinatesResArr = [];
-  }, [minItemsPage, children, arrayResult]);
+  }, [minItemsPage, children, result]);
 
   useEffect(() => {
     children.total > 50
-      ? setArrayResult({
-          ...arrayResult,
+      ? setResult({
+          ...result,
           businesses: children.businesses,
           region: children.region,
           total: 50,
         })
-      : setArrayResult(children);
+      : setResult(children);
 
     setPageInfo({ ...pageInfo, currentPage: DEFAULT_CURRENT_PAGE });
   }, [children]);
 
   useEffect(
-    () => setPageInfo({ ...pageInfo, totalPage: getTotalPages(arrayResult.total, ITEMS_BY_PAGE) }),
-    [arrayResult],
+    () => setPageInfo({ ...pageInfo, totalPage: getTotalPages(result.total, ITEMS_BY_PAGE) }),
+    [result],
   );
 
   useEffect(() => {
@@ -131,34 +136,42 @@ export const ItemContainer = (props: Props): JSX.Element => {
   return (
     <div id="item-pagin-result-container">
       <div id="item-result-container">
-        {arrayResult?.businesses
-          ? arrayResult.businesses.map((item: ItemInfoType, index: number) => {
-              if (index >= minItemsPage && index < maxItemsPage) {
-                return (
-                  <Link
-                    key={index}
-                    id="element-container"
-                    to={`/${item.id}`}
-                    onClick={() => setIdSelected(item.id)}
-                  >
-                    <BasicInfoProd>{item}</BasicInfoProd>
-                    <div id="element-img">
-                      {!item.image_url ? (
-                        <img className="img-res-container-item" src={`/img/nullPicture.png`} />
-                      ) : (
-                        <img className="img-res-container-item" src={item.image_url} />
-                      )}
-                    </div>
-                  </Link>
-                );
-              }
-            })
-          : null}
+        {result?.businesses.map((item: ItemInfoType, index: number) => {
+          if (index >= minItemsPage && index < maxItemsPage) {
+            return (
+              <Link
+                key={index}
+                id="element-container"
+                to={`/${item.id}`}
+                onClick={() => setIdSelected(item.id)}
+              >
+                <BasicInfoProd
+                  name={item.name}
+                  rating={item.rating}
+                  review_count={item.review_count}
+                  price={item.price}
+                  categories={item.categories}
+                  is_closed={item.is_closed}
+                />
+                <div id="element-img">
+                  {!item.image_url ? (
+                    <img className="img-res-container-item" src={`/img/nullPicture.png`} />
+                  ) : (
+                    <img className="img-res-container-item" src={item.image_url} />
+                  )}
+                </div>
+              </Link>
+            );
+          }
+        })}
       </div>
       <div>
-        <Pagination incrementPage={incrementPage} decrementPage={decrementPage}>
-          {pageInfo}
-        </Pagination>
+        <Pagination
+          incrementPage={incrementPage}
+          decrementPage={decrementPage}
+          currentPage={pageInfo.currentPage}
+          totalPage={pageInfo.totalPage}
+        />
       </div>
     </div>
   );

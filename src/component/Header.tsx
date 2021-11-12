@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
 
 type updateSearchInputsType = {
-  children: FilterInputType;
+  filterVal: FilterInputType;
   updateSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
 };
@@ -36,7 +36,7 @@ type attrStrType = {
  * @param url API URL
  * @returns API data
  */
-const getRandomImg = async (url: string) => {
+const getAPIData = async (url: string) => {
   const resp = await fetch(url);
   const data = await resp.json();
   return data;
@@ -87,7 +87,7 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 };
 
 export function Header(props: updateSearchInputsType): JSX.Element {
-  const { children, updateSearchInputs, setFilterValue } = props;
+  const { updateSearchInputs, setFilterValue } = props;
 
   const DEFAULT_VALUE = null;
   const [businessInput, setBusinessInput] = useState<string>("");
@@ -164,12 +164,12 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   useEffect(() => {
     if (price1 || price2 || price3 || price4) {
       setFilterValue({
-        ...children,
+        ...props.filterVal,
         priceFilter: getParameterFilterStr(priceStr),
       });
     } else {
       setFilterValue({
-        ...children,
+        ...props.filterVal,
         priceFilter: ``,
       });
     }
@@ -220,19 +220,19 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   useEffect(() => {
     if (hotNew || requestQuote || reservation || deals || genderNeutral || openAll || wheelchair) {
       setFilterValue({
-        ...children,
+        ...props.filterVal,
         attrFilter: getParameterFilterStr(attributesInput),
       });
     } else {
       setFilterValue({
-        ...children,
+        ...props.filterVal,
         attrFilter: ``,
       });
     }
   }, [attributesInput]);
 
   useEffect(() => {
-    Promise.resolve(getRandomImg(URL_RANDOM_IMG))
+    Promise.resolve(getAPIData(URL_RANDOM_IMG))
       .then((resp) => setUrlRamdomImg(resp.urls.full))
       .catch((err) => console.error(err));
   }, []);
@@ -247,15 +247,15 @@ export function Header(props: updateSearchInputsType): JSX.Element {
 
   useEffect(() => {
     if (openInput === "DEFAULT") {
-      setFilterValue({ ...children, openFilter: `` });
+      setFilterValue({ ...props.filterVal, openFilter: `` });
     } else if (openInput === "openNow") {
-      setFilterValue({ ...children, openFilter: `&open_now=true` });
+      setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` });
     }
   }, [openInput]);
 
   useEffect(() => {
     setFilterValue({
-      ...children,
+      ...props.filterVal,
       openFilter: `&open_at=${new Date(`${openAtDate} ${openAtHour}:00`).getTime() / 1000}`,
     });
   }, [openAtDate, openAtHour]);
@@ -263,7 +263,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   useEffect(() => {
     if (sortByInput !== "")
       setFilterValue({
-        ...children,
+        ...props.filterVal,
         sortByFilter: `&sort_by=${sortByInput}`,
       });
   }, [sortByInput]);

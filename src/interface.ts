@@ -27,11 +27,6 @@ export interface FilterInputType {
   attrFilter: string;
 }
 
-export interface ItemInfoChildrenType {
-  selectedBusiness: ItemInfoType;
-  reviewData: reviewMainType;
-}
-
 export interface InputType {
   business: string | null;
   where: string | null;
@@ -91,12 +86,6 @@ export interface categoriesType {
   title: string;
 }
 
-export interface reviewMainType {
-  possible_languages?: string[];
-  reviews?: reviewsType[];
-  total: number;
-}
-
 export interface reviewsType {
   id: string;
   rating: number;
@@ -111,9 +100,4 @@ export interface UserType {
   profile_url?: string | null;
   image_url?: string | null;
   name: string;
-}
-
-export interface pageInfoType {
-  currentPage: number;
-  totalPage: number;
 }

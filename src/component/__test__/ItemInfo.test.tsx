@@ -34,7 +34,14 @@ describe(`ItemInfo components test`, () => {
 
       render(
         <BrowserRouter>
-          <ItemInfo setIdReviewData={setIdReviewData}>{children}</ItemInfo>
+          <ItemInfo
+            setIdReviewData={setIdReviewData}
+            id={selectedBusiness.id}
+            name={selectedBusiness.name}
+            hours={selectedBusiness?.hours}
+            phone={selectedBusiness?.phone}
+            revTotal={0}
+          />
         </BrowserRouter>,
       );
 
@@ -68,15 +75,18 @@ describe(`ItemInfo and BasicInfoProd components test`, () => {
         ],
       };
 
-      const children = {
-        selectedBusiness: selectedBusiness,
-        reviewData: { total: 0 },
-      };
       const setIdReviewData = (idValue: string) => {};
 
       render(
         <BrowserRouter>
-          <ItemInfo setIdReviewData={setIdReviewData}>{children}</ItemInfo>
+          <ItemInfo
+            setIdReviewData={setIdReviewData}
+            id={selectedBusiness.id}
+            name={selectedBusiness.name}
+            hours={selectedBusiness?.hours}
+            phone={selectedBusiness?.phone}
+            revTotal={0}
+          />
         </BrowserRouter>,
       );
 
@@ -93,15 +103,16 @@ describe(`ItemInfo and BasicInfoProd components test`, () => {
       name: "Brandenburg Gate",
     };
 
-    const children = {
-      selectedBusiness: selectedBusiness,
-      reviewData: { total: 0 },
-    };
     const setIdReviewData = (idValue: string) => {};
 
     render(
       <BrowserRouter>
-        <ItemInfo setIdReviewData={setIdReviewData}>{children}</ItemInfo>
+        <ItemInfo
+          setIdReviewData={setIdReviewData}
+          id={selectedBusiness.id}
+          name={selectedBusiness.name}
+          revTotal={0}
+        />
       </BrowserRouter>,
     );
 
@@ -134,7 +145,7 @@ describe("getOpenHours function", () => {
         },
       ],
     };
-    const result = getOpenHours(selectedBusiness);
+    const result = getOpenHours(selectedBusiness.hours);
     let text = ``;
     result.map((item) => (text += item.props.children));
     expect(text).toEqual(

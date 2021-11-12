@@ -4,12 +4,10 @@ import { Header, ItemContainer, ItemInfo, MapPage, Footer } from "./component/in
 import {
   InputType,
   ItemInfoType,
-  reviewMainType,
+  reviewsType,
   ApiResponseType,
-  ItemInfoChildrenType,
   FilterInputType,
   MarkerType,
-  MapPageChildrenType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
 import { Switch, Route } from "react-router-dom";
@@ -18,6 +16,12 @@ const requestHeaders: HeadersInit = {
   Authorization: BEARER,
   Origin: "localhost",
   withCredentials: "true",
+};
+
+type reviewMainType = {
+  possible_languages?: string[];
+  reviews?: reviewsType[];
+  total: number;
 };
 
 /**
@@ -76,24 +80,9 @@ function App() {
   const [idReviewData, setIdReviewData] = useState<string>();
   const [reviewData, setReviewData] = useState<reviewMainType>({ total: DEFAULT_NUMBER });
 
-  const [itemInfoChildren, setItemInfoChildren] = useState<ItemInfoChildrenType>({
-    selectedBusiness: { id: DEFAULT_STRING, name: DEFAULT_STRING },
-    reviewData: { total: DEFAULT_NUMBER },
-  });
-
   const [markerResArr, setMarkerResArr] = useState<MarkerType[]>([]);
-  const [mapPageChildren, setMapPageChildren] = useState<MapPageChildrenType>({});
 
   const [isMapView, setIsMapView] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (markerResArr !== undefined)
-      setMapPageChildren({ ...mapPageChildren, markers: [...markerResArr] });
-  }, [markerResArr]);
-  useEffect(() => {
-    if (resultYELP?.region?.center)
-      setMapPageChildren({ ...mapPageChildren, region: resultYELP.region.center });
-  }, [resultYELP]);
 
   useEffect(
     () =>
@@ -124,14 +113,6 @@ function App() {
         .catch((err) => console.error(err));
   }, [idReviewData]);
 
-  useEffect(() => {
-    setItemInfoChildren({ ...itemInfoChildren, selectedBusiness: selectedBusiness });
-  }, [selectedBusiness]);
-
-  useEffect(() => {
-    setItemInfoChildren({ ...itemInfoChildren, reviewData: reviewData });
-  }, [reviewData]);
-
   /**
    * set searchInputs values and check if where field is not filled.
    * @param objectIn Object with business and where input fields.
@@ -151,16 +132,26 @@ function App() {
       <Switch>
         <Route exact path="/">
           <div id="home-container">
-            <Header updateSearchInputs={updateSearchInputs} setFilterValue={setFilterValue}>
-              {filterValue}
-            </Header>
-            <button onClick={() => setIsMapView(!isMapView)}>
-              {isMapView ? `See Results view` : `See Map View`}{" "}
-            </button>
+            <Header
+              updateSearchInputs={updateSearchInputs}
+              setFilterValue={setFilterValue}
+              filterVal={filterValue}
+            />
+            {resultYELP.total !== DEFAULT_NUMBER ? (
+              <button onClick={() => setIsMapView(!isMapView)}>
+                {isMapView ? `See Results view` : `See Map View`}{" "}
+              </button>
+            ) : (
+              DEFAULT_VALUE
+            )}
 
             <div id="result-container">
               <div className={isMapView ? "show" : "hide"}>
-                <MapPage setIdSelected={setIdSelected}>{mapPageChildren}</MapPage>
+                <MapPage
+                  setIdSelected={setIdSelected}
+                  markers={markerResArr}
+                  region={resultYELP.region.center}
+                />
               </div>
               <div className={isMapView ? "hide" : "show"}>
                 <ItemContainer setIdSelected={setIdSelected} setMarkerResArr={setMarkerResArr}>
@@ -172,7 +163,24 @@ function App() {
         </Route>
         <Route path={`/${selectedBusiness.id}`}>
           <div>
-            <ItemInfo setIdReviewData={setIdReviewData}>{itemInfoChildren}</ItemInfo>
+            <ItemInfo
+              id={selectedBusiness.id}
+              name={selectedBusiness.name}
+              rating={selectedBusiness?.rating}
+              review_count={selectedBusiness?.review_count}
+              price={selectedBusiness?.price}
+              categories={selectedBusiness?.categories}
+              is_closed={selectedBusiness?.is_closed}
+              hours={selectedBusiness?.hours}
+              location_disp={selectedBusiness?.location?.display_address}
+              url={selectedBusiness?.url}
+              phone={selectedBusiness?.phone}
+              photosArr={selectedBusiness?.photos}
+              setIdReviewData={setIdReviewData}
+              revPos_lang={reviewData?.possible_languages}
+              revArr={reviewData?.reviews}
+              revTotal={reviewData.total}
+            />
           </div>
         </Route>
       </Switch>

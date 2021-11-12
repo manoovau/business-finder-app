@@ -1,9 +1,14 @@
 import React from "react";
-import { ItemInfoType, categoriesType } from "../interface";
+import { categoriesType } from "../interface";
 import { createIconReview } from "../hooks/useReview";
 
 type Props = {
-  children: ItemInfoType | undefined;
+  name?: string;
+  price?: string;
+  rating?: number;
+  review_count?: number;
+  is_closed?: boolean;
+  categories?: categoriesType[];
 };
 
 /**
@@ -26,27 +31,27 @@ const getCategories = (data: categoriesType[]): JSX.Element => {
   return <p>{htmlText}</p>;
 };
 
-export const BasicInfoProd = ({ children }: Props): JSX.Element => {
+export const BasicInfoProd = (props: Props): JSX.Element => {
   const DEFAULT_VALUE = null;
   return (
     <div id="basic-info-container">
-      <h2>{children?.name}</h2>
+      <h2>{props?.name}</h2>
       <div className="rating">
-        {children?.rating ? (
-          <div data-testid="rating-test">{createIconReview(children.rating)}</div>
+        {props?.rating ? (
+          <div data-testid="rating-test">{createIconReview(props.rating)}</div>
         ) : (
           DEFAULT_VALUE
         )}{" "}
-        {children?.review_count}
+        {props?.review_count}
       </div>
 
       <div id="price-categ-container">
-        {children?.price ? <p className="price">{children.price}</p> : DEFAULT_VALUE}
+        {props?.price ? <p className="price">{props.price}</p> : DEFAULT_VALUE}
         <div id="categories-container">
-          {children?.categories ? getCategories(children.categories) : DEFAULT_VALUE}
+          {props?.categories ? getCategories(props.categories) : DEFAULT_VALUE}
         </div>
       </div>
-      {children?.is_closed ? (
+      {props?.is_closed ? (
         <p data-testid="is-perm-closed">Sorry, it is permanently closed</p>
       ) : (
         DEFAULT_VALUE

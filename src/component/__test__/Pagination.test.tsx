@@ -4,18 +4,17 @@ import { render, screen } from "@testing-library/react";
 describe(`Pagination components test`, () => {
   describe(`currentPage and totalPages DEFAULT VALUES`, () => {
     test(`"decrement-button", "pagination-info" and "increment-button" are not in the Document`, () => {
-      const children = {
-        currentPage: 1,
-        totalPage: 0,
-      };
       const incrementPage = (): void => {};
 
       const decrementPage = (): void => {};
 
       render(
-        <Pagination incrementPage={incrementPage} decrementPage={decrementPage}>
-          {children}
-        </Pagination>,
+        <Pagination
+          incrementPage={incrementPage}
+          decrementPage={decrementPage}
+          currentPage={1}
+          totalPage={0}
+        />,
       );
 
       expect(screen.queryByTestId("decrement-button")).toBeNull();
@@ -28,18 +27,17 @@ describe(`Pagination components test`, () => {
 describe(`Pagination components test`, () => {
   describe(`currentPage < totalPages && currentPage = DEFAULT_VALUE, totalPages != DEFAULT_VALUE`, () => {
     test(`phone key contains string, phone element in Document.`, () => {
-      const children = {
-        currentPage: 1,
-        totalPage: 10,
-      };
       const incrementPage = (): void => {};
 
       const decrementPage = (): void => {};
 
       render(
-        <Pagination incrementPage={incrementPage} decrementPage={decrementPage}>
-          {children}
-        </Pagination>,
+        <Pagination
+          incrementPage={incrementPage}
+          decrementPage={decrementPage}
+          currentPage={1}
+          totalPage={10}
+        />,
       );
 
       expect(screen.queryByTestId("decrement-button")).toBeNull();
@@ -61,9 +59,12 @@ describe(`Pagination components test`, () => {
       const decrementPage = (): void => {};
 
       render(
-        <Pagination incrementPage={incrementPage} decrementPage={decrementPage}>
-          {children}
-        </Pagination>,
+        <Pagination
+          incrementPage={incrementPage}
+          decrementPage={decrementPage}
+          currentPage={3}
+          totalPage={10}
+        />,
       );
 
       expect(screen.queryByTestId("decrement-button")).toBeInTheDocument();
@@ -76,18 +77,17 @@ describe(`Pagination components test`, () => {
 describe(`Pagination components test`, () => {
   describe(`currentPage = totalPages && currentPage != DEFAULT_VALUE, totalPages != DEFAULT_VALUE`, () => {
     test(`phone key contains string, phone element in Document.`, () => {
-      const children = {
-        currentPage: 10,
-        totalPage: 10,
-      };
       const incrementPage = (): void => {};
 
       const decrementPage = (): void => {};
 
       render(
-        <Pagination incrementPage={incrementPage} decrementPage={decrementPage}>
-          {children}
-        </Pagination>,
+        <Pagination
+          incrementPage={incrementPage}
+          decrementPage={decrementPage}
+          currentPage={10}
+          totalPage={10}
+        />,
       );
 
       expect(screen.queryByTestId("decrement-button")).toBeInTheDocument();

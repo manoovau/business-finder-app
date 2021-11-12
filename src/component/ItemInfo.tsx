@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { ItemInfoType, OpenType, ItemInfoChildrenType } from "../interface";
+import { OpenType, HoursType, categoriesType, reviewsType } from "../interface";
 import { BasicInfoProd, ItemReview } from "./index";
 import { Link } from "react-router-dom";
 
 type Props = {
-  children: ItemInfoChildrenType;
+  id: string;
+  name: string;
+  rating?: number;
+  review_count?: number;
+  price?: string;
+  categories?: categoriesType[];
+  is_closed?: boolean;
+  hours?: HoursType[];
+  location_disp?: string[];
+  url?: string | null;
+  phone?: string | null;
+  photosArr?: string[];
+  revPos_lang?: string[];
+  revArr?: reviewsType[];
+  revTotal: number;
   setIdReviewData: (id: string) => void;
 };
 
@@ -45,13 +59,13 @@ export const getDay = (index: number): string => {
 
 /**
  * set open hours element content
- * @param children selected object data
- * @returns Open hours element
+ * @param itemInfo open hours array
+ * @returns Open hours JSX.Element array for full week
  */
-export const getOpenHours = (children: ItemInfoType | undefined) => {
+export const getOpenHours = (itemInfo: HoursType[] | undefined) => {
   const openHoursArr: JSX.Element[] = [];
-  if (children?.hours) {
-    children.hours[0].open.map((item: OpenType, index: number) => {
+  if (itemInfo) {
+    itemInfo[0].open.map((item: OpenType, index: number) => {
       openHoursArr.push(
         <p key={index}>{`${getDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
           2,
@@ -84,24 +98,18 @@ export const getAddress = (data: string[]): JSX.Element => {
 };
 
 export const ItemInfo = (props: Props): JSX.Element => {
-  const { children, setIdReviewData } = props;
-  const [selectedBusiness, setSelectedBusiness] = useState<ItemInfoType>();
+  const { setIdReviewData } = props;
   const [showReview, setShowReview] = useState<boolean>(false);
 
-  useEffect(() => {
-    setSelectedBusiness(children.selectedBusiness);
-  }, [children]);
-
   const DEFAULT_VALUE = null;
-  const [openHoursEle, setOpenHoursEle] = useState<JSX.Element[]>([]);
+
   const [showOpenHours, setShowOpenHours] = useState<boolean>(false);
   const [showPhone, setShowPhone] = useState<boolean>(false);
 
   useEffect(() => {
-    setOpenHoursEle(getOpenHours(selectedBusiness));
     setShowOpenHours(false);
     setShowReview(false);
-  }, [selectedBusiness]);
+  }, [props.id]);
 
   return (
     <div id="item-info-container">
@@ -109,9 +117,16 @@ export const ItemInfo = (props: Props): JSX.Element => {
         <Link to="/" id="title">
           <h3>{`< Go Back `}</h3>
         </Link>
-        <BasicInfoProd>{selectedBusiness}</BasicInfoProd>
-        {selectedBusiness?.hours ? (
-          <p>{selectedBusiness.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
+        <BasicInfoProd
+          name={props?.name}
+          rating={props?.rating}
+          review_count={props?.review_count}
+          price={props?.price}
+          categories={props?.categories}
+          is_closed={props?.is_closed}
+        />
+        {props?.hours ? (
+          <p>{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
         ) : (
           DEFAULT_VALUE
         )}
@@ -119,22 +134,20 @@ export const ItemInfo = (props: Props): JSX.Element => {
           Open hours
         </p>
         <div id="open-hours-ele" className={showOpenHours ? "show" : "hide"}>
-          {openHoursEle}
+          {getOpenHours(props.hours)}
         </div>
         <div id="address-container">
-          {selectedBusiness?.location?.display_address
-            ? getAddress(selectedBusiness.location.display_address)
-            : DEFAULT_VALUE}
+          {props?.location_disp ? getAddress(props.location_disp) : DEFAULT_VALUE}
         </div>
         <div id="icon-container">
-          {!selectedBusiness?.url ? (
+          {!props?.url ? (
             DEFAULT_VALUE
           ) : (
-            <a href={selectedBusiness.url}>
+            <a href={props.url}>
               <i className="fas fa-link"></i>
             </a>
           )}
-          {!selectedBusiness?.phone ? (
+          {!props?.phone ? (
             DEFAULT_VALUE
           ) : (
             <i
@@ -142,7 +155,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
               className="fas fa-phone-alt"
               onClick={() => setShowPhone(!showPhone)}
             >
-              {showPhone ? <p>{selectedBusiness.phone}</p> : DEFAULT_VALUE}
+              {showPhone ? <p>{props.phone}</p> : DEFAULT_VALUE}
             </i>
           )}
 
@@ -151,7 +164,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
             id="review-icon-img"
             alt="review icon"
             onClick={() => {
-              setIdReviewData(children.selectedBusiness.id);
+              setIdReviewData(props.id);
               setShowReview(!showReview);
             }}
           />
@@ -159,29 +172,30 @@ export const ItemInfo = (props: Props): JSX.Element => {
       </div>
       <div id="images-container">
         <div id="main-img-container">
-          {selectedBusiness?.photos ? (
+          {props?.photosArr ? (
             <img
               id="main-img"
-              src={
-                selectedBusiness.photos.length === 0
-                  ? `/img/nullPicture.png`
-                  : selectedBusiness.photos[0]
-              }
+              src={props.photosArr.length === 0 ? `/img/nullPicture.png` : props.photosArr[0]}
             />
           ) : (
             DEFAULT_VALUE
           )}
         </div>
         <div id="img-carousel">
-          {selectedBusiness?.photos
-            ? selectedBusiness.photos.map((item: string, index: number) => (
+          {props?.photosArr
+            ? props.photosArr.map((item: string, index: number) => (
                 <img key={index} onClick={() => setMainImg(item)} src={item} />
               ))
             : DEFAULT_VALUE}
         </div>
       </div>
       <div className={showReview ? "show" : "hide"}>
-        <ItemReview>{children}</ItemReview>
+        <ItemReview
+          url={props.url}
+          revPos_lang={props.revPos_lang}
+          revArr={props.revArr}
+          revTotal={props.revTotal}
+        />
       </div>
     </div>
   );

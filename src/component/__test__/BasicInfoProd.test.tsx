@@ -10,7 +10,9 @@ describe(`BasicInfoProd components test`, () => {
         name: "Brandenburg Gate",
       };
 
-      render(<BasicInfoProd>{selectedBusiness}</BasicInfoProd>);
+      render(
+        <BasicInfoProd name={selectedBusiness?.name} is_closed={selectedBusiness?.is_closed} />,
+      );
 
       expect(screen.queryByTestId("is-perm-closed")).toBeNull();
       expect(screen.queryByTestId("rating-test")).toBeNull();
@@ -28,7 +30,13 @@ describe(`BasicInfoProd components test`, () => {
         rating: 3,
       };
 
-      render(<BasicInfoProd>{selectedBusiness}</BasicInfoProd>);
+      render(
+        <BasicInfoProd
+          name={selectedBusiness.name}
+          rating={selectedBusiness.rating}
+          is_closed={selectedBusiness.is_closed}
+        />,
+      );
 
       expect(screen.queryByTestId("is-perm-closed")).toBeInTheDocument();
       expect(screen.queryByTestId("rating-test")).toBeInTheDocument();

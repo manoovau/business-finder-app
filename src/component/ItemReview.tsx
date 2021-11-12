@@ -1,9 +1,12 @@
 import React from "react";
-import { ItemInfoChildrenType, reviewsType } from "../interface";
+import { reviewsType } from "../interface";
 import { createIconReview } from "../hooks/useReview";
 
 type Props = {
-  children: ItemInfoChildrenType;
+  url?: string | null;
+  revPos_lang?: string[];
+  revArr?: reviewsType[];
+  revTotal: number;
 };
 
 /**
@@ -54,15 +57,14 @@ export const getLanguage = (possibLanguage: string): string => {
   }
 };
 
-export const ItemReview = ({ children }: Props): JSX.Element => {
-  const { reviewData, selectedBusiness } = children;
+export const ItemReview = (props: Props): JSX.Element => {
   const DEFAULT_VALUE = null;
   return (
     <div id="id-review-container">
       <h4>Available languages</h4>
-      {reviewData?.possible_languages ? (
+      {props?.revPos_lang ? (
         <div id="possib-lang" data-testid="possib-lang-test-id">
-          {reviewData?.possible_languages.map((item: string, index: number) => {
+          {props.revPos_lang.map((item: string, index: number) => {
             return <p key={index}>{getLanguage(item)}</p>;
           })}
         </div>
@@ -71,8 +73,8 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
       )}
       <div id="reviews-container">
         <h5>Review Highlights</h5>
-        {reviewData?.reviews
-          ? reviewData.reviews.map((item: reviewsType, index: number) => {
+        {props?.revArr
+          ? props.revArr.map((item: reviewsType, index: number) => {
               return (
                 <div className="review" key={index}>
                   <div className="review-user">
@@ -95,9 +97,8 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
                   </div>
                   <div id="review-text-container">
                     <p className="review-text">{item.text}</p>
-                    {item?.text?.substr(item?.text?.length - 3) === "..." &&
-                    selectedBusiness.url ? (
-                      <a href={selectedBusiness.url}>See more</a>
+                    {item?.text?.substr(item?.text?.length - 3) === "..." && props.url ? (
+                      <a href={props.url}>See more</a>
                     ) : (
                       DEFAULT_VALUE
                     )}
@@ -106,11 +107,7 @@ export const ItemReview = ({ children }: Props): JSX.Element => {
               );
             })
           : DEFAULT_VALUE}
-        {!selectedBusiness.url ? (
-          DEFAULT_VALUE
-        ) : (
-          <a href={selectedBusiness.url}>See more reviews ({reviewData.total})</a>
-        )}
+        {!props.url ? DEFAULT_VALUE : <a href={props.url}>See more reviews ({props.revTotal})</a>}
       </div>
     </div>
   );

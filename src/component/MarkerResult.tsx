@@ -2,12 +2,16 @@ import React from "react";
 import { Marker, Popup } from "react-leaflet";
 import Leaflet from "leaflet";
 import markerMap from "../assets/markerMap.png";
-import { MarkerType } from "../interface";
 import { Link } from "react-router-dom";
 import { createIconReview } from "../hooks/useReview";
 
 type prop = {
-  children: MarkerType;
+  lat: number;
+  long: number;
+  idCoord: string;
+  name: string;
+  rating?: number;
+  img: string;
   setIdSelected: (id: string) => void;
 };
 
@@ -23,23 +27,18 @@ const IconLocation = Leaflet.icon({
 });
 
 export const MarkerResult = (props: prop): JSX.Element => {
-  const { children, setIdSelected } = props;
+  const { setIdSelected } = props;
   return (
-    <Marker position={[children.coord.latitude, children.coord.longitude]} icon={IconLocation}>
+    <Marker position={[props.lat, props.long]} icon={IconLocation}>
       <Popup>
-        <Link
-          id="marker"
-          to={`/${children.idCoord}`}
-          onClick={() => setIdSelected(children.idCoord)}
-        >
-          {children.nameCoord}
+        <Link id="marker" to={`/${props.idCoord}`} onClick={() => setIdSelected(props.idCoord)}>
+          {props.name}
         </Link>
         <div className="rating">
-          {children?.ratingCoord ? <div>{createIconReview(children.ratingCoord)}</div> : null}{" "}
-          {children?.ratingCoord}
+          {props?.rating ? <div>{createIconReview(props.rating)}</div> : null} {props?.rating}
         </div>
         <div id="element-img">
-          <img className="img-popup-container-item" src={children.imgCoord} />
+          <img className="img-popup-container-item" src={props.img} />
         </div>
       </Popup>
     </Marker>

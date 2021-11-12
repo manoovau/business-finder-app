@@ -19,12 +19,14 @@ describe("ItemReview component test", () => {
         total: 3,
         possible_languages: ["zh", "sv", "tr"],
       };
-      const children = {
-        selectedBusiness: { id: "", name: "" },
-        reviewData: ReviewChildren,
-      };
 
-      render(<ItemReview>{children}</ItemReview>);
+      render(
+        <ItemReview
+          revPos_lang={ReviewChildren.possible_languages}
+          revArr={ReviewChildren.reviews}
+          revTotal={ReviewChildren.total}
+        />,
+      );
 
       expect(screen.getByText("Available languages")).toBeInTheDocument();
       expect(screen.getByText("Suavecito M.")).toBeInTheDocument();
@@ -57,12 +59,13 @@ describe("ItemReview component test", () => {
         possible_languages: ["de"],
       };
 
-      const children = {
-        selectedBusiness: { id: "", name: "" },
-        reviewData: ReviewChildren,
-      };
-
-      render(<ItemReview>{children}</ItemReview>);
+      render(
+        <ItemReview
+          revPos_lang={ReviewChildren.possible_languages}
+          revArr={ReviewChildren.reviews}
+          revTotal={ReviewChildren.total}
+        />,
+      );
 
       expect(screen.queryByTestId("profile-url")).toBeNull();
 
@@ -97,12 +100,13 @@ describe("ItemReview component test: ", () => {
         possible_languages: ["en"],
       };
 
-      const children = {
-        selectedBusiness: { id: "", name: "" },
-        reviewData: ReviewChildren,
-      };
-
-      render(<ItemReview>{children}</ItemReview>);
+      render(
+        <ItemReview
+          revPos_lang={ReviewChildren.possible_languages}
+          revArr={ReviewChildren.reviews}
+          revTotal={ReviewChildren.total}
+        />,
+      );
       const imgElement = screen.getByRole("img");
       expect(screen.getByTestId("profile-url")).toBeInTheDocument();
       expect(screen.getByTestId("profile-url")).toHaveAttribute("href", "profileUrl");
@@ -137,7 +141,14 @@ describe("ItemReview component test: ", () => {
         reviewData: ReviewChildren,
       };
 
-      render(<ItemReview>{children}</ItemReview>);
+      render(
+        <ItemReview
+          url={selectedBusinessUrl}
+          revPos_lang={ReviewChildren.possible_languages}
+          revArr={ReviewChildren.reviews}
+          revTotal={ReviewChildren.total}
+        />,
+      );
 
       const imgElement = screen.getByRole("img");
       expect(screen.getByTestId("profile-url")).toBeInTheDocument();
