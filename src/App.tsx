@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Header, ItemContainer, ItemInfo, MapPage, Footer } from "./component/index";
+import {
+  Header,
+  ItemContainer,
+  ItemInfo,
+  MapPage,
+  Footer,
+  BasicInfoProd,
+  ItemReview,
+} from "./component/index";
 import {
   InputType,
   ItemInfoType,
@@ -10,7 +18,7 @@ import {
   MarkerType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./hooks/yelp-api";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Link } from "react-router-dom";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -84,6 +92,7 @@ function App() {
 
   const [isMapView, setIsMapView] = useState<boolean>(false);
 
+  const [showReview, setShowReview] = useState<boolean>(false);
   useEffect(
     () =>
       setTerm(
@@ -126,6 +135,8 @@ function App() {
       (document.getElementById("where") as HTMLInputElement).placeholder = "Where...";
     }
   };
+  console.log("App.tsx");
+  console.log(resultYELP);
 
   return (
     <div className="App">
@@ -154,33 +165,48 @@ function App() {
                 />
               </div>
               <div className={isMapView ? "hide" : "show"}>
-                <ItemContainer setIdSelected={setIdSelected} setMarkerResArr={setMarkerResArr}>
-                  {resultYELP}
-                </ItemContainer>
+                <ItemContainer
+                  setIdSelected={setIdSelected}
+                  setMarkerResArr={setMarkerResArr}
+                  resultYELPBus={resultYELP.businesses}
+                />
               </div>
             </div>
           </div>
         </Route>
         <Route path={`/${selectedBusiness.id}`}>
           <div>
-            <ItemInfo
-              id={selectedBusiness.id}
+            <Link to="/" id="title">
+              <h3>{`< Go Back `}</h3>
+            </Link>
+            <BasicInfoProd
               name={selectedBusiness.name}
               rating={selectedBusiness?.rating}
               review_count={selectedBusiness?.review_count}
               price={selectedBusiness?.price}
               categories={selectedBusiness?.categories}
               is_closed={selectedBusiness?.is_closed}
+            />
+            <ItemInfo
+              id={selectedBusiness.id}
               hours={selectedBusiness?.hours}
               location_disp={selectedBusiness?.location?.display_address}
               url={selectedBusiness?.url}
               phone={selectedBusiness?.phone}
               photosArr={selectedBusiness?.photos}
+              showReview={showReview}
               setIdReviewData={setIdReviewData}
-              revPos_lang={reviewData?.possible_languages}
-              revArr={reviewData?.reviews}
-              revTotal={reviewData.total}
+              setShowReview={setShowReview}
             />
+
+            <div className={showReview ? "show" : "hide"}>
+              <ItemReview
+                url={selectedBusiness?.url}
+                revPos_lang={reviewData?.possible_languages}
+                revArr={reviewData?.reviews}
+                revTotal={reviewData.total}
+              />
+            </div>
           </div>
         </Route>
       </Switch>

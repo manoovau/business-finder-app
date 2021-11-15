@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { ApiResponseType, ItemInfoType, MarkerType } from "../interface";
+import { ItemInfoType, MarkerType } from "../interface";
 import { BasicInfoProd, Pagination } from "./index";
 import { Link } from "react-router-dom";
 
 type Props = {
-  children: ApiResponseType;
+  resultYELPBus: ItemInfoType[];
   setIdSelected: (id: string) => void;
   setMarkerResArr: (arr: MarkerType[]) => void;
 };
@@ -14,32 +14,26 @@ type pageInfoType = {
   totalPage: number;
 };
 
+type itemsPageType = {
+  min: number;
+  max: number;
+};
+
 /**
  * Set the minimum and maximum index values for the items display by page, based on the current page and the items allowed by page
- * @param setMin minimum index for the array
- * @param setMax maximum index for the array
  * @param page current page
  * @param itemsByPage items allowed by page
+ * @returns Object with min and max items per page value
  */
-export const setMaxMinitemsPage = (
-  setMin: (value: number) => void,
-  setMax: (value: number) => void,
-  page: number,
-  itemsByPage: number,
-): void => {
-  if (page === 1) {
-    setMin(0);
-    setMax(itemsByPage);
-  } else if (page !== 1) {
-    setMin((page - 1) * itemsByPage);
-    setMax(page * itemsByPage);
-  }
+export const setMaxMinItemsPage = (page: number, itemsByPage: number): itemsPageType => {
+  if (page === 1) return { min: 0, max: itemsByPage };
+  return { min: (page - 1) * itemsByPage, max: page * itemsByPage };
 };
 
 /**
  * Calculate the amount of pages needed based on the total number of items and the number of item by page
- * @param totalItem total ampunt of item
- * @param itemByPage item allowed by page
+ * @param totalItem total ampunt of item/s
+ * @param itemByPage item/s allowed by page
  * @returns total amount of pages needed
  */
 export function getTotalPages(totalItem: number, itemByPage: number): number {
@@ -50,35 +44,27 @@ export function getTotalPages(totalItem: number, itemByPage: number): number {
 }
 
 export const ItemContainer = (props: Props): JSX.Element => {
-  const { children, setIdSelected, setMarkerResArr } = props;
+  const { setIdSelected, setMarkerResArr } = props;
 
   const ITEMS_BY_PAGE = 10;
   const DEFAULT_NUMBER_VALUE = 0;
   const DEFAULT_CURRENT_PAGE = 1;
-  const [result, setResult] = useState<ApiResponseType>({
-    businesses: [],
-    region: {
-      center: {
-        latitude: 50.5,
-        longitude: 30.5,
-      },
-    },
-    total: DEFAULT_NUMBER_VALUE,
-  });
 
   const [pageInfo, setPageInfo] = useState<pageInfoType>({
     currentPage: DEFAULT_CURRENT_PAGE,
     totalPage: DEFAULT_NUMBER_VALUE,
   });
+  const [itemsPage, setItemsPage] = useState<itemsPageType>({
+    min: DEFAULT_NUMBER_VALUE,
+    max: ITEMS_BY_PAGE,
+  });
 
-  const [minItemsPage, setMInitemsPage] = useState<number>(DEFAULT_NUMBER_VALUE);
-  const [maxItemsPage, setMaxItemsPage] = useState<number>(ITEMS_BY_PAGE);
   let coordinatesResArr: MarkerType[] = [];
 
   useEffect(() => {
-    if (result.businesses !== [])
-      result.businesses.map((item: ItemInfoType, index: number) => {
-        if (index >= minItemsPage && index < maxItemsPage) {
+    if (props.resultYELPBus !== [])
+      props.resultYELPBus.map((item: ItemInfoType, index: number) => {
+        if (index >= itemsPage.min && index < itemsPage.max) {
           let url = "";
           if (!item?.image_url) {
             url = `/img/nullPicture.png`;
@@ -99,28 +85,19 @@ export const ItemContainer = (props: Props): JSX.Element => {
 
     setMarkerResArr([...coordinatesResArr]);
     coordinatesResArr = [];
-  }, [minItemsPage, children, result]);
+  }, [itemsPage.min, props.resultYELPBus]);
 
   useEffect(() => {
-    children.total > 50
-      ? setResult({
-          ...result,
-          businesses: children.businesses,
-          region: children.region,
-          total: 50,
-        })
-      : setResult(children);
-
-    setPageInfo({ ...pageInfo, currentPage: DEFAULT_CURRENT_PAGE });
-  }, [children]);
-
-  useEffect(
-    () => setPageInfo({ ...pageInfo, totalPage: getTotalPages(result.total, ITEMS_BY_PAGE) }),
-    [result],
-  );
+    setPageInfo({
+      ...pageInfo,
+      currentPage: DEFAULT_CURRENT_PAGE,
+      totalPage: getTotalPages(props.resultYELPBus.length, ITEMS_BY_PAGE),
+    });
+  }, [props.resultYELPBus]);
 
   useEffect(() => {
-    setMaxMinitemsPage(setMInitemsPage, setMaxItemsPage, pageInfo.currentPage, ITEMS_BY_PAGE);
+    const result = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
+    setItemsPage({ ...itemsPage, min: result.min, max: result.max });
   }, [pageInfo.currentPage]);
 
   const incrementPage = (): void => {
@@ -136,8 +113,8 @@ export const ItemContainer = (props: Props): JSX.Element => {
   return (
     <div id="item-pagin-result-container">
       <div id="item-result-container">
-        {result?.businesses.map((item: ItemInfoType, index: number) => {
-          if (index >= minItemsPage && index < maxItemsPage) {
+        {props.resultYELPBus.map((item: ItemInfoType, index: number) => {
+          if (index >= itemsPage.min && index < itemsPage.max) {
             return (
               <Link
                 key={index}

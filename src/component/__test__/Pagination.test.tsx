@@ -50,10 +50,6 @@ describe(`Pagination components test`, () => {
 describe(`Pagination components test`, () => {
   describe(`currentPage < totalPages && currentPage != DEFAULT_VALUE, totalPages != DEFAULT_VALUE`, () => {
     test(`phone key contains string, phone element in Document.`, () => {
-      const children = {
-        currentPage: 3,
-        totalPage: 10,
-      };
       const incrementPage = (): void => {};
 
       const decrementPage = (): void => {};

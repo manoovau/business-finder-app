@@ -1,24 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { OpenType, HoursType, categoriesType, reviewsType } from "../interface";
-import { BasicInfoProd, ItemReview } from "./index";
-import { Link } from "react-router-dom";
+import { OpenType, HoursType } from "../interface";
 
 type Props = {
   id: string;
-  name: string;
-  rating?: number;
-  review_count?: number;
-  price?: string;
-  categories?: categoriesType[];
-  is_closed?: boolean;
   hours?: HoursType[];
   location_disp?: string[];
   url?: string | null;
   phone?: string | null;
   photosArr?: string[];
-  revPos_lang?: string[];
-  revArr?: reviewsType[];
-  revTotal: number;
+  showReview: boolean;
+  setShowReview: (showReview: boolean) => void;
   setIdReviewData: (id: string) => void;
 };
 
@@ -98,8 +89,7 @@ export const getAddress = (data: string[]): JSX.Element => {
 };
 
 export const ItemInfo = (props: Props): JSX.Element => {
-  const { setIdReviewData } = props;
-  const [showReview, setShowReview] = useState<boolean>(false);
+  const { setIdReviewData, setShowReview } = props;
 
   const DEFAULT_VALUE = null;
 
@@ -114,17 +104,6 @@ export const ItemInfo = (props: Props): JSX.Element => {
   return (
     <div id="item-info-container">
       <div id="info-container">
-        <Link to="/" id="title">
-          <h3>{`< Go Back `}</h3>
-        </Link>
-        <BasicInfoProd
-          name={props?.name}
-          rating={props?.rating}
-          review_count={props?.review_count}
-          price={props?.price}
-          categories={props?.categories}
-          is_closed={props?.is_closed}
-        />
         {props?.hours ? (
           <p>{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
         ) : (
@@ -165,7 +144,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
             alt="review icon"
             onClick={() => {
               setIdReviewData(props.id);
-              setShowReview(!showReview);
+              setShowReview(!props.showReview);
             }}
           />
         </div>
@@ -188,14 +167,6 @@ export const ItemInfo = (props: Props): JSX.Element => {
               ))
             : DEFAULT_VALUE}
         </div>
-      </div>
-      <div className={showReview ? "show" : "hide"}>
-        <ItemReview
-          url={props.url}
-          revPos_lang={props.revPos_lang}
-          revArr={props.revArr}
-          revTotal={props.revTotal}
-        />
       </div>
     </div>
   );
