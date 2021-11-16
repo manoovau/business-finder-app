@@ -105,7 +105,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
     <div id="item-info-container">
       <div id="info-container">
         {props?.hours ? (
-          <p>{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
+          <p data-testid="is-open">{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
         ) : (
           DEFAULT_VALUE
         )}

@@ -8,6 +8,7 @@ import {
   Footer,
   BasicInfoProd,
   ItemReview,
+  Pagination,
 } from "./component/index";
 import {
   InputType,
@@ -32,6 +33,16 @@ type reviewMainType = {
   total: number;
 };
 
+type pageInfoType = {
+  currentPage: number;
+  totalPage: number;
+};
+
+type itemsPageType = {
+  min: number;
+  max: number;
+};
+
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
@@ -47,10 +58,36 @@ const useFetchYELP = async (fetchParameter: string) => {
   return data;
 };
 
+/**
+ * Set the minimum and maximum index values for the items display by page, based on the current page and the items allowed by page
+ * @param page current page
+ * @param itemsByPage items allowed by page
+ * @returns Object with min and max items per page value
+ */
+export const setMaxMinItemsPage = (page: number, itemsByPage: number): itemsPageType => {
+  if (page === 1) return { min: 0, max: itemsByPage };
+  return { min: (page - 1) * itemsByPage, max: page * itemsByPage };
+};
+
+/**
+ * Calculate the amount of pages needed based on the total number of items and the number of item by page
+ * @param totalItem total ampunt of item/s
+ * @param itemByPage item/s allowed by page
+ * @returns total amount of pages needed
+ */
+export function getTotalPages(totalItem: number, itemByPage: number): number {
+  if (totalItem <= itemByPage) return 1;
+  return (totalItem / itemByPage) % 1 === 0
+    ? totalItem / itemByPage
+    : Math.floor(totalItem / itemByPage) + 1;
+}
+
 function App() {
   const DEFAULT_VALUE = null;
   const DEFAULT_STRING = "default_string";
   const DEFAULT_NUMBER = 0;
+  const DEFAULT_CURRENT_PAGE = 1;
+  const ITEMS_BY_PAGE = 10;
 
   const [searchInputs, setSearchInputs] = useState<InputType>({
     business: DEFAULT_VALUE,
@@ -89,10 +126,26 @@ function App() {
   const [reviewData, setReviewData] = useState<reviewMainType>({ total: DEFAULT_NUMBER });
 
   const [markerResArr, setMarkerResArr] = useState<MarkerType[]>([]);
+  const [businessPage, setBusinessPage] = useState<ItemInfoType[]>([]);
 
   const [isMapView, setIsMapView] = useState<boolean>(false);
 
   const [showReview, setShowReview] = useState<boolean>(false);
+
+  const [pageInfo, setPageInfo] = useState<pageInfoType>({
+    currentPage: DEFAULT_CURRENT_PAGE,
+    totalPage: DEFAULT_NUMBER,
+  });
+
+  const [itemsPage, setItemsPage] = useState<itemsPageType>({
+    min: DEFAULT_NUMBER,
+    max: ITEMS_BY_PAGE,
+  });
+
+  const businessPageArr: ItemInfoType[] = [];
+
+  const coordinatesResArr: MarkerType[] = [];
+
   useEffect(
     () =>
       setTerm(
@@ -122,6 +175,49 @@ function App() {
         .catch((err) => console.error(err));
   }, [idReviewData]);
 
+  useEffect(() => {
+    setPageInfo({
+      ...pageInfo,
+      currentPage: DEFAULT_CURRENT_PAGE,
+      totalPage: getTotalPages(resultYELP.businesses.length, ITEMS_BY_PAGE),
+    });
+  }, [resultYELP.businesses]);
+
+  useEffect(() => {
+    const result = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
+    setItemsPage({ ...itemsPage, min: result.min, max: result.max });
+  }, [pageInfo.currentPage]);
+
+  useEffect(() => {
+    businessPageArr.length = 0;
+    coordinatesResArr.length = 0;
+    if (resultYELP.businesses !== [])
+      resultYELP.businesses.map((item: ItemInfoType, index: number) => {
+        if (index >= itemsPage.min && index < itemsPage.max) {
+          let url = "";
+          if (!item?.image_url) {
+            url = `/img/nullPicture.png`;
+          } else {
+            url = item.image_url;
+          }
+
+          if (item?.coordinates)
+            coordinatesResArr.push({
+              coord: item.coordinates,
+              idCoord: item.id,
+              nameCoord: item.name,
+              imgCoord: url,
+              ratingCoord: item.rating,
+            });
+          businessPageArr.push(item);
+          console.log(item);
+        }
+      });
+
+    setMarkerResArr([...coordinatesResArr]);
+    setBusinessPage([...businessPageArr]);
+  }, [itemsPage.min, resultYELP.businesses]);
+
   /**
    * set searchInputs values and check if where field is not filled.
    * @param objectIn Object with business and where input fields.
@@ -135,8 +231,21 @@ function App() {
       (document.getElementById("where") as HTMLInputElement).placeholder = "Where...";
     }
   };
-  console.log("App.tsx");
-  console.log(resultYELP);
+
+  /**
+   * increment PageInfo Object, key currentPage value
+   */
+  const incrementPage = (): void => {
+    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage + 1 });
+    window.scrollTo(0, 0);
+  };
+  /**
+   * decrement PageInfo Object, key currentPage value
+   */
+  const decrementPage = (): void => {
+    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage - 1 });
+    window.scrollTo(0, 0);
+  };
 
   return (
     <div className="App">
@@ -148,12 +257,12 @@ function App() {
               setFilterValue={setFilterValue}
               filterVal={filterValue}
             />
-            {resultYELP.total !== DEFAULT_NUMBER ? (
+            {!resultYELP.total ? (
+              DEFAULT_VALUE
+            ) : (
               <button onClick={() => setIsMapView(!isMapView)}>
                 {isMapView ? `See Results view` : `See Map View`}{" "}
               </button>
-            ) : (
-              DEFAULT_VALUE
             )}
 
             <div id="result-container">
@@ -165,11 +274,15 @@ function App() {
                 />
               </div>
               <div className={isMapView ? "hide" : "show"}>
-                <ItemContainer
-                  setIdSelected={setIdSelected}
-                  setMarkerResArr={setMarkerResArr}
-                  resultYELPBus={resultYELP.businesses}
-                />
+                <div id="item-pagin-result-container">
+                  <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
+                  <Pagination
+                    incrementPage={incrementPage}
+                    decrementPage={decrementPage}
+                    currentPage={pageInfo.currentPage}
+                    totalPage={pageInfo.totalPage}
+                  />
+                </div>
               </div>
             </div>
           </div>

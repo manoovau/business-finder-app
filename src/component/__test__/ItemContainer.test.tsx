@@ -1,4 +1,4 @@
-import { setMaxMinItemsPage, getTotalPages } from "../ItemContainer";
+import { setMaxMinItemsPage, getTotalPages } from "../../App";
 
 describe("setMaxMinItemsPage function", () => {
   test("return min(20) and max(30) index when current page is 3 and items per page is 10 ", () => {
