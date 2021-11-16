@@ -33,7 +33,7 @@ export const MapPage = (props: prop): JSX.Element => {
                 return (
                   <MarkerResult
                     setIdSelected={setIdSelected}
-                    key={index}
+                    key={`marker${index}`}
                     lat={item.coord.latitude}
                     long={item.coord.longitude}
                     idCoord={item.idCoord}

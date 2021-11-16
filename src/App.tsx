@@ -97,7 +97,7 @@ function App() {
   // YELP API LIMIT is 50
   const LIMIT = 50;
   const [term, setTerm] = useState<string>(
-    `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}`,
+    `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}`,
   );
   const [filterValue, setFilterValue] = useState<FilterInputType>({
     openFilter: ``,
@@ -144,18 +144,18 @@ function App() {
 
   const businessPageArr: ItemInfoType[] = [];
 
-  const coordinatesResArr: MarkerType[] = [];
+  const coorResArr: MarkerType[] = [];
 
   useEffect(
     () =>
       setTerm(
-        `?term=${searchInputs.business}&location=${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
+        `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
       ),
     [searchInputs],
   );
 
   useEffect(() => {
-    if (term !== `?term=${DEFAULT_VALUE}&location=${DEFAULT_VALUE}&limit=${LIMIT}`)
+    if (term !== `?term=${DEFAULT_VALUE}${DEFAULT_VALUE}&limit=${LIMIT}`)
       Promise.resolve(useFetchYELP(`${PATH}${term}`))
         .then((resp) => setResultYELP(resp))
         .catch((err) => console.error(err));
@@ -184,13 +184,13 @@ function App() {
   }, [resultYELP.businesses]);
 
   useEffect(() => {
-    const result = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
+    const result: itemsPageType = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
     setItemsPage({ ...itemsPage, min: result.min, max: result.max });
   }, [pageInfo.currentPage]);
 
   useEffect(() => {
     businessPageArr.length = 0;
-    coordinatesResArr.length = 0;
+    coorResArr.length = 0;
     if (resultYELP.businesses !== [])
       resultYELP.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
@@ -202,7 +202,7 @@ function App() {
           }
 
           if (item?.coordinates)
-            coordinatesResArr.push({
+            coorResArr.push({
               coord: item.coordinates,
               idCoord: item.id,
               nameCoord: item.name,
@@ -210,11 +210,10 @@ function App() {
               ratingCoord: item.rating,
             });
           businessPageArr.push(item);
-          console.log(item);
         }
       });
 
-    setMarkerResArr([...coordinatesResArr]);
+    setMarkerResArr([...coorResArr]);
     setBusinessPage([...businessPageArr]);
   }, [itemsPage.min, resultYELP.businesses]);
 
@@ -224,7 +223,7 @@ function App() {
    */
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
-    if (!searchInputs.where) {
+    if (searchInputs.where === "") {
       (document.getElementById("where") as HTMLInputElement).placeholder =
         "Please, fill location field.";
     } else {
@@ -246,6 +245,9 @@ function App() {
     setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage - 1 });
     window.scrollTo(0, 0);
   };
+  console.log(term);
+  console.log(searchInputs.where);
+  console.log(resultYELP);
 
   return (
     <div className="App">

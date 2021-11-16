@@ -57,6 +57,18 @@ i,
   cursor: pointer;
 }
 
+#footer-container {
+  background-color: var(--secondary-color);
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  padding: 2em 0;
+}
+
+#footer-container a {
+  color: var(--header-color);
+}
+
 #header-container {
   padding: 1em;
   background-color: var(--secondary-color);

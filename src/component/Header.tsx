@@ -72,18 +72,18 @@ const getParameterFilterStr = (objectInput: priceStrType | attrStrType): string 
  * @returns min or max limit date
  */
 const getDateInputLimit = (min_max: string, dayLimit: number): string => {
-  const DATE: Date[] = [];
+  const dateArr: Date[] = [];
   const DAY_IN_MS = 1000 * 60 * 60 * 24;
   if (min_max === "min") {
-    DATE.push(new Date(Date.now() - DAY_IN_MS * dayLimit));
+    dateArr.push(new Date(Date.now() - DAY_IN_MS * dayLimit));
   } else if (min_max === "max") {
-    DATE.push(new Date(Date.now() + DAY_IN_MS * dayLimit));
+    dateArr.push(new Date(Date.now() + DAY_IN_MS * dayLimit));
   }
 
-  const MIN_DAY_INPUT = `0${DATE[0].getDate()}`.slice(-2);
-  const MIN_MONTH_INPUT = `0${DATE[0].getMonth() + 1}`.slice(-2);
+  const MIN_DAY_INPUT = `0${dateArr[0].getDate()}`.slice(-2);
+  const MIN_MONTH_INPUT = `0${dateArr[0].getMonth() + 1}`.slice(-2);
 
-  return `0${DATE[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
+  return `0${dateArr[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
 };
 
 export function Header(props: updateSearchInputsType): JSX.Element {
@@ -144,6 +144,27 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     wheelchair: "",
     endBase: `"`,
   });
+
+  /**
+   * request current location and set latitud and longitud in where value
+   */
+  const getCurrentLocation = () => {
+    setSearchValues({ ...searchValues, where: `` });
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        setSearchValues({
+          ...searchValues,
+          where: `&latitude=${position.coords.latitude}&longitude=${position.coords.longitude}`,
+        });
+      },
+      function (error) {
+        console.error(error);
+      },
+      {
+        enableHighAccuracy: true,
+      },
+    );
+  };
 
   useEffect(() => {
     price1 ? setPriceStr({ ...priceStr, prc1: 1 }) : setPriceStr({ ...priceStr, prc1: "" });
@@ -242,7 +263,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   }, [business]);
 
   useEffect(() => {
-    setSearchValues({ ...searchValues, where: where });
+    setSearchValues({ ...searchValues, where: `&location=${where}` });
   }, [where]);
 
   useEffect(() => {
@@ -300,6 +321,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
               setWhereInput(e.target.value.toLowerCase())
             }
           />
+          <button onClick={getCurrentLocation}>Use my Location</button>
         </div>
         <button onClick={() => updateSearchInputs(searchValues)}>Search</button>
       </div>

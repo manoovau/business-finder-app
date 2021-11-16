@@ -58,7 +58,7 @@ export const getOpenHours = (itemInfo: HoursType[] | undefined) => {
   if (itemInfo) {
     itemInfo[0].open.map((item: OpenType, index: number) => {
       openHoursArr.push(
-        <p key={index}>{`${getDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
+        <p key={getDay(index)}>{`${getDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
           2,
         )} - ${item.end.substring(0, 2)}:${item.end.slice(2)}`}</p>,
       );
@@ -163,7 +163,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
         <div id="img-carousel">
           {props?.photosArr
             ? props.photosArr.map((item: string, index: number) => (
-                <img key={index} onClick={() => setMainImg(item)} src={item} />
+                <img key={`photo${index}`} onClick={() => setMainImg(item)} src={item} />
               ))
             : DEFAULT_VALUE}
         </div>

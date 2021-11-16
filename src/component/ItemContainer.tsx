@@ -13,10 +13,10 @@ export const ItemContainer = (props: Props): JSX.Element => {
 
   return (
     <div id="item-result-container">
-      {props.resultYELPBus.map((item: ItemInfoType, index: number) => {
+      {props.resultYELPBus.map((item: ItemInfoType) => {
         return (
           <Link
-            key={index}
+            key={item.id}
             id="element-container"
             to={`/${item.id}`}
             onClick={() => setIdSelected(item.id)}

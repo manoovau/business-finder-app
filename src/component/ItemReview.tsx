@@ -65,7 +65,7 @@ export const ItemReview = (props: Props): JSX.Element => {
       {props?.revPos_lang ? (
         <div id="possib-lang" data-testid="possib-lang-test-id">
           {props.revPos_lang.map((item: string, index: number) => {
-            return <p key={index}>{getLanguage(item)}</p>;
+            return <p key={`lang${index}`}>{getLanguage(item)}</p>;
           })}
         </div>
       ) : (
@@ -76,7 +76,7 @@ export const ItemReview = (props: Props): JSX.Element => {
         {props?.revArr
           ? props.revArr.map((item: reviewsType, index: number) => {
               return (
-                <div className="review" key={index}>
+                <div className="review" key={`review${index}`}>
                   <div className="review-user">
                     {!item.user.profile_url ? (
                       <h5>{item.user.name}</h5>
