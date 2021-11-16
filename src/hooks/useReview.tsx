@@ -6,25 +6,25 @@ import React from "react";
  * @returns array with rating icon
  */
 export const createIconReview = (num: number) => {
-  const iconHTML = [];
-  const totalStar = 5;
-  const emptyStar = Math.floor(totalStar - num);
-  const fullStarNum = Math.floor(num);
-  for (let i = 0; i < fullStarNum; i++) {
-    iconHTML.push(<i key={i} className="fas fa-star"></i>);
+  const iconHtmlArr = [];
+  const TOTAL_STAR = 5;
+  const EMPTY_STAR = Math.floor(TOTAL_STAR - num);
+  const FULL_STAR_NUM = Math.floor(num);
+  for (let i = 0; i < FULL_STAR_NUM; i++) {
+    iconHtmlArr.push(<i key={`star${i}`} className="fas fa-star"></i>);
   }
   if (num % 1 >= 0.1 && num % 1 < 0.3) {
-    iconHTML.push(<i key={5} className="far fa-star"></i>);
+    iconHtmlArr.push(<i key={`star${TOTAL_STAR}`} className="far fa-star"></i>);
   } else if (num % 1 >= 0.3 && num % 1 < 0.8) {
-    iconHTML.push(<i key={5} className="fas fa-star-half-alt"></i>);
+    iconHtmlArr.push(<i key={`star${TOTAL_STAR}`} className="fas fa-star-half-alt"></i>);
   } else if (num % 1 >= 0.8) {
-    iconHTML.push(<i key={5} className="fas fa-star"></i>);
+    iconHtmlArr.push(<i key={`star${TOTAL_STAR}`} className="fas fa-star"></i>);
   }
-  if (emptyStar > 0) {
-    for (let i = 0; i < emptyStar; i++) {
-      iconHTML.push(<i key={i + totalStar + 1} className="far fa-star"></i>);
+  if (EMPTY_STAR > 0) {
+    for (let i = 0; i < EMPTY_STAR; i++) {
+      iconHtmlArr.push(<i key={`star${i + TOTAL_STAR + 1}`} className="far fa-star"></i>);
     }
   }
 
-  return iconHTML;
+  return iconHtmlArr;
 };
