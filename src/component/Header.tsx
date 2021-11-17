@@ -311,17 +311,21 @@ export function Header(props: updateSearchInputsType): JSX.Element {
               setBusinessInput(e.target.value.toLowerCase())
             }
           />
-          <input
-            type="text"
-            id="where"
-            name="where"
-            placeholder="Where..."
-            value={whereInput}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setWhereInput(e.target.value.toLowerCase())
-            }
-          />
-          <button onClick={getCurrentLocation}>Use my Location</button>
+          <div id="where-container">
+            <input
+              type="text"
+              id="where"
+              name="where"
+              placeholder="Where..."
+              value={whereInput}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setWhereInput(e.target.value.toLowerCase())
+              }
+            />
+            <button id="gps-btn" title="Use my Location" onClick={getCurrentLocation}>
+              <img id="gps-img" src="/img/gps.png" />
+            </button>
+          </div>
         </div>
         <button onClick={() => updateSearchInputs(searchValues)}>Search</button>
       </div>

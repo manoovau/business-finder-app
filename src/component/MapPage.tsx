@@ -1,7 +1,7 @@
 import React from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { MarkerResult } from "./MarkerResult";
+import { MarkerResult, CurrentLocMarker } from "./index";
 import { CenterType, MarkerType } from "../interface";
 
 type prop = {
@@ -28,6 +28,7 @@ export const MapPage = (props: prop): JSX.Element => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           />
+          <CurrentLocMarker lat={props.region.latitude} long={props.region.longitude} />
           {props?.markers
             ? props.markers.map((item: MarkerType, index: number) => {
                 return (
@@ -40,6 +41,7 @@ export const MapPage = (props: prop): JSX.Element => {
                     name={item.nameCoord}
                     rating={item.ratingCoord}
                     img={item.imgCoord}
+                    markerType={"result"}
                   />
                 );
               })

@@ -6,3 +6,5 @@ export { BasicInfoProd } from "./BasicInfoProd";
 export { ItemReview } from "./ItemReview";
 export { Pagination } from "./Pagination";
 export { MapPage } from "./MapPage";
+export { MarkerResult } from "./MarkerResult";
+export { CurrentLocMarker } from "./CurrentLocMarker";
