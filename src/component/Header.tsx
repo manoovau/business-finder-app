@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useState, useEffect } from "react";
-import { URL_RANDOM_IMG } from "../hooks/yelp-api/index";
 import { useDebounce } from "use-debounce/lib";
 import { InputType } from "../interface";
 import { Link } from "react-router-dom";
@@ -29,17 +28,6 @@ type attrStrType = {
   openAll: string;
   wheelchair: string;
   endBase: string;
-};
-
-/**
- * fetch function. Get API data from API url
- * @param url API URL
- * @returns API data
- */
-const getAPIData = async (url: string) => {
-  const resp = await fetch(url);
-  const data = await resp.json();
-  return data;
 };
 
 /**
@@ -109,8 +97,6 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   const [openAtDate, setOpenAtDate] = useState<string>(
     `${new Date().getFullYear()}/${new Date().getMonth() + 1}/${new Date().getDate()}`,
   );
-
-  const [urlRandomImg, setUrlRamdomImg] = useState<string | null>(DEFAULT_VALUE);
 
   const [price1, setPrice1] = useState<boolean>(false);
   const [price2, setPrice2] = useState<boolean>(false);
@@ -253,12 +239,6 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   }, [attributesInput]);
 
   useEffect(() => {
-    Promise.resolve(getAPIData(URL_RANDOM_IMG))
-      .then((resp) => setUrlRamdomImg(resp.urls.full))
-      .catch((err) => console.error(err));
-  }, []);
-
-  useEffect(() => {
     setSearchValues({ ...searchValues, business: business });
   }, [business]);
 
@@ -293,7 +273,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     <div
       id="header-container"
       style={{
-        backgroundImage: `url("${urlRandomImg}")`,
+        backgroundImage: `url("https://source.unsplash.com/1600x900/?food")`,
       }}
     >
       <div id="search-container">
