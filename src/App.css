@@ -57,6 +57,18 @@ i,
   cursor: pointer;
 }
 
+#gps-img {
+  height: auto;
+  width: 15px;
+  padding-top: 0.15em;
+}
+
+#gps-btn {
+  height: auto;
+  width: 25px;
+  border-radius: 50%;
+}
+
 #footer-container {
   background-color: var(--secondary-color);
   position: fixed;
@@ -238,7 +250,7 @@ i,
 .leaflet-container {
   margin: 1em;
   width: 90vw;
-  height: 50vh;
+  height: 40vh;
 }
 
 .show {

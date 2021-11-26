@@ -18,7 +18,7 @@ import {
   FilterInputType,
   MarkerType,
 } from "./interface";
-import { URL_BASE, BEARER } from "./hooks/yelp-api";
+import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link } from "react-router-dom";
 
 const requestHeaders: HeadersInit = {
