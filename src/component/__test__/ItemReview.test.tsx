@@ -1,6 +1,5 @@
 import { ItemReview, getLanguage } from "../ItemReview";
 import { render, screen } from "@testing-library/react";
-import { shallow } from "enzyme";
 
 describe("ItemReview component test", () => {
   describe(`test if component contains text for:`, () => {

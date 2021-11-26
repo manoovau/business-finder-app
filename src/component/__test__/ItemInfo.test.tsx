@@ -27,24 +27,24 @@ describe(`ItemInfo components test`, () => {
       };
 
       const showReview = false;
-      const setIdReviewData = (idValue: string) => {};
-      const setShowReview = (showReview: boolean) =>
-        void void render(
-          <BrowserRouter>
-            <ItemInfo
-              setIdReviewData={setIdReviewData}
-              setShowReview={setShowReview}
-              id={selectedBusiness.id}
-              showReview={showReview}
-              hours={selectedBusiness?.hours}
-              phone={selectedBusiness?.phone}
-            />
-          </BrowserRouter>,
-        );
+      const setIdReviewData = (idValue: string): void => {};
+      const setShowReview = (showReview: boolean): void => {};
+      render(
+        <BrowserRouter>
+          <ItemInfo
+            setIdReviewData={setIdReviewData}
+            setShowReview={setShowReview}
+            id={selectedBusiness.id}
+            showReview={showReview}
+            hours={selectedBusiness?.hours}
+            phone={selectedBusiness?.phone}
+          />
+        </BrowserRouter>,
+      );
 
-      //  expect(screen.getByText("It is Open")).toBeInTheDocument();
-      //  expect(screen.queryByTestId("is-open")).toBeInTheDocument();
-      // expect(screen.queryByTestId("phone-element")).toBeInTheDocument();
+      expect(screen.getByText("It is Open")).toBeInTheDocument();
+      expect(screen.queryByTestId("is-open")).toBeInTheDocument();
+      expect(screen.queryByTestId("phone-element")).toBeInTheDocument();
     });
   });
 });
@@ -74,22 +74,22 @@ describe(`ItemInfo and BasicInfoProd components test`, () => {
       };
 
       const showReview = false;
-      const setIdReviewData = (idValue: string) => {};
-      const setShowReview = (showReview: boolean) =>
-        void void render(
-          <BrowserRouter>
-            <ItemInfo
-              setIdReviewData={setIdReviewData}
-              setShowReview={setShowReview}
-              showReview={showReview}
-              id={selectedBusiness.id}
-              hours={selectedBusiness?.hours}
-              phone={selectedBusiness?.phone}
-            />
-          </BrowserRouter>,
-        );
+      const setIdReviewData = (idValue: string): void => {};
+      const setShowReview = (showReview: boolean): void => {};
+      render(
+        <BrowserRouter>
+          <ItemInfo
+            setIdReviewData={setIdReviewData}
+            setShowReview={setShowReview}
+            showReview={showReview}
+            id={selectedBusiness.id}
+            hours={selectedBusiness?.hours}
+            phone={selectedBusiness?.phone}
+          />
+        </BrowserRouter>,
+      );
 
-      //     expect(screen.getByText("It is closed")).toBeInTheDocument();
+      expect(screen.getByText("It is closed")).toBeInTheDocument();
       expect(screen.queryByTestId("phone-element")).toBeNull();
     });
   });
@@ -103,18 +103,18 @@ describe(`ItemInfo and BasicInfoProd components test`, () => {
     };
 
     const showReview = false;
-    const setIdReviewData = (idValue: string) => {};
-    const setShowReview = (showReview: boolean) =>
-      void void render(
-        <BrowserRouter>
-          <ItemInfo
-            setIdReviewData={setIdReviewData}
-            setShowReview={setShowReview}
-            showReview={showReview}
-            id={selectedBusiness.id}
-          />
-        </BrowserRouter>,
-      );
+    const setIdReviewData = (idValue: string): void => {};
+    const setShowReview = (showReview: boolean): void => {};
+    render(
+      <BrowserRouter>
+        <ItemInfo
+          setIdReviewData={setIdReviewData}
+          setShowReview={setShowReview}
+          showReview={showReview}
+          id={selectedBusiness.id}
+        />
+      </BrowserRouter>,
+    );
 
     expect(screen.queryByTestId("phone-element")).toBeNull();
   });
