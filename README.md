@@ -15,12 +15,14 @@ Clone business-finder-app folder. It includes all dependencies.
 ## yelp API Authentication.
 
 - request yelp API Key. See: https://www.yelp.com/developers/documentation/v3/authentication
-- create "yelp-credentials.ts" file inside "src/hooks/yelp-api" folder.
+- create "yelp-credentials.ts" file inside "src/authentication/yelp-api" folder.
 - Paste information below inside "yelp-credentials.ts" file and save changes:
 
+```
 const API_KEY = "<insert yelp API_KEY>"
 
 export const BEARER = `Bearer ${API_KEY}`;
+```
 
 ## Get Cookies to make API work.
 
