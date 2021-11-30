@@ -80,8 +80,10 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   const DEFAULT_VALUE = null;
   const [businessInput, setBusinessInput] = useState<string>("");
   const [whereInput, setWhereInput] = useState<string>("");
+  const [geolocationInput, setGeolocationInput] = useState<string>("");
   const [business] = useDebounce(businessInput, 500);
   const [where] = useDebounce(whereInput, 500);
+  const [currentGeolocation] = useDebounce(geolocationInput, 500);
   const [searchValues, setSearchValues] = useState<InputType>({
     business: DEFAULT_VALUE,
     where: DEFAULT_VALUE,
@@ -135,13 +137,13 @@ export function Header(props: updateSearchInputsType): JSX.Element {
    * request current location and set latitud and longitud in where value
    */
   const getCurrentLocation = () => {
-    setSearchValues({ ...searchValues, where: `` });
+    setWhereInput("");
+    setSearchValues({ ...searchValues, where: DEFAULT_VALUE });
     navigator.geolocation.getCurrentPosition(
       function (position) {
-        setSearchValues({
-          ...searchValues,
-          where: `&latitude=${position.coords.latitude}&longitude=${position.coords.longitude}`,
-        });
+        setGeolocationInput(
+          `&latitude=${position.coords.latitude}&longitude=${position.coords.longitude}`,
+        );
       },
       function (error) {
         console.error(error);
@@ -152,121 +154,149 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     );
   };
 
-  useEffect(() => {
-    price1 ? setPriceStr({ ...priceStr, prc1: 1 }) : setPriceStr({ ...priceStr, prc1: "" });
-  }, [price1]);
+  useEffect(
+    () => (price1 ? setPriceStr({ ...priceStr, prc1: 1 }) : setPriceStr({ ...priceStr, prc1: "" })),
+    [price1],
+  );
 
-  useEffect(() => {
-    price2 ? setPriceStr({ ...priceStr, prc2: 2 }) : setPriceStr({ ...priceStr, prc2: "" });
-  }, [price2]);
+  useEffect(
+    () => (price2 ? setPriceStr({ ...priceStr, prc2: 2 }) : setPriceStr({ ...priceStr, prc2: "" })),
+    [price2],
+  );
 
-  useEffect(() => {
-    price3 ? setPriceStr({ ...priceStr, prc3: 3 }) : setPriceStr({ ...priceStr, prc3: "" });
-  }, [price3]);
+  useEffect(
+    () => (price3 ? setPriceStr({ ...priceStr, prc3: 3 }) : setPriceStr({ ...priceStr, prc3: "" })),
+    [price3],
+  );
 
-  useEffect(() => {
-    price4 ? setPriceStr({ ...priceStr, prc4: 4 }) : setPriceStr({ ...priceStr, prc4: "" });
-  }, [price4]);
+  useEffect(
+    () => (price4 ? setPriceStr({ ...priceStr, prc4: 4 }) : setPriceStr({ ...priceStr, prc4: "" })),
+    [price4],
+  );
 
-  useEffect(() => {
-    if (price1 || price2 || price3 || price4) {
+  useEffect(
+    () =>
+      price1 || price2 || price3 || price4
+        ? setFilterValue({
+            ...props.filterVal,
+            priceFilter: getParameterFilterStr(priceStr),
+          })
+        : setFilterValue({
+            ...props.filterVal,
+            priceFilter: ``,
+          }),
+    [priceStr],
+  );
+
+  useEffect(
+    () =>
+      hotNew
+        ? setAttributesInput({ ...attributesInput, hotNew: "hot_and_new" })
+        : setAttributesInput({ ...attributesInput, hotNew: "" }),
+    [hotNew],
+  );
+
+  useEffect(
+    () =>
+      requestQuote
+        ? setAttributesInput({ ...attributesInput, requestQuote: "request_a_quote" })
+        : setAttributesInput({ ...attributesInput, requestQuote: "" }),
+    [requestQuote],
+  );
+
+  useEffect(
+    () =>
+      reservation
+        ? setAttributesInput({ ...attributesInput, reservation: "reservation" })
+        : setAttributesInput({ ...attributesInput, reservation: "" }),
+    [reservation],
+  );
+
+  useEffect(
+    () =>
+      deals
+        ? setAttributesInput({ ...attributesInput, deals: "deals" })
+        : setAttributesInput({ ...attributesInput, deals: "" }),
+    [deals],
+  );
+
+  useEffect(
+    () =>
+      genderNeutral
+        ? setAttributesInput({ ...attributesInput, genderNeutral: "gender_neutral_restrooms" })
+        : setAttributesInput({ ...attributesInput, genderNeutral: "" }),
+    [genderNeutral],
+  );
+
+  useEffect(
+    () =>
+      openAll
+        ? setAttributesInput({ ...attributesInput, openAll: "open_to_all" })
+        : setAttributesInput({ ...attributesInput, openAll: "" }),
+    [openAll],
+  );
+
+  useEffect(
+    () =>
+      wheelchair
+        ? setAttributesInput({ ...attributesInput, wheelchair: "wheelchair_accessible" })
+        : setAttributesInput({ ...attributesInput, wheelchair: "" }),
+    [wheelchair],
+  );
+
+  useEffect(
+    () =>
+      hotNew || requestQuote || reservation || deals || genderNeutral || openAll || wheelchair
+        ? setFilterValue({
+            ...props.filterVal,
+            attrFilter: getParameterFilterStr(attributesInput),
+          })
+        : setFilterValue({
+            ...props.filterVal,
+            attrFilter: ``,
+          }),
+    [attributesInput],
+  );
+
+  useEffect(() => setSearchValues({ ...searchValues, business: business }), [business]);
+
+  useEffect(
+    () =>
+      !where && !currentGeolocation
+        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
+        : setSearchValues({ ...searchValues, where: `&location=${where}` }),
+    [where],
+  );
+
+  useEffect(
+    () =>
+      !where && !currentGeolocation
+        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
+        : setSearchValues({ ...searchValues, where: currentGeolocation }),
+
+    [currentGeolocation],
+  );
+
+  useEffect(
+    () =>
+      openInput === "DEFAULT"
+        ? setFilterValue({ ...props.filterVal, openFilter: `` })
+        : setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` }),
+    [openInput],
+  );
+
+  useEffect(
+    () =>
       setFilterValue({
         ...props.filterVal,
-        priceFilter: getParameterFilterStr(priceStr),
-      });
-    } else {
-      setFilterValue({
-        ...props.filterVal,
-        priceFilter: ``,
-      });
-    }
-  }, [priceStr]);
-
-  useEffect(() => {
-    hotNew
-      ? setAttributesInput({ ...attributesInput, hotNew: "hot_and_new" })
-      : setAttributesInput({ ...attributesInput, hotNew: "" });
-  }, [hotNew]);
-
-  useEffect(() => {
-    requestQuote
-      ? setAttributesInput({ ...attributesInput, requestQuote: "request_a_quote" })
-      : setAttributesInput({ ...attributesInput, requestQuote: "" });
-  }, [requestQuote]);
-
-  useEffect(() => {
-    reservation
-      ? setAttributesInput({ ...attributesInput, reservation: "reservation" })
-      : setAttributesInput({ ...attributesInput, reservation: "" });
-  }, [reservation]);
-
-  useEffect(() => {
-    deals
-      ? setAttributesInput({ ...attributesInput, deals: "deals" })
-      : setAttributesInput({ ...attributesInput, deals: "" });
-  }, [deals]);
-
-  useEffect(() => {
-    genderNeutral
-      ? setAttributesInput({ ...attributesInput, genderNeutral: "gender_neutral_restrooms" })
-      : setAttributesInput({ ...attributesInput, genderNeutral: "" });
-  }, [genderNeutral]);
-
-  useEffect(() => {
-    openAll
-      ? setAttributesInput({ ...attributesInput, openAll: "open_to_all" })
-      : setAttributesInput({ ...attributesInput, openAll: "" });
-  }, [openAll]);
-
-  useEffect(() => {
-    wheelchair
-      ? setAttributesInput({ ...attributesInput, wheelchair: "wheelchair_accessible" })
-      : setAttributesInput({ ...attributesInput, wheelchair: "" });
-  }, [wheelchair]);
-
-  useEffect(() => {
-    if (hotNew || requestQuote || reservation || deals || genderNeutral || openAll || wheelchair) {
-      setFilterValue({
-        ...props.filterVal,
-        attrFilter: getParameterFilterStr(attributesInput),
-      });
-    } else {
-      setFilterValue({
-        ...props.filterVal,
-        attrFilter: ``,
-      });
-    }
-  }, [attributesInput]);
-
-  useEffect(() => {
-    setSearchValues({ ...searchValues, business: business });
-  }, [business]);
-
-  useEffect(() => {
-    setSearchValues({ ...searchValues, where: `&location=${where}` });
-  }, [where]);
-
-  useEffect(() => {
-    if (openInput === "DEFAULT") {
-      setFilterValue({ ...props.filterVal, openFilter: `` });
-    } else if (openInput === "openNow") {
-      setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` });
-    }
-  }, [openInput]);
-
-  useEffect(() => {
-    setFilterValue({
-      ...props.filterVal,
-      openFilter: `&open_at=${new Date(`${openAtDate} ${openAtHour}:00`).getTime() / 1000}`,
-    });
-  }, [openAtDate, openAtHour]);
+        openFilter: `&open_at=${new Date(`${openAtDate} ${openAtHour}:00`).getTime() / 1000}`,
+      }),
+    [openAtDate, openAtHour],
+  );
 
   useEffect(() => {
     if (sortByInput !== "")
-      setFilterValue({
-        ...props.filterVal,
-        sortByFilter: `&sort_by=${sortByInput}`,
-      });
+      setFilterValue({ ...props.filterVal, sortByFilter: `&sort_by=${sortByInput}` });
   }, [sortByInput]);
 
   return (

@@ -89,10 +89,23 @@ function App() {
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
 
+  const init_YELP_API: ApiResponseType = {
+    businesses: [],
+    region: {
+      center: {
+        latitude: DEFAULT_NUMBER,
+        longitude: DEFAULT_NUMBER,
+      },
+    },
+    total: DEFAULT_NUMBER,
+  };
+
   const [searchInputs, setSearchInputs] = useState<InputType>({
     business: DEFAULT_VALUE,
     where: DEFAULT_VALUE,
   });
+
+  const [isTypoLocation, setIsTypoLocation] = useState<boolean>(false);
 
   // YELP API LIMIT is 50
   const LIMIT = 50;
@@ -106,16 +119,7 @@ function App() {
     attrFilter: ``,
   });
   const PATH = "/businesses/search";
-  const [resultYELP, setResultYELP] = useState<ApiResponseType>({
-    businesses: [],
-    region: {
-      center: {
-        latitude: DEFAULT_NUMBER,
-        longitude: DEFAULT_NUMBER,
-      },
-    },
-    total: DEFAULT_NUMBER,
-  });
+  const [resultYELP, setResultYELP] = useState<ApiResponseType>(init_YELP_API);
 
   const [selectedBusiness, setSelectedBusiness] = useState<ItemInfoType>({
     id: DEFAULT_STRING,
@@ -151,14 +155,20 @@ function App() {
       setTerm(
         `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
       ),
-    [searchInputs],
+    [searchInputs, filterValue],
   );
 
   useEffect(() => {
-    if (term !== `?term=${DEFAULT_VALUE}${DEFAULT_VALUE}&limit=${LIMIT}`)
+    if (!searchInputs.where) {
+      setResultYELP(init_YELP_API);
+    } else {
       Promise.resolve(useFetchYELP(`${PATH}${term}`))
-        .then((resp) => setResultYELP(resp))
+        .then((resp) => {
+          !resp.error ? setResultYELP(resp) : setResultYELP(init_YELP_API);
+          resp.error ? setIsTypoLocation(true) : setIsTypoLocation(false);
+        })
         .catch((err) => console.error(err));
+    }
   }, [term]);
 
   useEffect(() => {
@@ -176,11 +186,12 @@ function App() {
   }, [idReviewData]);
 
   useEffect(() => {
-    setPageInfo({
-      ...pageInfo,
-      currentPage: DEFAULT_CURRENT_PAGE,
-      totalPage: getTotalPages(resultYELP.businesses.length, ITEMS_BY_PAGE),
-    });
+    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
+      setPageInfo({
+        ...pageInfo,
+        currentPage: DEFAULT_CURRENT_PAGE,
+        totalPage: getTotalPages(resultYELP.businesses.length, ITEMS_BY_PAGE),
+      });
   }, [resultYELP.businesses]);
 
   useEffect(() => {
@@ -191,7 +202,7 @@ function App() {
   useEffect(() => {
     businessPageArr.length = 0;
     coorResArr.length = 0;
-    if (resultYELP.businesses !== [])
+    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
       resultYELP.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
           let url = "";
@@ -223,7 +234,7 @@ function App() {
    */
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
-    if (searchInputs.where === "") {
+    if (searchInputs.where === DEFAULT_VALUE) {
       (document.getElementById("where") as HTMLInputElement).placeholder =
         "Please, fill location field.";
     } else {
@@ -245,9 +256,6 @@ function App() {
     setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage - 1 });
     window.scrollTo(0, 0);
   };
-  console.log(term);
-  console.log(searchInputs.where);
-  console.log(resultYELP);
 
   return (
     <div className="App">
@@ -266,27 +274,31 @@ function App() {
                 {isMapView ? `See Results view` : `See Map View`}{" "}
               </button>
             )}
-
-            <div id="result-container">
-              <div className={isMapView ? "show" : "hide"}>
-                <MapPage
-                  setIdSelected={setIdSelected}
-                  markers={markerResArr}
-                  region={resultYELP.region.center}
-                />
-              </div>
-              <div className={isMapView ? "hide" : "show"}>
-                <div id="item-pagin-result-container">
-                  <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
-                  <Pagination
-                    incrementPage={incrementPage}
-                    decrementPage={decrementPage}
-                    currentPage={pageInfo.currentPage}
-                    totalPage={pageInfo.totalPage}
+            {isTypoLocation ? <p id="location-error">Location not found</p> : DEFAULT_VALUE}
+            {!resultYELP.total ? (
+              DEFAULT_VALUE
+            ) : (
+              <div id="result-container">
+                <div className={isMapView ? "show" : "hide"}>
+                  <MapPage
+                    setIdSelected={setIdSelected}
+                    markers={markerResArr}
+                    region={resultYELP.region.center}
                   />
                 </div>
+                <div className={isMapView ? "hide" : "show"}>
+                  <div id="item-pagin-result-container">
+                    <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
+                    <Pagination
+                      incrementPage={incrementPage}
+                      decrementPage={decrementPage}
+                      currentPage={pageInfo.currentPage}
+                      totalPage={pageInfo.totalPage}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </Route>
         <Route path={`/${selectedBusiness.id}`}>

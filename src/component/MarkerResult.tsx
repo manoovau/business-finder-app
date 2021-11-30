@@ -42,7 +42,6 @@ export const MarkerResult = (props: prop): JSX.Element => {
     className: "leaflet-venue-icon",
   });
 
-  console.log(props.markerType);
   return (
     <Marker
       position={[props.lat, props.long]}
