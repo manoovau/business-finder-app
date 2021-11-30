@@ -88,6 +88,7 @@ function App() {
   const DEFAULT_NUMBER = 0;
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
+  const whereElement = document.getElementById("where") as HTMLInputElement;
 
   const init_YELP_API: ApiResponseType = {
     businesses: [],
@@ -166,6 +167,7 @@ function App() {
         .then((resp) => {
           !resp.error ? setResultYELP(resp) : setResultYELP(init_YELP_API);
           resp.error ? setIsTypoLocation(true) : setIsTypoLocation(false);
+          console.log(term);
         })
         .catch((err) => console.error(err));
     }
@@ -228,6 +230,14 @@ function App() {
     setBusinessPage([...businessPageArr]);
   }, [itemsPage.min, resultYELP.businesses]);
 
+  useEffect(() => {
+    if (isTypoLocation) {
+      whereElement.classList.add("error");
+      whereElement.placeholder = "Please, fill a correct location";
+      whereElement.value = "";
+    }
+  }, [isTypoLocation]);
+
   /**
    * set searchInputs values and check if where field is not filled.
    * @param objectIn Object with business and where input fields.
@@ -235,10 +245,11 @@ function App() {
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
     if (searchInputs.where === DEFAULT_VALUE) {
-      (document.getElementById("where") as HTMLInputElement).placeholder =
-        "Please, fill location field.";
+      whereElement.placeholder = "Please, fill location field.";
+      whereElement.classList.add("error");
     } else {
-      (document.getElementById("where") as HTMLInputElement).placeholder = "Where...";
+      whereElement.placeholder = "Where...";
+      whereElement.classList.remove("error");
     }
   };
 
@@ -274,7 +285,6 @@ function App() {
                 {isMapView ? `See Results view` : `See Map View`}{" "}
               </button>
             )}
-            {isTypoLocation ? <p id="location-error">Location not found</p> : DEFAULT_VALUE}
             {!resultYELP.total ? (
               DEFAULT_VALUE
             ) : (

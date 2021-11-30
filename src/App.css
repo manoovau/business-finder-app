@@ -262,6 +262,10 @@ i,
   display: none;
 }
 
+.error {
+  border: 2px solid #f71d1d;
+}
+
 @media (min-width: 640px) {
   #item-result-container {
     display: flex;
