@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { OpenType, HoursType } from "../interface";
+import { OpenType, HoursType, CenterType } from "../interface";
+import { MapPage } from "./index";
 
 type Props = {
   id: string;
@@ -8,6 +9,7 @@ type Props = {
   url?: string | null;
   phone?: string | null;
   photosArr?: string[];
+  coordinates?: CenterType;
   showReview: boolean;
   setShowReview: (showReview: boolean) => void;
   setIdReviewData: (id: string) => void;
@@ -168,6 +170,13 @@ export const ItemInfo = (props: Props): JSX.Element => {
             : DEFAULT_VALUE}
         </div>
       </div>
+      {props?.coordinates ? (
+        <div id="map-item">
+          <MapPage region={props?.coordinates} setIdSelected={setIdReviewData} />
+        </div>
+      ) : (
+        DEFAULT_VALUE
+      )}
     </div>
   );
 };

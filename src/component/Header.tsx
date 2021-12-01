@@ -299,6 +299,10 @@ export function Header(props: updateSearchInputsType): JSX.Element {
       setFilterValue({ ...props.filterVal, sortByFilter: `&sort_by=${sortByInput}` });
   }, [sortByInput]);
 
+  useEffect(() => {
+    if (searchValues.where !== DEFAULT_VALUE) updateSearchInputs(searchValues);
+  }, [searchValues]);
+
   return (
     <div
       id="header-container"

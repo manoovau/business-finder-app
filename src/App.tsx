@@ -167,7 +167,6 @@ function App() {
         .then((resp) => {
           !resp.error ? setResultYELP(resp) : setResultYELP(init_YELP_API);
           resp.error ? setIsTypoLocation(true) : setIsTypoLocation(false);
-          console.log(term);
         })
         .catch((err) => console.error(err));
     }
@@ -244,7 +243,8 @@ function App() {
    */
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
-    if (searchInputs.where === DEFAULT_VALUE) {
+
+    if (objectIn.where === DEFAULT_VALUE) {
       whereElement.placeholder = "Please, fill location field.";
       whereElement.classList.add("error");
     } else {
@@ -331,6 +331,7 @@ function App() {
               url={selectedBusiness?.url}
               phone={selectedBusiness?.phone}
               photosArr={selectedBusiness?.photos}
+              coordinates={selectedBusiness?.coordinates}
               showReview={showReview}
               setIdReviewData={setIdReviewData}
               setShowReview={setShowReview}
