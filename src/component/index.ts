@@ -8,3 +8,5 @@ export { Pagination } from "./Pagination";
 export { MapPage } from "./MapPage";
 export { MarkerResult } from "./MarkerResult";
 export { CurrentLocMarker } from "./CurrentLocMarker";
+export { MapPageItem } from "./MapPageItem";
+export { ItemMarker } from "./ItemMarker";

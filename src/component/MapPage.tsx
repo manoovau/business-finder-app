@@ -8,10 +8,11 @@ type prop = {
   markers?: MarkerType[];
   region?: CenterType;
   setIdSelected: (id: string) => void;
+  updateLocationClick: (location: CenterType) => void;
 };
 
 export const MapPage = (props: prop): JSX.Element => {
-  const { setIdSelected } = props;
+  const { setIdSelected, updateLocationClick } = props;
   const DEFAULT_VALUE = null;
   // leaflet resize issue
   window.dispatchEvent(new Event("resize"));
@@ -28,7 +29,11 @@ export const MapPage = (props: prop): JSX.Element => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           />
-          <CurrentLocMarker lat={props.region.latitude} long={props.region.longitude} />
+          <CurrentLocMarker
+            latitude={props.region.latitude}
+            longitude={props.region.longitude}
+            updateLocationClick={updateLocationClick}
+          />
           {props?.markers
             ? props.markers.map((item: MarkerType, index: number) => {
                 return (

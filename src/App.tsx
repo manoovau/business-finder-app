@@ -17,6 +17,7 @@ import {
   ApiResponseType,
   FilterInputType,
   MarkerType,
+  CenterType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link } from "react-router-dom";
@@ -268,6 +269,13 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  const updateLocationClick = (location: CenterType): void => {
+    setSearchInputs({
+      ...searchInputs,
+      where: `&latitude=${location.latitude}&longitude=${location.longitude}`,
+    });
+  };
+
   return (
     <div className="App">
       <Switch>
@@ -294,6 +302,7 @@ function App() {
                     setIdSelected={setIdSelected}
                     markers={markerResArr}
                     region={resultYELP.region.center}
+                    updateLocationClick={updateLocationClick}
                   />
                 </div>
                 <div className={isMapView ? "hide" : "show"}>
