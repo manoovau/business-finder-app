@@ -20,7 +20,11 @@ import {
   CenterType,
 } from "./interface";
 import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
-import { Switch, Route, Link } from "react-router-dom";
+import { Switch, Route, Link, Redirect } from "react-router-dom";
+
+import { CollectionReference, DocumentData } from "@firebase/firestore-types";
+import { db } from "./firebase-config";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -44,6 +48,20 @@ type itemsPageType = {
   max: number;
 };
 
+type userLocalType = {
+  id: string;
+  username: string;
+  password: string;
+  email: string;
+};
+
+const userLocalInit = {
+  id: "",
+  username: "",
+  password: "",
+  email: "",
+};
+
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
@@ -56,6 +74,17 @@ const useFetchYELP = async (fetchParameter: string) => {
     headers: requestHeaders,
   });
   const data = await resp.json();
+  return data;
+};
+
+/**
+ * get data from firebase
+ * @param usersCollecRef firebase collection
+ * @returns data from firebase
+ */
+const getUsers = async (usersCollecRef: CollectionReference<DocumentData> | any) => {
+  const data = await getDocs(usersCollecRef);
+
   return data;
 };
 
@@ -90,6 +119,7 @@ function App() {
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
   const whereElement = document.getElementById("where") as HTMLInputElement;
+  const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
 
   const init_YELP_API: ApiResponseType = {
     businesses: [],
@@ -151,6 +181,10 @@ function App() {
   const businessPageArr: ItemInfoType[] = [];
 
   const coorResArr: MarkerType[] = [];
+
+  const [user, setUser] = useState<string | null>("");
+  const [password, setPassword] = useState<string | null>("");
+  const [email, setEmail] = useState<string | null>("");
 
   useEffect(
     () =>
@@ -269,12 +303,100 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  /**
+   * set location filter
+   * @param location altitude and latitude location object
+   */
   const updateLocationClick = (location: CenterType): void => {
     setSearchInputs({
       ...searchInputs,
       where: `&latitude=${location.latitude}&longitude=${location.longitude}`,
     });
   };
+
+  const [users, setUsers] = useState<[] | unknown[]>([]);
+  const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
+  const usersCollecRef = collection(db, "users");
+  const usersLocal: userLocalType[] = [];
+
+  useEffect(() => {
+    Promise.resolve(getUsers(usersCollecRef))
+      .then((resp) => setUsers(resp.docs))
+      .catch((err) => console.error(err));
+  }, [user]);
+
+  /**
+   * create user inside users firebase collection
+   */
+  const createUser = async (): Promise<void> => {
+    await addDoc(usersCollecRef, {
+      email: "joan@gmail.com",
+      password: "joanjoanjoan",
+      username: "joan",
+    });
+  };
+
+  useEffect(() => {
+    const filter = usersLocal.filter((item: userLocalType) => item.username === user);
+    if (filter.length > 0 && filter[0].password === password) {
+      setCurrentUsersId(filter[0]);
+    } else if (filter.length > 0 && filter[0].password !== password) {
+      passwordLoginEle.placeholder = "password is not correct";
+      passwordLoginEle.value = "";
+      setCurrentUsersId(userLocalInit);
+    }
+  }, [user, password]);
+
+  /**
+   * update password field inside users firebase collection
+   */
+  const updateUser = async (): Promise<void> => {
+    const userDoc = doc(db, "users", currentUsersId.id);
+    await updateDoc(userDoc, { password: "nananana Batman" });
+  };
+
+  /**
+   * delete user inside firebase collection
+   */
+  const deleteUser = async (): Promise<void> => {
+    const userDoc = doc(db, "users", currentUsersId.id);
+    await deleteDoc(userDoc);
+  };
+
+  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+
+  const loginUser = () => {
+    const usernameLoginEle = document.getElementById("username-login") as HTMLInputElement;
+    //   const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
+    setUser(usernameLoginEle.value);
+    setPassword(passwordLoginEle.value);
+    if (!user) usernameLoginEle.placeholder = "username is empty";
+    if (!password) passwordLoginEle.placeholder = "password is empty";
+  };
+
+  const registerUser = () => {
+    const usernameRegisterEle = document.getElementById("username-register") as HTMLInputElement;
+    setUser(usernameRegisterEle.value);
+    if (user === "") usernameRegisterEle.placeholder = "username is empty";
+    const passwordRegisterEle = document.getElementById("password-register") as HTMLInputElement;
+    setPassword(passwordRegisterEle.value);
+    if (password === "") passwordRegisterEle.placeholder = "password is empty";
+    const emailRegisterEle = document.getElementById("email-register") as HTMLInputElement;
+    setEmail(emailRegisterEle.value);
+    if (email === "") emailRegisterEle.placeholder = "email is empty";
+  };
+
+  const logOut = () => {
+    setUser("");
+    setPassword("");
+    setEmail("");
+    setCurrentUsersId(userLocalInit);
+  };
+
+  console.log("CHECK USER");
+  console.log(currentUsersId);
+  console.log(user);
+  console.log(password);
 
   return (
     <div className="App">
@@ -285,12 +407,17 @@ function App() {
               updateSearchInputs={updateSearchInputs}
               setFilterValue={setFilterValue}
               filterVal={filterValue}
+              user={user}
+              logOut={logOut}
             />
+            <button onClick={createUser}>Create User</button>
+            <button onClick={updateUser}>Update User</button>
+            <button onClick={deleteUser}>Delete User</button>
             {!resultYELP.total ? (
               DEFAULT_VALUE
             ) : (
               <button onClick={() => setIsMapView(!isMapView)}>
-                {isMapView ? `See Results view` : `See Map View`}{" "}
+                {isMapView ? `See Results view` : `See Map View`}
               </button>
             )}
             {!resultYELP.total ? (
@@ -319,6 +446,35 @@ function App() {
               </div>
             )}
           </div>
+        </Route>
+        <Route path="/login">
+          {currentUsersId !== userLocalInit ? (
+            <Redirect to="/" />
+          ) : (
+            <div>
+              <Link to="/">
+                <h3>{`< Go Back `}</h3>
+              </Link>
+              <input id="username-login" type="text" placeholder="username" required />
+              <input id="password-login" type="text" placeholder="password" required />
+              <button onClick={loginUser}>Login In</button>
+            </div>
+          )}
+        </Route>
+        <Route path="/register">
+          {currentUsersId !== userLocalInit ? (
+            <Redirect to="/" />
+          ) : (
+            <div>
+              <Link to="/">
+                <h3>{`< Go Back `}</h3>
+              </Link>
+              <input id="username-register" type="text" placeholder="username" />
+              <input id="password-register" type="text" placeholder="password" />
+              <input id="email-register" type="text" placeholder="username" />
+              <button onClick={registerUser}>Register</button>
+            </div>
+          )}
         </Route>
         <Route path={`/${selectedBusiness.id}`}>
           <div>

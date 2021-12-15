@@ -6,8 +6,10 @@ import { FilterInputType } from "../interface";
 
 type updateSearchInputsType = {
   filterVal: FilterInputType;
+  user: string | null;
   updateSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
+  logOut: () => void;
 };
 
 type priceStrType = {
@@ -75,7 +77,7 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 };
 
 export function Header(props: updateSearchInputsType): JSX.Element {
-  const { updateSearchInputs, setFilterValue } = props;
+  const { updateSearchInputs, setFilterValue, logOut } = props;
 
   const DEFAULT_VALUE = null;
   const [businessInput, setBusinessInput] = useState<string>("");
@@ -314,6 +316,21 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <Link to="/" id="title">
           <h1>Business Finder</h1>
         </Link>
+        {props.user === "" ? (
+          <div>
+            <Link to="/login" id="login">
+              <h3>{`Log In`}</h3>
+            </Link>
+            <Link to="/register" id="register">
+              <h3>{`Register`}</h3>
+            </Link>
+          </div>
+        ) : (
+          <Link to="/" id="register" onClick={logOut}>
+            <h3>{`Log Out`}</h3>
+          </Link>
+        )}
+
         <div id="input-container">
           <input
             type="text"
