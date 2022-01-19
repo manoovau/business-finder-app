@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import "./App.css";
 import {
   Header,
@@ -119,7 +119,6 @@ function App() {
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
   const whereElement = document.getElementById("where") as HTMLInputElement;
-  const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
 
   const init_YELP_API: ApiResponseType = {
     businesses: [],
@@ -295,6 +294,7 @@ function App() {
     setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage + 1 });
     window.scrollTo(0, 0);
   };
+
   /**
    * decrement PageInfo Object, key currentPage value
    */
@@ -314,38 +314,16 @@ function App() {
     });
   };
 
-  const [users, setUsers] = useState<[] | unknown[]>([]);
-  const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
-  const usersCollecRef = collection(db, "users");
-  const usersLocal: userLocalType[] = [];
-
-  useEffect(() => {
-    Promise.resolve(getUsers(usersCollecRef))
-      .then((resp) => setUsers(resp.docs))
-      .catch((err) => console.error(err));
-  }, [user]);
-
   /**
    * create user inside users firebase collection
    */
-  const createUser = async (): Promise<void> => {
+  const createUser = async (user: string, password: string, email: string): Promise<void> => {
     await addDoc(usersCollecRef, {
-      email: "joan@gmail.com",
-      password: "joanjoanjoan",
-      username: "joan",
+      email: email,
+      password: password,
+      username: user,
     });
   };
-
-  useEffect(() => {
-    const filter = usersLocal.filter((item: userLocalType) => item.username === user);
-    if (filter.length > 0 && filter[0].password === password) {
-      setCurrentUsersId(filter[0]);
-    } else if (filter.length > 0 && filter[0].password !== password) {
-      passwordLoginEle.placeholder = "password is not correct";
-      passwordLoginEle.value = "";
-      setCurrentUsersId(userLocalInit);
-    }
-  }, [user, password]);
 
   /**
    * update password field inside users firebase collection
@@ -363,40 +341,130 @@ function App() {
     await deleteDoc(userDoc);
   };
 
-  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
-
+  /**
+   * identify errors inside login input values and store correct user information
+   */
   const loginUser = () => {
     const usernameLoginEle = document.getElementById("username-login") as HTMLInputElement;
-    //   const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
-    setUser(usernameLoginEle.value);
-    setPassword(passwordLoginEle.value);
-    if (!user) usernameLoginEle.placeholder = "username is empty";
+    const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
+
+    usernameLoginEle.classList.remove("error");
+    passwordLoginEle.classList.remove("error");
+
     if (!password) passwordLoginEle.placeholder = "password is empty";
+    if (!user) {
+      usernameLoginEle.placeholder = "username is empty";
+    } else {
+      const usernameFilter = usersLocal.filter((item: userLocalType) => item.username === user);
+      if (usernameFilter.length === 0) {
+        usernameLoginEle.classList.add("error");
+        usernameLoginEle.placeholder = "username is not correct";
+        usernameLoginEle.value = "";
+        setUser("");
+      } else if (usernameFilter.length > 0 && usernameFilter[0].password === password) {
+        setCurrentUsersId(usernameFilter[0]);
+      } else if (usernameFilter.length > 0 && usernameFilter[0].password !== password) {
+        passwordLoginEle.classList.add("error");
+        passwordLoginEle.placeholder = "password is not correct";
+        passwordLoginEle.value = "";
+        setCurrentUsersId(userLocalInit);
+      }
+    }
   };
 
+  /**
+   * identify errors inside register input values and store correct user registration information
+   */
   const registerUser = () => {
     const usernameRegisterEle = document.getElementById("username-register") as HTMLInputElement;
-    setUser(usernameRegisterEle.value);
-    if (user === "") usernameRegisterEle.placeholder = "username is empty";
     const passwordRegisterEle = document.getElementById("password-register") as HTMLInputElement;
-    setPassword(passwordRegisterEle.value);
-    if (password === "") passwordRegisterEle.placeholder = "password is empty";
     const emailRegisterEle = document.getElementById("email-register") as HTMLInputElement;
-    setEmail(emailRegisterEle.value);
-    if (email === "") emailRegisterEle.placeholder = "email is empty";
+
+    usernameRegisterEle.classList.remove("error");
+    passwordRegisterEle.classList.remove("error");
+    emailRegisterEle.classList.remove("error");
+
+    if (!password) {
+      passwordRegisterEle.classList.add("error");
+      passwordRegisterEle.placeholder = "password is empty";
+    }
+
+    if (!user) {
+      usernameRegisterEle.placeholder = "username is empty";
+      usernameRegisterEle.classList.add("error");
+    }
+    if (!email) {
+      emailRegisterEle.placeholder = "email is empty";
+      emailRegisterEle.classList.add("error");
+    } else {
+      const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
+      if (checkEmailInput.length > 0) {
+        emailRegisterEle.value = "";
+        emailRegisterEle.placeholder = "You are registered";
+        emailRegisterEle.classList.add("error");
+        setEmail("");
+      } else {
+        const checkUsernameInput = usersLocal.filter(
+          (item: userLocalType) => item.username === user,
+        );
+        if (checkUsernameInput.length > 0) {
+          setUser("");
+          usernameRegisterEle.placeholder = "Please, use other username";
+          usernameRegisterEle.value = "";
+          usernameRegisterEle.classList.add("error");
+        }
+      }
+
+      if (user && password && email)
+        setCurrentUsersId({ ...currentUsersId, username: user, password: password, email: email });
+    }
   };
 
+  const [users, setUsers] = useState<[] | unknown[]>([]);
+  const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
+  const usersCollecRef = collection(db, "users");
+  const usersLocal: userLocalType[] = [];
+
+  useEffect(() => {
+    if (user && password && email)
+      createUser(currentUsersId.username, currentUsersId.password, currentUsersId.email);
+  }, [currentUsersId]);
+
+  useEffect(() => {
+    Promise.resolve(getUsers(usersCollecRef))
+      .then((resp) => setUsers(resp.docs))
+      .catch((err) => console.error(err));
+  }, [user]);
+
+  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+
+  /**
+   * store user input value
+   * @param e user input value
+   */
+  const setUserInput = (e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value);
+
+  /**
+   * store password input value
+   * @param e password input value
+   */
+  const setPasswordInput = (e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value);
+
+  /**
+   * store email input value
+   * @param e email input value
+   */
+  const setEmailInput = (e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value);
+
+  /**
+   * set initial values for user, password, email amd currentUsersId
+   */
   const logOut = () => {
     setUser("");
     setPassword("");
     setEmail("");
     setCurrentUsersId(userLocalInit);
   };
-
-  console.log("CHECK USER");
-  console.log(currentUsersId);
-  console.log(user);
-  console.log(password);
 
   return (
     <div className="App">
@@ -407,10 +475,10 @@ function App() {
               updateSearchInputs={updateSearchInputs}
               setFilterValue={setFilterValue}
               filterVal={filterValue}
-              user={user}
+              password={currentUsersId.password}
               logOut={logOut}
             />
-            <button onClick={createUser}>Create User</button>
+            <button onClick={() => createUser("user", "password", "email")}>Create User</button>
             <button onClick={updateUser}>Update User</button>
             <button onClick={deleteUser}>Delete User</button>
             {!resultYELP.total ? (
@@ -455,8 +523,20 @@ function App() {
               <Link to="/">
                 <h3>{`< Go Back `}</h3>
               </Link>
-              <input id="username-login" type="text" placeholder="username" required />
-              <input id="password-login" type="text" placeholder="password" required />
+              <input
+                id="username-login"
+                type="text"
+                placeholder="username"
+                onChange={setUserInput}
+                required
+              />
+              <input
+                id="password-login"
+                type="text"
+                placeholder="password"
+                onChange={setPasswordInput}
+                required
+              />
               <button onClick={loginUser}>Login In</button>
             </div>
           )}
@@ -469,9 +549,19 @@ function App() {
               <Link to="/">
                 <h3>{`< Go Back `}</h3>
               </Link>
-              <input id="username-register" type="text" placeholder="username" />
-              <input id="password-register" type="text" placeholder="password" />
-              <input id="email-register" type="text" placeholder="username" />
+              <input
+                id="username-register"
+                type="text"
+                placeholder="username"
+                onChange={setUserInput}
+              />
+              <input
+                id="password-register"
+                type="text"
+                placeholder="password"
+                onChange={setPasswordInput}
+              />
+              <input id="email-register" type="text" placeholder="email" onChange={setEmailInput} />
               <button onClick={registerUser}>Register</button>
             </div>
           )}

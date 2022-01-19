@@ -6,7 +6,7 @@ import { FilterInputType } from "../interface";
 
 type updateSearchInputsType = {
   filterVal: FilterInputType;
-  user: string | null;
+  password: string | null;
   updateSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   logOut: () => void;
@@ -316,7 +316,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <Link to="/" id="title">
           <h1>Business Finder</h1>
         </Link>
-        {props.user === "" ? (
+        {props.password === "" ? (
           <div>
             <Link to="/login" id="login">
               <h3>{`Log In`}</h3>
