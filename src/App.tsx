@@ -23,8 +23,10 @@ import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link, Redirect } from "react-router-dom";
 
 import { CollectionReference, DocumentData } from "@firebase/firestore-types";
-import { db } from "./firebase-config";
+
+import { db, storage } from "./firebase-config";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -420,10 +422,40 @@ function App() {
     }
   };
 
+  /**
+   * store local file in firebase database
+   * @param file local file
+   */
+  const uploadFile = (file: any) => {
+    if (!file) return;
+
+    const storageRef = ref(storage, `/files/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        setProgress(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+      },
+      (err) => console.error(err),
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((url) => console.log(url));
+      },
+    );
+  };
+
+  const formHandler = (e: any) => {
+    e.preventDefault();
+    const file = e.target[0].files[0];
+    uploadFile(file);
+  };
   const [users, setUsers] = useState<[] | unknown[]>([]);
   const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
   const usersCollecRef = collection(db, "users");
   const usersLocal: userLocalType[] = [];
+
+  const [addImg, setAddImg] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     if (user && password && email)
@@ -562,6 +594,14 @@ function App() {
                 onChange={setPasswordInput}
               />
               <input id="email-register" type="text" placeholder="email" onChange={setEmailInput} />
+              <div id="add-img" onClick={() => setAddImg(!addImg)}>
+                <form onSubmit={formHandler}>
+                  <input type="file" className="input" />
+                  <button type="submit">Upload</button>
+                </form>
+                <hr />
+                <h2>Uploading {progress}%</h2>
+              </div>
               <button onClick={registerUser}>Register</button>
             </div>
           )}
