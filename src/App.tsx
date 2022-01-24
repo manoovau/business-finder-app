@@ -120,7 +120,6 @@ function App() {
   const DEFAULT_NUMBER = 0;
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
-  const whereElement = document.getElementById("where") as HTMLInputElement;
 
   const init_YELP_API: ApiResponseType = {
     businesses: [],
@@ -138,7 +137,7 @@ function App() {
     where: DEFAULT_VALUE,
   });
 
-  const [isTypoLocation, setIsTypoLocation] = useState<boolean>(false);
+  const [isErrorLocation, setIsErrorLocation] = useState<boolean>(false);
 
   // YELP API LIMIT is 50
   const LIMIT = 50;
@@ -183,9 +182,15 @@ function App() {
 
   const coorResArr: MarkerType[] = [];
 
-  const [user, setUser] = useState<string | null>("");
-  const [password, setPassword] = useState<string | null>("");
-  const [email, setEmail] = useState<string | null>("");
+  const [user, setUser] = useState<string>("");
+  const [userInPlaceholder, setUserInPlaceholder] = useState<string>("username");
+  const [isUserInError, setIsUserInError] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>("");
+  const [pwInPlaceholder, setPwInPlaceholder] = useState<string>("password");
+  const [isPwInError, setIsPwInError] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [emailInPlaceholder, setEmailInPlaceholder] = useState<string>("email");
+  const [isEmailInError, setIsEmailInError] = useState<boolean>(false);
 
   useEffect(
     () =>
@@ -196,13 +201,20 @@ function App() {
   );
 
   useEffect(() => {
+    if (searchInputs.where === "") setIsErrorLocation(true);
+
     if (!searchInputs.where) {
       setResultYELP(init_YELP_API);
     } else {
       Promise.resolve(useFetchYELP(`${PATH}${term}`))
         .then((resp) => {
-          !resp.error ? setResultYELP(resp) : setResultYELP(init_YELP_API);
-          resp.error ? setIsTypoLocation(true) : setIsTypoLocation(false);
+          if (!resp.error) {
+            setResultYELP(resp);
+            setIsErrorLocation(false);
+          } else {
+            setResultYELP(init_YELP_API);
+            setIsErrorLocation(true);
+          }
         })
         .catch((err) => console.error(err));
     }
@@ -265,28 +277,12 @@ function App() {
     setBusinessPage([...businessPageArr]);
   }, [itemsPage.min, resultYELP.businesses]);
 
-  useEffect(() => {
-    if (isTypoLocation) {
-      whereElement.classList.add("error");
-      whereElement.placeholder = "Please, fill a correct location";
-      whereElement.value = "";
-    }
-  }, [isTypoLocation]);
-
   /**
    * set searchInputs values and check if where field is not filled.
    * @param objectIn Object with business and where input fields.
    */
   const updateSearchInputs = (objectIn: InputType): void => {
     setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
-
-    if (objectIn.where === DEFAULT_VALUE) {
-      whereElement.placeholder = "Please, fill location field.";
-      whereElement.classList.add("error");
-    } else {
-      whereElement.placeholder = "Where...";
-      whereElement.classList.remove("error");
-    }
   };
 
   /**
@@ -347,28 +343,29 @@ function App() {
    * identify errors inside login input values and store correct user information
    */
   const loginUser = () => {
-    const usernameLoginEle = document.getElementById("username-login") as HTMLInputElement;
-    const passwordLoginEle = document.getElementById("password-login") as HTMLInputElement;
+    setIsUserInError(false);
+    setIsPwInError(false);
 
-    usernameLoginEle.classList.remove("error");
-    passwordLoginEle.classList.remove("error");
-
-    if (!password) passwordLoginEle.placeholder = "password is empty";
+    if (!password) {
+      setPwInPlaceholder("password is empty");
+      setIsPwInError(true);
+    }
     if (!user) {
-      usernameLoginEle.placeholder = "username is empty";
+      setUserInPlaceholder("username is empty");
+      setIsUserInError(true);
     } else {
       const usernameFilter = usersLocal.filter((item: userLocalType) => item.username === user);
       if (usernameFilter.length === 0) {
-        usernameLoginEle.classList.add("error");
-        usernameLoginEle.placeholder = "username is not correct";
-        usernameLoginEle.value = "";
+        setUserInPlaceholder("username is not correct");
+        setIsUserInError(true);
         setUser("");
       } else if (usernameFilter.length > 0 && usernameFilter[0].password === password) {
         setCurrentUsersId(usernameFilter[0]);
+        setIsUserInError(false);
       } else if (usernameFilter.length > 0 && usernameFilter[0].password !== password) {
-        passwordLoginEle.classList.add("error");
-        passwordLoginEle.placeholder = "password is not correct";
-        passwordLoginEle.value = "";
+        setIsPwInError(true);
+        setPwInPlaceholder("password is not correct");
+        setPassword("");
         setCurrentUsersId(userLocalInit);
       }
     }
@@ -378,32 +375,28 @@ function App() {
    * identify errors inside register input values and store correct user registration information
    */
   const registerUser = () => {
-    const usernameRegisterEle = document.getElementById("username-register") as HTMLInputElement;
-    const passwordRegisterEle = document.getElementById("password-register") as HTMLInputElement;
-    const emailRegisterEle = document.getElementById("email-register") as HTMLInputElement;
-
-    usernameRegisterEle.classList.remove("error");
-    passwordRegisterEle.classList.remove("error");
-    emailRegisterEle.classList.remove("error");
+    setIsUserInError(false);
+    setIsPwInError(false);
+    setIsEmailInError(false);
 
     if (!password) {
-      passwordRegisterEle.classList.add("error");
-      passwordRegisterEle.placeholder = "password is empty";
+      setIsPwInError(true);
+      setPwInPlaceholder("password is empty");
     }
 
     if (!user) {
-      usernameRegisterEle.placeholder = "username is empty";
-      usernameRegisterEle.classList.add("error");
+      setUserInPlaceholder("username is empty");
+      setIsUserInError(true);
     }
     if (!email) {
-      emailRegisterEle.placeholder = "email is empty";
-      emailRegisterEle.classList.add("error");
+      setEmailInPlaceholder("email is empty");
+      setIsEmailInError(true);
     } else {
       const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
       if (checkEmailInput.length > 0) {
-        emailRegisterEle.value = "";
-        emailRegisterEle.placeholder = "You are registered";
-        emailRegisterEle.classList.add("error");
+        setEmailInPlaceholder("You are register");
+
+        setIsEmailInError(true);
         setEmail("");
       } else {
         const checkUsernameInput = usersLocal.filter(
@@ -411,9 +404,8 @@ function App() {
         );
         if (checkUsernameInput.length > 0) {
           setUser("");
-          usernameRegisterEle.placeholder = "Please, use other username";
-          usernameRegisterEle.value = "";
-          usernameRegisterEle.classList.add("error");
+          setUserInPlaceholder("Please, use other username");
+          setIsUserInError(true);
         }
       }
 
@@ -471,24 +463,6 @@ function App() {
   if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
 
   /**
-   * store user input value
-   * @param e user input value
-   */
-  const setUserInput = (e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value);
-
-  /**
-   * store password input value
-   * @param e password input value
-   */
-  const setPasswordInput = (e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value);
-
-  /**
-   * store email input value
-   * @param e email input value
-   */
-  const setEmailInput = (e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value);
-
-  /**
    * set initial values for user, password, email amd currentUsersId
    */
   const logOut = () => {
@@ -509,6 +483,8 @@ function App() {
               filterVal={filterValue}
               password={currentUsersId.password}
               logOut={logOut}
+              isErrorLocation={isErrorLocation}
+              setIsErrorLocation={setIsErrorLocation}
             />
             <button onClick={() => createUser("user", "password", "email")}>Create User</button>
             <button onClick={updateUser}>Update User</button>
@@ -558,15 +534,19 @@ function App() {
               <input
                 id="username-login"
                 type="text"
-                placeholder="username"
-                onChange={setUserInput}
+                className={isUserInError ? "error" : ""}
+                value={user}
+                placeholder={userInPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
                 required
               />
               <input
                 id="password-login"
                 type="text"
-                placeholder="password"
-                onChange={setPasswordInput}
+                className={isPwInError ? "error" : ""}
+                value={password}
+                placeholder={pwInPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
                 required
               />
               <button onClick={loginUser}>Login In</button>
@@ -584,16 +564,27 @@ function App() {
               <input
                 id="username-register"
                 type="text"
-                placeholder="username"
-                onChange={setUserInput}
+                className={isUserInError ? "error" : ""}
+                value={user}
+                placeholder={userInPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
               />
               <input
                 id="password-register"
                 type="text"
-                placeholder="password"
-                onChange={setPasswordInput}
+                className={isPwInError ? "error" : ""}
+                value={password}
+                placeholder={pwInPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
               />
-              <input id="email-register" type="text" placeholder="email" onChange={setEmailInput} />
+              <input
+                id="email-register"
+                type="text"
+                className={isEmailInError ? "error" : ""}
+                value={email}
+                placeholder={emailInPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
+              />
               <div id="add-img" onClick={() => setAddImg(!addImg)}>
                 <form onSubmit={formHandler}>
                   <input type="file" className="input" />

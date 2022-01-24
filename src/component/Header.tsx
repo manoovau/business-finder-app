@@ -10,6 +10,8 @@ type updateSearchInputsType = {
   updateSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   logOut: () => void;
+  isErrorLocation: boolean;
+  setIsErrorLocation: (typo: boolean) => void;
 };
 
 type priceStrType = {
@@ -77,7 +79,7 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 };
 
 export function Header(props: updateSearchInputsType): JSX.Element {
-  const { updateSearchInputs, setFilterValue, logOut } = props;
+  const { updateSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
 
   const DEFAULT_VALUE = null;
   const [businessInput, setBusinessInput] = useState<string>("");
@@ -134,6 +136,8 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     wheelchair: "",
     endBase: `"`,
   });
+
+  const [whereInPlaceholder, setWhereInPlaceholder] = useState<string>("Where...");
 
   /**
    * request current location and set latitud and longitud in where value
@@ -305,6 +309,19 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     if (searchValues.where !== DEFAULT_VALUE) updateSearchInputs(searchValues);
   }, [searchValues]);
 
+  useEffect(() => {
+    if (props.isErrorLocation) {
+      setWhereInput("");
+      setWhereInPlaceholder("Please, fill a correct location");
+    }
+  }, [props.isErrorLocation]);
+
+  useEffect(() => {
+    if (searchValues.where === "") {
+      setWhereInPlaceholder("Please, fill location field.");
+    }
+  }, [searchValues.where]);
+
   return (
     <div
       id="header-container"
@@ -346,8 +363,9 @@ export function Header(props: updateSearchInputsType): JSX.Element {
             <input
               type="text"
               id="where"
+              className={props.isErrorLocation ? "error" : ""}
               name="where"
-              placeholder="Where..."
+              placeholder={whereInPlaceholder}
               value={whereInput}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setWhereInput(e.target.value.toLowerCase())
@@ -358,7 +376,14 @@ export function Header(props: updateSearchInputsType): JSX.Element {
             </button>
           </div>
         </div>
-        <button onClick={() => updateSearchInputs(searchValues)}>Search</button>
+        <button
+          onClick={() => {
+            if (where === "") setIsErrorLocation(true);
+            updateSearchInputs(searchValues);
+          }}
+        >
+          Search
+        </button>
       </div>
       <div id="filter-container">
         <select

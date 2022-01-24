@@ -16,15 +16,6 @@ type Props = {
 };
 
 /**
- * Set url inside main image element
- * @param srcValue image url string
- */
-export const setMainImg = (srcValue: string): void => {
-  const mainImgEle = document.getElementById("main-img");
-  if (mainImgEle) mainImgEle.setAttribute("src", srcValue);
-};
-
-/**
  * Get Week day
  * @param index number (week day)
  * @returns Week day string
@@ -97,10 +88,14 @@ export const ItemInfo = (props: Props): JSX.Element => {
 
   const [showOpenHours, setShowOpenHours] = useState<boolean>(false);
   const [showPhone, setShowPhone] = useState<boolean>(false);
+  const [mainSrc, setMainSrc] = useState<string>("");
 
   useEffect(() => {
     setShowOpenHours(false);
     setShowReview(false);
+    !props.photosArr || props.photosArr.length === 0
+      ? setMainSrc(`/img/nullPicture.png`)
+      : setMainSrc(props.photosArr[0]);
   }, [props.id]);
 
   return (
@@ -153,20 +148,13 @@ export const ItemInfo = (props: Props): JSX.Element => {
       </div>
       <div id="images-container">
         <div id="main-img-container">
-          {props?.photosArr ? (
-            <img
-              id="main-img"
-              src={props.photosArr.length === 0 ? `/img/nullPicture.png` : props.photosArr[0]}
-            />
-          ) : (
-            DEFAULT_VALUE
-          )}
+          {props?.photosArr ? <img id="main-img" src={mainSrc} /> : DEFAULT_VALUE}
         </div>
         <div id="img-carousel">
           {props?.photosArr
-            ? props.photosArr.map((item: string, index: number) => (
-                <img key={`photo${index}`} onClick={() => setMainImg(item)} src={item} />
-              ))
+            ? props.photosArr.map((item: string, index: number) => {
+                return <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />;
+              })
             : DEFAULT_VALUE}
         </div>
       </div>
