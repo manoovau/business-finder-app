@@ -55,6 +55,7 @@ type userLocalType = {
   username: string;
   password: string;
   email: string;
+  avatar: string;
 };
 
 const userLocalInit = {
@@ -62,6 +63,7 @@ const userLocalInit = {
   username: "",
   password: "",
   email: "",
+  avatar: "",
 };
 
 /**
@@ -191,6 +193,8 @@ function App() {
   const [email, setEmail] = useState<string>("");
   const [emailInPlaceholder, setEmailInPlaceholder] = useState<string>("email");
   const [isEmailInError, setIsEmailInError] = useState<boolean>(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [registerCount, setRegisterCount] = useState<number>(0);
 
   useEffect(
     () =>
@@ -315,11 +319,17 @@ function App() {
   /**
    * create user inside users firebase collection
    */
-  const createUser = async (user: string, password: string, email: string): Promise<void> => {
+  const createUser = async (
+    user: string,
+    password: string,
+    email: string,
+    avatar: string,
+  ): Promise<void> => {
     await addDoc(usersCollecRef, {
       email: email,
       password: password,
       username: user,
+      avatar: avatar,
     });
   };
 
@@ -340,7 +350,7 @@ function App() {
   };
 
   /**
-   * identify errors inside login input values and store correct user information
+   * identify errors inside login input values and allow to access user account
    */
   const loginUser = () => {
     setIsUserInError(false);
@@ -410,7 +420,13 @@ function App() {
       }
 
       if (user && password && email)
-        setCurrentUsersId({ ...currentUsersId, username: user, password: password, email: email });
+        setCurrentUsersId({
+          ...currentUsersId,
+          username: user,
+          password: password,
+          email: email,
+          avatar: avatarUrl,
+        });
     }
   };
 
@@ -431,16 +447,21 @@ function App() {
       },
       (err) => console.error(err),
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => console.log(url));
+        getDownloadURL(uploadTask.snapshot.ref).then((url) => setAvatarUrl(url));
       },
     );
   };
 
+  /**
+   * extract file input and run firebase upload function
+   * @param e file input value
+   */
   const formHandler = (e: any) => {
     e.preventDefault();
     const file = e.target[0].files[0];
     uploadFile(file);
   };
+
   const [users, setUsers] = useState<[] | unknown[]>([]);
   const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
   const usersCollecRef = collection(db, "users");
@@ -451,16 +472,26 @@ function App() {
 
   useEffect(() => {
     if (user && password && email)
-      createUser(currentUsersId.username, currentUsersId.password, currentUsersId.email);
+      createUser(
+        currentUsersId.username,
+        currentUsersId.password,
+        currentUsersId.email,
+        currentUsersId.avatar,
+      );
+
+    setRegisterCount((prev) => prev + 1);
   }, [currentUsersId]);
 
   useEffect(() => {
     Promise.resolve(getUsers(usersCollecRef))
       .then((resp) => setUsers(resp.docs))
       .catch((err) => console.error(err));
-  }, [user]);
+  }, [user, registerCount]);
 
-  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+  useEffect(() => {
+    usersLocal.length = 0;
+    if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+  }, [users]);
 
   /**
    * set initial values for user, password, email amd currentUsersId
@@ -482,11 +513,14 @@ function App() {
               setFilterValue={setFilterValue}
               filterVal={filterValue}
               password={currentUsersId.password}
+              avatar={currentUsersId.avatar}
               logOut={logOut}
               isErrorLocation={isErrorLocation}
               setIsErrorLocation={setIsErrorLocation}
             />
-            <button onClick={() => createUser("user", "password", "email")}>Create User</button>
+            <button onClick={() => createUser("user", "password", "email", "avatar")}>
+              Create User
+            </button>
             <button onClick={updateUser}>Update User</button>
             <button onClick={deleteUser}>Delete User</button>
             {!resultYELP.total ? (

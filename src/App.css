@@ -98,6 +98,7 @@ i,
 #search-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 #input-container {
@@ -191,6 +192,12 @@ i,
   justify-content: center;
   flex-direction: row;
   align-items: center;
+}
+
+#img-avatar {
+  width: 35px;
+  height: 35px;
+  object-fit: cover;
 }
 
 .pagination-btn {

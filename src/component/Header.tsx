@@ -7,6 +7,7 @@ import { FilterInputType } from "../interface";
 type updateSearchInputsType = {
   filterVal: FilterInputType;
   password: string | null;
+  avatar: string;
   updateSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   logOut: () => void;
@@ -333,6 +334,11 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <Link to="/" id="title">
           <h1>Business Finder</h1>
         </Link>
+        <img
+          id="img-avatar"
+          src={props.avatar !== "" ? props.avatar : "/img/nullUser.png"}
+          alt="avatar image"
+        />
         {props.password === "" ? (
           <div>
             <Link to="/login" id="login">

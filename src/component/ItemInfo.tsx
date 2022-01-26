@@ -152,9 +152,9 @@ export const ItemInfo = (props: Props): JSX.Element => {
         </div>
         <div id="img-carousel">
           {props?.photosArr
-            ? props.photosArr.map((item: string, index: number) => {
-                return <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />;
-              })
+            ? props.photosArr.map((item: string, index: number) => (
+                <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />
+              ))
             : DEFAULT_VALUE}
         </div>
       </div>
