@@ -334,11 +334,14 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <Link to="/" id="title">
           <h1>Business Finder</h1>
         </Link>
-        <img
-          id="img-avatar"
-          src={props.avatar !== "" ? props.avatar : "/img/nullUser.png"}
-          alt="avatar image"
-        />
+        <Link to="/profile" id="profile">
+          <img
+            id="img-avatar"
+            src={props.avatar !== "" ? props.avatar : "/img/nullUser.png"}
+            alt="avatar image"
+          />
+        </Link>
+
         {props.password === "" ? (
           <div>
             <Link to="/login" id="login">

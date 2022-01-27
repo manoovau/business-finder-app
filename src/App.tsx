@@ -195,6 +195,14 @@ function App() {
   const [isEmailInError, setIsEmailInError] = useState<boolean>(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [registerCount, setRegisterCount] = useState<number>(0);
+  const [currentPw, setCurrentPw] = useState<string>("");
+  const [currentPwPlaceholder, setCurrentPwPlaceholder] = useState<string>("Fill current password");
+  const [isCurrentPwError, setIsCurrentPwError] = useState<boolean>(false);
+  const [newPw1, setNewPw1] = useState<string>("");
+  const [newPw1Placeholder, setNewPw1Placeholder] = useState<string>("Fill new password");
+  const [isNewPwPw1Error, setIsNewPwPw1Error] = useState<boolean>(false);
+  const [newPw2, setNewPw2] = useState<string>("");
+  const [newPw2Placeholder, setNewPw2Placeholder] = useState<string>("Repeat new password");
 
   useEffect(
     () =>
@@ -336,9 +344,9 @@ function App() {
   /**
    * update password field inside users firebase collection
    */
-  const updateUser = async (): Promise<void> => {
+  const updateUser = async (pw: string): Promise<void> => {
     const userDoc = doc(db, "users", currentUsersId.id);
-    await updateDoc(userDoc, { password: "nananana Batman" });
+    await updateDoc(userDoc, { password: pw });
   };
 
   /**
@@ -431,6 +439,33 @@ function App() {
   };
 
   /**
+   * identify errors inside change password inputs and replace old password with new password
+   */
+  const updatePw = () => {
+    if (currentPw !== currentUsersId.password) {
+      setIsCurrentPwError(true);
+      setCurrentPwPlaceholder("Password is not correct");
+    } else {
+      setIsCurrentPwError(false);
+      setCurrentPwPlaceholder("Fill current password");
+      if (newPw1 !== newPw2) {
+        setIsNewPwPw1Error(true);
+        setNewPw1Placeholder("New Password is not equal");
+        setNewPw2Placeholder("");
+      } else {
+        setIsNewPwPw1Error(false);
+        setCurrentPw("");
+
+        setCurrentUsersId({ ...currentUsersId, password: newPw1 });
+        setNewPw1Placeholder("Fill new password");
+        setNewPw2Placeholder("Repeat new password");
+
+        updateUser(newPw1);
+      }
+    }
+  };
+
+  /**
    * store local file in firebase database
    * @param file local file
    */
@@ -471,7 +506,7 @@ function App() {
   const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
-    if (user && password && email)
+    if (user && password && email) {
       createUser(
         currentUsersId.username,
         currentUsersId.password,
@@ -479,8 +514,20 @@ function App() {
         currentUsersId.avatar,
       );
 
-    setRegisterCount((prev) => prev + 1);
+      setRegisterCount((prev) => prev + 1);
+    }
   }, [currentUsersId]);
+
+  useEffect(() => {
+    if (currentUsersId.id === "" && currentUsersId.username !== "") {
+      const usernameFilter: userLocalType[] = usersLocal.filter(
+        (item: userLocalType) => item.username === user,
+      );
+
+      if (usernameFilter[0] !== undefined)
+        setCurrentUsersId({ ...currentUsersId, id: usernameFilter[0].id });
+    }
+  }, [usersLocal]);
 
   useEffect(() => {
     Promise.resolve(getUsers(usersCollecRef))
@@ -488,10 +535,7 @@ function App() {
       .catch((err) => console.error(err));
   }, [user, registerCount]);
 
-  useEffect(() => {
-    usersLocal.length = 0;
-    if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
-  }, [users]);
+  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
 
   /**
    * set initial values for user, password, email amd currentUsersId
@@ -521,7 +565,7 @@ function App() {
             <button onClick={() => createUser("user", "password", "email", "avatar")}>
               Create User
             </button>
-            <button onClick={updateUser}>Update User</button>
+            <button onClick={() => updateUser("change")}>Update User</button>
             <button onClick={deleteUser}>Delete User</button>
             {!resultYELP.total ? (
               DEFAULT_VALUE
@@ -583,7 +627,7 @@ function App() {
                 onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
                 required
               />
-              <button onClick={loginUser}>Login In</button>
+              <button onClick={loginUser}>Login</button>
             </div>
           )}
         </Route>
@@ -628,6 +672,45 @@ function App() {
                 <h2>Uploading {progress}%</h2>
               </div>
               <button onClick={registerUser}>Register</button>
+            </div>
+          )}
+        </Route>
+        <Route path="/profile">
+          {currentUsersId === userLocalInit ? (
+            <Redirect to="/" />
+          ) : (
+            <div>
+              <Link to="/">
+                <h3>{`< Go Back `}</h3>
+              </Link>
+              <input
+                id="current-password"
+                type="text"
+                className={isCurrentPwError ? "error" : ""}
+                value={currentPw}
+                placeholder={currentPwPlaceholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setCurrentPw(e.target.value)}
+                required
+              />
+              <input
+                id="new-password"
+                type="text"
+                className={isNewPwPw1Error ? "error" : ""}
+                value={newPw1}
+                placeholder={newPw1Placeholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
+                required
+              />
+              <input
+                id="new-password"
+                type="text"
+                className={isNewPwPw1Error ? "error" : ""}
+                value={newPw2}
+                placeholder={newPw2Placeholder}
+                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
+                required
+              />
+              <button onClick={updatePw}>Change Password</button>
             </div>
           )}
         </Route>
