@@ -71,7 +71,7 @@ const userLocalInit = {
  * @param url YELP API URL
  * @returns YELP API data
  */
-const useFetchYELP = async (fetchParameter: string) => {
+const fetchYELP = async (fetchParameter: string) => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
   const resp = await fetch(URL, {
@@ -89,7 +89,7 @@ const useFetchYELP = async (fetchParameter: string) => {
 const getUsers = async (usersCollecRef: CollectionReference<DocumentData> | any) => {
   const data = await getDocs(usersCollecRef);
 
-  return data;
+  return data.docs;
 };
 
 /**
@@ -218,32 +218,49 @@ function App() {
     if (!searchInputs.where) {
       setResultYELP(init_YELP_API);
     } else {
-      Promise.resolve(useFetchYELP(`${PATH}${term}`))
-        .then((resp) => {
+      const fetchResultsearch = async () => {
+        try {
+          const resp = await fetchYELP(`${PATH}${term}`);
           if (!resp.error) {
             setResultYELP(resp);
             setIsErrorLocation(false);
           } else {
             setResultYELP(init_YELP_API);
             setIsErrorLocation(true);
+            console.error(resp.error.description);
           }
-        })
-        .catch((err) => console.error(err));
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchResultsearch();
     }
   }, [term]);
 
   useEffect(() => {
-    if (idSelected !== undefined)
-      Promise.resolve(useFetchYELP(`/businesses/${idSelected}`))
-        .then((resp) => setSelectedBusiness(resp))
-        .catch((err) => console.error(err));
+    if (idSelected !== undefined) {
+      const fetchSelBusiness = async () => {
+        try {
+          setSelectedBusiness(await fetchYELP(`/businesses/${idSelected}`));
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchSelBusiness();
+    }
   }, [idSelected]);
 
   useEffect(() => {
-    if (idReviewData !== undefined)
-      Promise.resolve(useFetchYELP(`/businesses/${idReviewData}/reviews`))
-        .then((resp) => setReviewData(resp))
-        .catch((err) => console.error(err));
+    if (idReviewData !== undefined) {
+      const fetchRevData = async () => {
+        try {
+          setReviewData(await fetchYELP(`/businesses/${idReviewData}/reviews`));
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchRevData();
+    }
   }, [idReviewData]);
 
   useEffect(() => {
@@ -530,9 +547,14 @@ function App() {
   }, [usersLocal]);
 
   useEffect(() => {
-    Promise.resolve(getUsers(usersCollecRef))
-      .then((resp) => setUsers(resp.docs))
-      .catch((err) => console.error(err));
+    const getUsersData = async () => {
+      try {
+        setUsers(await getUsers(usersCollecRef));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getUsersData();
   }, [user, registerCount]);
 
   if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
