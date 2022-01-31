@@ -219,32 +219,41 @@ function App() {
       setResultYELP(init_YELP_API);
     } else {
       const fetchResultsearch = async () => {
-        try {
-          const resp = await fetchYELP(`${PATH}${term}`);
-          if (!resp.error) {
-            setResultYELP(resp);
-            setIsErrorLocation(false);
-          } else {
-            setResultYELP(init_YELP_API);
-            setIsErrorLocation(true);
-            console.error(resp.error.description);
-          }
-        } catch (error) {
-          console.error(error);
+        const resp = await fetchYELPAsyncFunc(`${PATH}${term}`);
+        if (!resp.error) {
+          setResultYELP(resp);
+          setIsErrorLocation(false);
+        } else {
+          setResultYELP(init_YELP_API);
+          setIsErrorLocation(true);
+          console.error(resp.error.description);
         }
       };
       fetchResultsearch();
     }
   }, [term]);
 
+  const fetchYELPAsyncFunc = async (url: string): Promise<void | ItemInfoType | any> => {
+    try {
+      return await fetchYELP(url);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getUsersAsyncFunc = async () => {
+    try {
+      setUsers(await getUsers(usersCollecRef));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (idSelected !== undefined) {
       const fetchSelBusiness = async () => {
-        try {
-          setSelectedBusiness(await fetchYELP(`/businesses/${idSelected}`));
-        } catch (err) {
-          console.error(err);
-        }
+        setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
+        //  setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
       };
       fetchSelBusiness();
     }
@@ -253,11 +262,7 @@ function App() {
   useEffect(() => {
     if (idReviewData !== undefined) {
       const fetchRevData = async () => {
-        try {
-          setReviewData(await fetchYELP(`/businesses/${idReviewData}/reviews`));
-        } catch (err) {
-          console.error(err);
-        }
+        setReviewData(await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`));
       };
       fetchRevData();
     }
@@ -548,11 +553,8 @@ function App() {
 
   useEffect(() => {
     const getUsersData = async () => {
-      try {
-        setUsers(await getUsers(usersCollecRef));
-      } catch (err) {
-        console.error(err);
-      }
+      const resp = await getUsersAsyncFunc();
+      if (resp !== undefined) setUsers(resp);
     };
     getUsersData();
   }, [user, registerCount]);
