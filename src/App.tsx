@@ -226,6 +226,7 @@ function App() {
         } else {
           setResultYELP(init_YELP_API);
           setIsErrorLocation(true);
+          setSearchInputs({ ...searchInputs, where: "" });
           console.error(resp.error.description);
         }
       };
@@ -243,7 +244,7 @@ function App() {
 
   const getUsersAsyncFunc = async () => {
     try {
-      setUsers(await getUsers(usersCollecRef));
+      return await getUsers(usersCollecRef);
     } catch (err) {
       console.error(err);
     }
@@ -253,7 +254,6 @@ function App() {
     if (idSelected !== undefined) {
       const fetchSelBusiness = async () => {
         setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
-        //  setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
       };
       fetchSelBusiness();
     }
