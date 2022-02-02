@@ -207,6 +207,7 @@ function App() {
   const [isNewPwPw1Error, setIsNewPwPw1Error] = useState<boolean>(false);
   const [newPw2, setNewPw2] = useState<string>("");
   const [newPw2Placeholder, setNewPw2Placeholder] = useState<string>("Repeat new password");
+  const [isDelConf, setIsDelConf] = useState<boolean>(false);
 
   useEffect(
     () =>
@@ -392,6 +393,7 @@ function App() {
   const deleteUser = async (): Promise<void> => {
     const userDoc = doc(db, "users", currentUsersId.id);
     await deleteDoc(userDoc);
+    logOut();
   };
 
   /**
@@ -601,11 +603,6 @@ function App() {
               isErrorLocation={isErrorLocation}
               setIsErrorLocation={setIsErrorLocation}
             />
-            <button onClick={() => createUser("user", "password", "email", "avatar")}>
-              Create User
-            </button>
-            <button onClick={() => updateUser("change")}>Update User</button>
-            <button onClick={deleteUser}>Delete User</button>
             {!resultYELP.total ? (
               DEFAULT_VALUE
             ) : (
@@ -718,38 +715,61 @@ function App() {
           {currentUsersId === userLocalInit ? (
             <Redirect to="/" />
           ) : (
-            <div>
-              <Link to="/">
-                <h3>{`< Go Back `}</h3>
-              </Link>
-              <input
-                id="current-password"
-                type="text"
-                className={isCurrentPwError ? "error" : ""}
-                value={currentPw}
-                placeholder={currentPwPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setCurrentPw(e.target.value)}
-                required
-              />
-              <input
-                id="new-password"
-                type="text"
-                className={isNewPwPw1Error ? "error" : ""}
-                value={newPw1}
-                placeholder={newPw1Placeholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
-                required
-              />
-              <input
-                id="new-password"
-                type="text"
-                className={isNewPwPw1Error ? "error" : ""}
-                value={newPw2}
-                placeholder={newPw2Placeholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
-                required
-              />
-              <button onClick={updatePw}>Change Password</button>
+            <div id="profile-contaimer">
+              <div id="change-pw-container">
+                <Link to="/">
+                  <h3>{`< Go Back `}</h3>
+                </Link>
+                <input
+                  id="current-password"
+                  type="text"
+                  className={isCurrentPwError ? "error" : ""}
+                  value={currentPw}
+                  placeholder={currentPwPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    setCurrentPw(e.target.value)
+                  }
+                  required
+                />
+                <input
+                  id="new-password"
+                  type="text"
+                  className={isNewPwPw1Error ? "error" : ""}
+                  value={newPw1}
+                  placeholder={newPw1Placeholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
+                  required
+                />
+                <input
+                  id="new-password"
+                  type="text"
+                  className={isNewPwPw1Error ? "error" : ""}
+                  value={newPw2}
+                  placeholder={newPw2Placeholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
+                  required
+                />
+                <Link to="/">
+                  <button onClick={updatePw}>Change Password</button>
+                </Link>
+              </div>
+              <div id="remove-account-container">
+                <button
+                  className={isDelConf ? "hide" : "show"}
+                  onClick={() => setIsDelConf(!isDelConf)}
+                >
+                  REMOVE ACCOUNT
+                </button>
+                <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
+                  <p>Are you sure ?</p>
+                  <Link to="/">
+                    <button onClick={deleteUser}>yes</button>
+                  </Link>
+                  <Link to="/">
+                    <button>no</button>
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
         </Route>
