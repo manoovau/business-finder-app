@@ -15,6 +15,7 @@ import {
   ItemInfoType,
   reviewsType,
   ApiResponseType,
+  ErrorType,
   FilterInputType,
   MarkerType,
   CenterType,
@@ -69,24 +70,27 @@ const userLocalInit = {
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
- * @returns YELP API data
+ * @returns A `Promise` that will be resolved with the results of YELP API data
  */
-const fetchYELP = async (fetchParameter: string) => {
+const fetchYELP = async (fetchParameter: string): Promise<ApiResponseType | ErrorType> => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
   const resp = await fetch(URL, {
     headers: requestHeaders,
   });
   const data = await resp.json();
+
   return data;
 };
 
 /**
  * get data from firebase
  * @param usersCollecRef firebase collection
- * @returns data from firebase
+ * @returns  A `Promise` that will be resolved with users firebase data
  */
-const getUsers = async (usersCollecRef: CollectionReference<DocumentData> | any) => {
+const getUsers = async (
+  usersCollecRef: CollectionReference<DocumentData> | any,
+): Promise<[] | unknown[]> => {
   const data = await getDocs(usersCollecRef);
 
   return data.docs;
@@ -218,7 +222,7 @@ function App() {
     if (!searchInputs.where) {
       setResultYELP(init_YELP_API);
     } else {
-      const fetchResultsearch = async () => {
+      const fetchResultsearch = async (): Promise<void> => {
         const resp = await fetchYELPAsyncFunc(`${PATH}${term}`);
         if (!resp.error) {
           setResultYELP(resp);
@@ -234,7 +238,14 @@ function App() {
     }
   }, [term]);
 
-  const fetchYELPAsyncFunc = async (url: string): Promise<void | ItemInfoType | any> => {
+  /**
+   * gwt data from YELP APi
+   * @param url fetch YELP API url
+   * @returns  A `Promise` that will be resolved with the results of YELP API result
+   */
+  const fetchYELPAsyncFunc = async (
+    url: string,
+  ): Promise<void | ApiResponseType | ErrorType | any> => {
     try {
       return await fetchYELP(url);
     } catch (err) {
@@ -242,7 +253,11 @@ function App() {
     }
   };
 
-  const getUsersAsyncFunc = async () => {
+  /**
+   * get users list from firebase
+   * @returns  A `Promise` that will be resolved with the results of users firebase array
+   */
+  const getUsersAsyncFunc = async (): Promise<void | any> => {
     try {
       return await getUsers(usersCollecRef);
     } catch (err) {
@@ -252,7 +267,7 @@ function App() {
 
   useEffect(() => {
     if (idSelected !== undefined) {
-      const fetchSelBusiness = async () => {
+      const fetchSelBusiness = async (): Promise<void> => {
         setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
       };
       fetchSelBusiness();
@@ -261,7 +276,7 @@ function App() {
 
   useEffect(() => {
     if (idReviewData !== undefined) {
-      const fetchRevData = async () => {
+      const fetchRevData = async (): Promise<void> => {
         setReviewData(await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`));
       };
       fetchRevData();
@@ -382,7 +397,7 @@ function App() {
   /**
    * identify errors inside login input values and allow to access user account
    */
-  const loginUser = () => {
+  const loginUser = (): void => {
     setIsUserInError(false);
     setIsPwInError(false);
 
@@ -414,7 +429,7 @@ function App() {
   /**
    * identify errors inside register input values and store correct user registration information
    */
-  const registerUser = () => {
+  const registerUser = (): void => {
     setIsUserInError(false);
     setIsPwInError(false);
     setIsEmailInError(false);
@@ -463,7 +478,7 @@ function App() {
   /**
    * identify errors inside change password inputs and replace old password with new password
    */
-  const updatePw = () => {
+  const updatePw = (): void => {
     if (currentPw !== currentUsersId.password) {
       setIsCurrentPwError(true);
       setCurrentPwPlaceholder("Password is not correct");
@@ -491,7 +506,7 @@ function App() {
    * store local file in firebase database
    * @param file local file
    */
-  const uploadFile = (file: any) => {
+  const uploadFile = (file: any): void => {
     if (!file) return;
 
     const storageRef = ref(storage, `/files/${file.name}`);
@@ -513,7 +528,7 @@ function App() {
    * extract file input and run firebase upload function
    * @param e file input value
    */
-  const formHandler = (e: any) => {
+  const formHandler = (e: any): void => {
     e.preventDefault();
     const file = e.target[0].files[0];
     uploadFile(file);
@@ -552,7 +567,7 @@ function App() {
   }, [usersLocal]);
 
   useEffect(() => {
-    const getUsersData = async () => {
+    const getUsersData = async (): Promise<void> => {
       const resp = await getUsersAsyncFunc();
       if (resp !== undefined) setUsers(resp);
     };
@@ -564,7 +579,7 @@ function App() {
   /**
    * set initial values for user, password, email amd currentUsersId
    */
-  const logOut = () => {
+  const logOut = (): void => {
     setUser("");
     setPassword("");
     setEmail("");

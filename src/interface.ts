@@ -38,6 +38,15 @@ export interface ApiResponseType {
   total: number;
 }
 
+export interface ErrorType {
+  error?: ErrorKeyType;
+}
+
+export interface ErrorKeyType {
+  code?: string;
+  description?: string;
+}
+
 export interface ItemInfoType {
   id: string;
   name: string;
