@@ -38,11 +38,11 @@ export interface ApiResponseType {
   total: number;
 }
 
-export interface ErrorType {
-  error?: ErrorKeyType;
+export interface ApiErrorResponse {
+  error?: ApiError;
 }
 
-export interface ErrorKeyType {
+export interface ApiError {
   code?: string;
   description?: string;
 }

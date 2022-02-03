@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState, FormEvent } from "react";
 import "./App.css";
 import {
   Header,
@@ -15,7 +15,7 @@ import {
   ItemInfoType,
   reviewsType,
   ApiResponseType,
-  ErrorType,
+  ApiErrorResponse,
   FilterInputType,
   MarkerType,
   CenterType,
@@ -23,10 +23,21 @@ import {
 import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link, Redirect } from "react-router-dom";
 
-import { CollectionReference, DocumentData } from "@firebase/firestore-types";
+import {
+  CollectionReference,
+  DocumentData,
+  QueryDocumentSnapshot,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  QuerySnapshot,
+} from "firebase/firestore";
 
 import { db, storage } from "./firebase-config";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 const requestHeaders: HeadersInit = {
@@ -70,9 +81,12 @@ const userLocalInit = {
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
- * @returns A `Promise` that will be resolved with the results of YELP API data
+ * @returns YELP API response
  */
-const fetchYELP = async (fetchParameter: string): Promise<ApiResponseType | ErrorType> => {
+
+const fetchYELP = async (
+  fetchParameter: string,
+): Promise<ApiResponseType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
   const resp = await fetch(URL, {
@@ -86,14 +100,43 @@ const fetchYELP = async (fetchParameter: string): Promise<ApiResponseType | Erro
 /**
  * get data from firebase
  * @param usersCollecRef firebase collection
- * @returns  A `Promise` that will be resolved with users firebase data
+ * @returns users firebase response
  */
 const getUsers = async (
-  usersCollecRef: CollectionReference<DocumentData> | any,
-): Promise<[] | unknown[]> => {
+  usersCollecRef: CollectionReference<DocumentData>,
+): Promise<QuerySnapshot<DocumentData>> => {
   const data = await getDocs(usersCollecRef);
 
-  return data.docs;
+  return data;
+};
+
+/**
+ * gwt data from YELP APi
+ * @param url fetch YELP API url
+ * @returns YELP API response or void
+ */
+export const fetchYELPAsyncFunc = async (
+  url: string,
+): Promise<void | ApiResponseType | ApiErrorResponse | ItemInfoType | reviewMainType | any> => {
+  try {
+    return await fetchYELP(url);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+/**
+ * get users list from firebase
+ * @returns users firebase array response
+ */
+export const getUsersAsyncFunc = async (
+  collectRef: CollectionReference<DocumentData>,
+): Promise<void | QuerySnapshot<DocumentData>> => {
+  try {
+    return await getUsers(collectRef);
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 /**
@@ -238,33 +281,6 @@ function App() {
       fetchResultsearch();
     }
   }, [term]);
-
-  /**
-   * gwt data from YELP APi
-   * @param url fetch YELP API url
-   * @returns  A `Promise` that will be resolved with the results of YELP API result
-   */
-  const fetchYELPAsyncFunc = async (
-    url: string,
-  ): Promise<void | ApiResponseType | ErrorType | any> => {
-    try {
-      return await fetchYELP(url);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  /**
-   * get users list from firebase
-   * @returns  A `Promise` that will be resolved with the results of users firebase array
-   */
-  const getUsersAsyncFunc = async (): Promise<void | any> => {
-    try {
-      return await getUsers(usersCollecRef);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   useEffect(() => {
     if (idSelected !== undefined) {
@@ -508,7 +524,7 @@ function App() {
    * store local file in firebase database
    * @param file local file
    */
-  const uploadFile = (file: any): void => {
+  const uploadFile = (file: File | undefined): void => {
     if (!file) return;
 
     const storageRef = ref(storage, `/files/${file.name}`);
@@ -530,13 +546,16 @@ function App() {
    * extract file input and run firebase upload function
    * @param e file input value
    */
-  const formHandler = (e: any): void => {
+  const formHandler = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    const file = e.target[0].files[0];
-    uploadFile(file);
+    const target = e.target as HTMLInputElement;
+    if (target.files !== null) {
+      const file = target.files[0];
+      uploadFile(file);
+    }
   };
 
-  const [users, setUsers] = useState<[] | unknown[]>([]);
+  const [users, setUsers] = useState<[] | QueryDocumentSnapshot<DocumentData>[]>([]);
   const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
   const usersCollecRef = collection(db, "users");
   const usersLocal: userLocalType[] = [];
@@ -570,13 +589,14 @@ function App() {
 
   useEffect(() => {
     const getUsersData = async (): Promise<void> => {
-      const resp = await getUsersAsyncFunc();
-      if (resp !== undefined) setUsers(resp);
+      const resp = await getUsersAsyncFunc(usersCollecRef);
+      if (resp !== undefined) setUsers(resp.docs);
     };
     getUsersData();
   }, [user, registerCount]);
 
-  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+  if (users.length > 0)
+    users.map((doc: DocumentData) => usersLocal.push({ ...doc.data(), id: doc.id }));
 
   /**
    * set initial values for user, password, email amd currentUsersId
