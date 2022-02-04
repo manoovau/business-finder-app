@@ -120,7 +120,7 @@ export const fetchYELPAsyncFunc = async (
 ): Promise<void | ApiResponseType | ApiErrorResponse | ItemInfoType | reviewMainType | any> => {
   try {
     return await fetchYELP(url);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
   }
 };
@@ -134,7 +134,7 @@ export const getUsersAsyncFunc = async (
 ): Promise<void | QuerySnapshot<DocumentData>> => {
   try {
     return await getUsers(collectRef);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
   }
 };
