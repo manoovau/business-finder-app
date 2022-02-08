@@ -32,10 +32,19 @@ export interface InputType {
   where: string | null;
 }
 
-export interface ApiResponseType {
+export interface BusinessesType {
   businesses: ItemInfoType[];
   region: RegionType;
   total: number;
+}
+
+export interface ApiErrorResponse {
+  error: ApiError;
+}
+
+export interface ApiError {
+  ok: boolean;
+  description?: string | unknown;
 }
 
 export interface ItemInfoType {

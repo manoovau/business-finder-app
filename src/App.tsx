@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState, FormEvent } from "react";
 import "./App.css";
 import {
   Header,
@@ -14,7 +14,8 @@ import {
   InputType,
   ItemInfoType,
   reviewsType,
-  ApiResponseType,
+  BusinessesType,
+  ApiErrorResponse,
   FilterInputType,
   MarkerType,
   CenterType,
@@ -22,11 +23,28 @@ import {
 import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link, Redirect } from "react-router-dom";
 
-import { CollectionReference, DocumentData } from "@firebase/firestore-types";
+import {
+  CollectionReference,
+  DocumentData,
+  QueryDocumentSnapshot,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  QuerySnapshot,
+} from "firebase/firestore";
 
 import { db, storage } from "./firebase-config";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+
+import {
+  getDownloadURL,
+  ref,
+  StorageError,
+  uploadBytesResumable,
+  UploadTaskSnapshot,
+} from "firebase/storage";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -69,27 +87,63 @@ const userLocalInit = {
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
- * @returns YELP API data
+ * @returns YELP API response
  */
-const useFetchYELP = async (fetchParameter: string) => {
+
+const fetchYELP = async (
+  fetchParameter: string,
+): Promise<BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
   const resp = await fetch(URL, {
     headers: requestHeaders,
   });
-  const data = await resp.json();
+
+  const data: BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType = await resp.json();
+
   return data;
 };
 
 /**
  * get data from firebase
  * @param usersCollecRef firebase collection
- * @returns data from firebase
+ * @returns users firebase response
  */
-const getUsers = async (usersCollecRef: CollectionReference<DocumentData> | any) => {
+const getUsers = async (
+  usersCollecRef: CollectionReference<DocumentData>,
+): Promise<QuerySnapshot<DocumentData>> => {
   const data = await getDocs(usersCollecRef);
 
   return data;
+};
+
+/**
+ * get data from YELP APi
+ * @param url fetch YELP API url
+ * @returns YELP API response or void
+ */
+export const fetchYELPAsyncFunc = async (
+  url: string,
+): Promise<BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
+  try {
+    return await fetchYELP(url);
+  } catch (err: unknown) {
+    return { error: { ok: false, description: err } };
+  }
+};
+
+/**
+ * get users list from firebase
+ * @returns users firebase array response
+ */
+export const getUsersAsyncFunc = async (
+  collectRef: CollectionReference<DocumentData>,
+): Promise<void | QuerySnapshot<DocumentData>> => {
+  try {
+    return await getUsers(collectRef);
+  } catch (err: unknown) {
+    console.error(err);
+  }
 };
 
 /**
@@ -123,7 +177,7 @@ function App() {
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
 
-  const init_YELP_API: ApiResponseType = {
+  const init_YELP_API: BusinessesType = {
     businesses: [],
     region: {
       center: {
@@ -153,7 +207,7 @@ function App() {
     attrFilter: ``,
   });
   const PATH = "/businesses/search";
-  const [resultYELP, setResultYELP] = useState<ApiResponseType>(init_YELP_API);
+  const [businesses, setBusinesses] = useState<BusinessesType>(init_YELP_API);
 
   const [selectedBusiness, setSelectedBusiness] = useState<ItemInfoType>({
     id: DEFAULT_STRING,
@@ -203,6 +257,7 @@ function App() {
   const [isNewPwPw1Error, setIsNewPwPw1Error] = useState<boolean>(false);
   const [newPw2, setNewPw2] = useState<string>("");
   const [newPw2Placeholder, setNewPw2Placeholder] = useState<string>("Repeat new password");
+  const [isDelConf, setIsDelConf] = useState<boolean>(false);
 
   useEffect(
     () =>
@@ -216,44 +271,53 @@ function App() {
     if (searchInputs.where === "") setIsErrorLocation(true);
 
     if (!searchInputs.where) {
-      setResultYELP(init_YELP_API);
+      setBusinesses(init_YELP_API);
     } else {
-      Promise.resolve(useFetchYELP(`${PATH}${term}`))
-        .then((resp) => {
-          if (!resp.error) {
-            setResultYELP(resp);
-            setIsErrorLocation(false);
-          } else {
-            setResultYELP(init_YELP_API);
-            setIsErrorLocation(true);
-          }
-        })
-        .catch((err) => console.error(err));
+      const fetchResultsearch = async (): Promise<void> => {
+        const resp = await fetchYELPAsyncFunc(`${PATH}${term}`);
+
+        if ("error" in resp) {
+          setBusinesses(init_YELP_API);
+          setIsErrorLocation(true);
+          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUE });
+        } else {
+          if ("businesses" in resp) setBusinesses(resp);
+          setIsErrorLocation(false);
+        }
+      };
+
+      fetchResultsearch();
     }
   }, [term]);
 
   useEffect(() => {
-    if (idSelected !== undefined)
-      Promise.resolve(useFetchYELP(`/businesses/${idSelected}`))
-        .then((resp) => setSelectedBusiness(resp))
-        .catch((err) => console.error(err));
+    if (idSelected !== undefined) {
+      const fetchSelBusiness = async (): Promise<void> => {
+        const resp = await fetchYELPAsyncFunc(`/businesses/${idSelected}`);
+        if ("id" in resp) setSelectedBusiness(resp);
+      };
+      fetchSelBusiness();
+    }
   }, [idSelected]);
 
   useEffect(() => {
-    if (idReviewData !== undefined)
-      Promise.resolve(useFetchYELP(`/businesses/${idReviewData}/reviews`))
-        .then((resp) => setReviewData(resp))
-        .catch((err) => console.error(err));
+    if (idReviewData !== undefined) {
+      const fetchRevData = async (): Promise<void> => {
+        const resp = await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`);
+        if ("total" in resp) setReviewData(resp);
+      };
+      fetchRevData();
+    }
   }, [idReviewData]);
 
   useEffect(() => {
-    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
+    if (businesses.businesses !== [] || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
         currentPage: DEFAULT_CURRENT_PAGE,
-        totalPage: getTotalPages(resultYELP.businesses.length, ITEMS_BY_PAGE),
+        totalPage: getTotalPages(businesses.businesses.length, ITEMS_BY_PAGE),
       });
-  }, [resultYELP.businesses]);
+  }, [businesses.businesses]);
 
   useEffect(() => {
     const result: itemsPageType = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
@@ -263,8 +327,8 @@ function App() {
   useEffect(() => {
     businessPageArr.length = 0;
     coorResArr.length = 0;
-    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
-      resultYELP.businesses.map((item: ItemInfoType, index: number) => {
+    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+      businesses.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
           let url = "";
           if (!item?.image_url) {
@@ -287,7 +351,7 @@ function App() {
 
     setMarkerResArr([...coorResArr]);
     setBusinessPage([...businessPageArr]);
-  }, [itemsPage.min, resultYELP.businesses]);
+  }, [itemsPage.min, businesses.businesses]);
 
   /**
    * set searchInputs values and check if where field is not filled.
@@ -355,12 +419,13 @@ function App() {
   const deleteUser = async (): Promise<void> => {
     const userDoc = doc(db, "users", currentUsersId.id);
     await deleteDoc(userDoc);
+    logOut();
   };
 
   /**
    * identify errors inside login input values and allow to access user account
    */
-  const loginUser = () => {
+  const loginUser = (): void => {
     setIsUserInError(false);
     setIsPwInError(false);
 
@@ -392,7 +457,7 @@ function App() {
   /**
    * identify errors inside register input values and store correct user registration information
    */
-  const registerUser = () => {
+  const registerUser = (): void => {
     setIsUserInError(false);
     setIsPwInError(false);
     setIsEmailInError(false);
@@ -441,7 +506,7 @@ function App() {
   /**
    * identify errors inside change password inputs and replace old password with new password
    */
-  const updatePw = () => {
+  const updatePw = (): void => {
     if (currentPw !== currentUsersId.password) {
       setIsCurrentPwError(true);
       setCurrentPwPlaceholder("Password is not correct");
@@ -469,7 +534,7 @@ function App() {
    * store local file in firebase database
    * @param file local file
    */
-  const uploadFile = (file: any) => {
+  const uploadFile = (file: File | undefined): void => {
     if (!file) return;
 
     const storageRef = ref(storage, `/files/${file.name}`);
@@ -477,10 +542,10 @@ function App() {
 
     uploadTask.on(
       "state_changed",
-      (snapshot) => {
+      (snapshot: UploadTaskSnapshot) => {
         setProgress(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
       },
-      (err) => console.error(err),
+      (err: StorageError) => console.error(err),
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((url) => setAvatarUrl(url));
       },
@@ -491,13 +556,16 @@ function App() {
    * extract file input and run firebase upload function
    * @param e file input value
    */
-  const formHandler = (e: any) => {
+  const formHandler = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    const file = e.target[0].files[0];
-    uploadFile(file);
+    const target = e.target as HTMLInputElement;
+    if (target.files !== null) {
+      const file = target.files[0];
+      uploadFile(file);
+    }
   };
 
-  const [users, setUsers] = useState<[] | unknown[]>([]);
+  const [users, setUsers] = useState<[] | QueryDocumentSnapshot<DocumentData>[]>([]);
   const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
   const usersCollecRef = collection(db, "users");
   const usersLocal: userLocalType[] = [];
@@ -530,17 +598,20 @@ function App() {
   }, [usersLocal]);
 
   useEffect(() => {
-    Promise.resolve(getUsers(usersCollecRef))
-      .then((resp) => setUsers(resp.docs))
-      .catch((err) => console.error(err));
+    const getUsersData = async (): Promise<void> => {
+      const resp = await getUsersAsyncFunc(usersCollecRef);
+      if (resp !== undefined) setUsers(resp.docs);
+    };
+    getUsersData();
   }, [user, registerCount]);
 
-  if (users.length > 0) users.map((doc: any) => usersLocal.push({ ...doc.data(), id: doc.id }));
+  if (users.length > 0)
+    users.map((doc: DocumentData) => usersLocal.push({ ...doc.data(), id: doc.id }));
 
   /**
    * set initial values for user, password, email amd currentUsersId
    */
-  const logOut = () => {
+  const logOut = (): void => {
     setUser("");
     setPassword("");
     setEmail("");
@@ -562,19 +633,14 @@ function App() {
               isErrorLocation={isErrorLocation}
               setIsErrorLocation={setIsErrorLocation}
             />
-            <button onClick={() => createUser("user", "password", "email", "avatar")}>
-              Create User
-            </button>
-            <button onClick={() => updateUser("change")}>Update User</button>
-            <button onClick={deleteUser}>Delete User</button>
-            {!resultYELP.total ? (
+            {!businesses.total ? (
               DEFAULT_VALUE
             ) : (
               <button onClick={() => setIsMapView(!isMapView)}>
                 {isMapView ? `See Results view` : `See Map View`}
               </button>
             )}
-            {!resultYELP.total ? (
+            {!businesses.total ? (
               DEFAULT_VALUE
             ) : (
               <div id="result-container">
@@ -582,7 +648,7 @@ function App() {
                   <MapPage
                     setIdSelected={setIdSelected}
                     markers={markerResArr}
-                    region={resultYELP.region.center}
+                    region={businesses.region.center}
                     updateLocationClick={updateLocationClick}
                   />
                 </div>
@@ -679,38 +745,61 @@ function App() {
           {currentUsersId === userLocalInit ? (
             <Redirect to="/" />
           ) : (
-            <div>
-              <Link to="/">
-                <h3>{`< Go Back `}</h3>
-              </Link>
-              <input
-                id="current-password"
-                type="text"
-                className={isCurrentPwError ? "error" : ""}
-                value={currentPw}
-                placeholder={currentPwPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setCurrentPw(e.target.value)}
-                required
-              />
-              <input
-                id="new-password"
-                type="text"
-                className={isNewPwPw1Error ? "error" : ""}
-                value={newPw1}
-                placeholder={newPw1Placeholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
-                required
-              />
-              <input
-                id="new-password"
-                type="text"
-                className={isNewPwPw1Error ? "error" : ""}
-                value={newPw2}
-                placeholder={newPw2Placeholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
-                required
-              />
-              <button onClick={updatePw}>Change Password</button>
+            <div id="profile-contaimer">
+              <div id="change-pw-container">
+                <Link to="/">
+                  <h3>{`< Go Back `}</h3>
+                </Link>
+                <input
+                  id="current-password"
+                  type="text"
+                  className={isCurrentPwError ? "error" : ""}
+                  value={currentPw}
+                  placeholder={currentPwPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                    setCurrentPw(e.target.value)
+                  }
+                  required
+                />
+                <input
+                  id="new-password"
+                  type="text"
+                  className={isNewPwPw1Error ? "error" : ""}
+                  value={newPw1}
+                  placeholder={newPw1Placeholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
+                  required
+                />
+                <input
+                  id="new-password"
+                  type="text"
+                  className={isNewPwPw1Error ? "error" : ""}
+                  value={newPw2}
+                  placeholder={newPw2Placeholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
+                  required
+                />
+                <Link to="/">
+                  <button onClick={updatePw}>Change Password</button>
+                </Link>
+              </div>
+              <div id="remove-account-container">
+                <button
+                  className={isDelConf ? "hide" : "show"}
+                  onClick={() => setIsDelConf(!isDelConf)}
+                >
+                  REMOVE ACCOUNT
+                </button>
+                <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
+                  <p>Are you sure ?</p>
+                  <Link to="/">
+                    <button onClick={deleteUser}>yes</button>
+                  </Link>
+                  <Link to="/">
+                    <button>no</button>
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
         </Route>
