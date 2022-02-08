@@ -14,7 +14,7 @@ import {
   InputType,
   ItemInfoType,
   reviewsType,
-  ApiResponseType,
+  BusinessesType,
   ApiErrorResponse,
   FilterInputType,
   MarkerType,
@@ -38,7 +38,13 @@ import {
 
 import { db, storage } from "./firebase-config";
 
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import {
+  getDownloadURL,
+  ref,
+  StorageError,
+  uploadBytesResumable,
+  UploadTaskSnapshot,
+} from "firebase/storage";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -86,13 +92,14 @@ const userLocalInit = {
 
 const fetchYELP = async (
   fetchParameter: string,
-): Promise<ApiResponseType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
+): Promise<BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
   const URL = `${URL_BASE}${fetchParameter}`;
 
   const resp = await fetch(URL, {
     headers: requestHeaders,
   });
-  const data = await resp.json();
+
+  const data: BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType = await resp.json();
 
   return data;
 };
@@ -111,17 +118,17 @@ const getUsers = async (
 };
 
 /**
- * gwt data from YELP APi
+ * get data from YELP APi
  * @param url fetch YELP API url
  * @returns YELP API response or void
  */
 export const fetchYELPAsyncFunc = async (
   url: string,
-): Promise<void | ApiResponseType | ApiErrorResponse | ItemInfoType | reviewMainType | any> => {
+): Promise<BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
   try {
     return await fetchYELP(url);
   } catch (err: unknown) {
-    console.error(err);
+    return { error: { ok: false, description: err } };
   }
 };
 
@@ -170,7 +177,7 @@ function App() {
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
 
-  const init_YELP_API: ApiResponseType = {
+  const init_YELP_API: BusinessesType = {
     businesses: [],
     region: {
       center: {
@@ -200,7 +207,7 @@ function App() {
     attrFilter: ``,
   });
   const PATH = "/businesses/search";
-  const [resultYELP, setResultYELP] = useState<ApiResponseType>(init_YELP_API);
+  const [businesses, setBusinesses] = useState<BusinessesType>(init_YELP_API);
 
   const [selectedBusiness, setSelectedBusiness] = useState<ItemInfoType>({
     id: DEFAULT_STRING,
@@ -264,20 +271,21 @@ function App() {
     if (searchInputs.where === "") setIsErrorLocation(true);
 
     if (!searchInputs.where) {
-      setResultYELP(init_YELP_API);
+      setBusinesses(init_YELP_API);
     } else {
       const fetchResultsearch = async (): Promise<void> => {
         const resp = await fetchYELPAsyncFunc(`${PATH}${term}`);
-        if (!resp.error) {
-          setResultYELP(resp);
-          setIsErrorLocation(false);
-        } else {
-          setResultYELP(init_YELP_API);
+
+        if ("error" in resp) {
+          setBusinesses(init_YELP_API);
           setIsErrorLocation(true);
-          setSearchInputs({ ...searchInputs, where: "" });
-          console.error(resp.error.description);
+          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUE });
+        } else {
+          if ("businesses" in resp) setBusinesses(resp);
+          setIsErrorLocation(false);
         }
       };
+
       fetchResultsearch();
     }
   }, [term]);
@@ -285,7 +293,8 @@ function App() {
   useEffect(() => {
     if (idSelected !== undefined) {
       const fetchSelBusiness = async (): Promise<void> => {
-        setSelectedBusiness(await fetchYELPAsyncFunc(`/businesses/${idSelected}`));
+        const resp = await fetchYELPAsyncFunc(`/businesses/${idSelected}`);
+        if ("id" in resp) setSelectedBusiness(resp);
       };
       fetchSelBusiness();
     }
@@ -294,20 +303,21 @@ function App() {
   useEffect(() => {
     if (idReviewData !== undefined) {
       const fetchRevData = async (): Promise<void> => {
-        setReviewData(await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`));
+        const resp = await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`);
+        if ("total" in resp) setReviewData(resp);
       };
       fetchRevData();
     }
   }, [idReviewData]);
 
   useEffect(() => {
-    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
+    if (businesses.businesses !== [] || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
         currentPage: DEFAULT_CURRENT_PAGE,
-        totalPage: getTotalPages(resultYELP.businesses.length, ITEMS_BY_PAGE),
+        totalPage: getTotalPages(businesses.businesses.length, ITEMS_BY_PAGE),
       });
-  }, [resultYELP.businesses]);
+  }, [businesses.businesses]);
 
   useEffect(() => {
     const result: itemsPageType = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
@@ -317,8 +327,8 @@ function App() {
   useEffect(() => {
     businessPageArr.length = 0;
     coorResArr.length = 0;
-    if (resultYELP.businesses !== [] || resultYELP.businesses !== undefined)
-      resultYELP.businesses.map((item: ItemInfoType, index: number) => {
+    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+      businesses.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
           let url = "";
           if (!item?.image_url) {
@@ -341,7 +351,7 @@ function App() {
 
     setMarkerResArr([...coorResArr]);
     setBusinessPage([...businessPageArr]);
-  }, [itemsPage.min, resultYELP.businesses]);
+  }, [itemsPage.min, businesses.businesses]);
 
   /**
    * set searchInputs values and check if where field is not filled.
@@ -532,10 +542,10 @@ function App() {
 
     uploadTask.on(
       "state_changed",
-      (snapshot) => {
+      (snapshot: UploadTaskSnapshot) => {
         setProgress(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
       },
-      (err) => console.error(err),
+      (err: StorageError) => console.error(err),
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((url) => setAvatarUrl(url));
       },
@@ -623,14 +633,14 @@ function App() {
               isErrorLocation={isErrorLocation}
               setIsErrorLocation={setIsErrorLocation}
             />
-            {!resultYELP.total ? (
+            {!businesses.total ? (
               DEFAULT_VALUE
             ) : (
               <button onClick={() => setIsMapView(!isMapView)}>
                 {isMapView ? `See Results view` : `See Map View`}
               </button>
             )}
-            {!resultYELP.total ? (
+            {!businesses.total ? (
               DEFAULT_VALUE
             ) : (
               <div id="result-container">
@@ -638,7 +648,7 @@ function App() {
                   <MapPage
                     setIdSelected={setIdSelected}
                     markers={markerResArr}
-                    region={resultYELP.region.center}
+                    region={businesses.region.center}
                     updateLocationClick={updateLocationClick}
                   />
                 </div>
