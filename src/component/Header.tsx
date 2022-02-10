@@ -147,12 +147,12 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     setWhereInput("");
     setSearchValues({ ...searchValues, where: DEFAULT_VALUE });
     navigator.geolocation.getCurrentPosition(
-      function (position) {
+      function (position: GeolocationPosition) {
         setGeolocationInput(
           `&latitude=${position.coords.latitude}&longitude=${position.coords.longitude}`,
         );
       },
-      function (error) {
+      function (error: GeolocationPositionError) {
         console.error(error);
       },
       {
