@@ -4,11 +4,11 @@ import { InputType } from "../interface";
 import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
 
-type updateSearchInputsType = {
+type Props = {
   filterVal: FilterInputType;
   password: string | null;
   avatar: string;
-  updateSearchInputs: (objectIn: InputType) => void;
+  setSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   logOut: () => void;
   isErrorLocation: boolean;
@@ -79,10 +79,11 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
   return `0${dateArr[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
 };
 
-export function Header(props: updateSearchInputsType): JSX.Element {
-  const { updateSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
+export function Header(props: Props): JSX.Element {
+  const { setSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
 
   const DEFAULT_VALUE = null;
+  const DEFAULT_STRING = "DEFAULT";
   const [businessInput, setBusinessInput] = useState<string>("");
   const [whereInput, setWhereInput] = useState<string>("");
   const [geolocationInput, setGeolocationInput] = useState<string>("");
@@ -93,7 +94,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     business: DEFAULT_VALUE,
     where: DEFAULT_VALUE,
   });
-  const [openInput, setOpenInput] = useState<string>("DEFAULT");
+  const [openInput, setOpenInput] = useState<string>(DEFAULT_STRING);
   const [openAtHour, setopenAtHour] = useState<string>("00:00");
   // open_at YELP API attribute only supports 2 days after or before the current day
   const LIMIT_DAY = 2;
@@ -286,7 +287,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
 
   useEffect(
     () =>
-      openInput === "DEFAULT"
+      openInput === DEFAULT_STRING
         ? setFilterValue({ ...props.filterVal, openFilter: `` })
         : setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` }),
     [openInput],
@@ -307,7 +308,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   }, [sortByInput]);
 
   useEffect(() => {
-    if (searchValues.where !== DEFAULT_VALUE) updateSearchInputs(searchValues);
+    if (searchValues.where !== DEFAULT_VALUE) setSearchInputs(searchValues);
   }, [searchValues]);
 
   useEffect(() => {
@@ -388,7 +389,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <button
           onClick={() => {
             if (where === "") setIsErrorLocation(true);
-            updateSearchInputs(searchValues);
+            setSearchInputs(searchValues);
           }}
         >
           Search
@@ -397,11 +398,11 @@ export function Header(props: updateSearchInputsType): JSX.Element {
       <div id="filter-container">
         <select
           id="select-open"
-          defaultValue={"DEFAULT"}
+          defaultValue={DEFAULT_STRING}
           name="open"
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setOpenInput(e.target.value)}
         >
-          <option value="DEFAULT">Choose open option</option>
+          <option value={DEFAULT_STRING}>Choose open option</option>
           <option value="openNow">Open Now</option>
           <option value="openAt">Open At</option>
         </select>
