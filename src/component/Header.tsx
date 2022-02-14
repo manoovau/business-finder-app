@@ -82,19 +82,25 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 export function Header(props: Props): JSX.Element {
   const { setSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
 
-  const DEFAULT_VALUE = null;
-  const DEFAULT_STRING = "DEFAULT";
-  const [businessInput, setBusinessInput] = useState<string>("");
-  const [whereInput, setWhereInput] = useState<string>("");
-  const [geolocationInput, setGeolocationInput] = useState<string>("");
+  const GENERIC_DEFAULT_VALUES = {
+    NULL: null,
+    INPUT: "DEFAULT",
+    EMPTY_STRING: "",
+  };
+
+  const [businessInput, setBusinessInput] = useState<string>(GENERIC_DEFAULT_VALUES.EMPTY_STRING);
+  const [whereInput, setWhereInput] = useState<string>(GENERIC_DEFAULT_VALUES.EMPTY_STRING);
+  const [geolocationInput, setGeolocationInput] = useState<string>(
+    GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+  );
   const [business] = useDebounce(businessInput, 500);
   const [where] = useDebounce(whereInput, 500);
   const [currentGeolocation] = useDebounce(geolocationInput, 500);
   const [searchValues, setSearchValues] = useState<InputType>({
-    business: DEFAULT_VALUE,
-    where: DEFAULT_VALUE,
+    business: GENERIC_DEFAULT_VALUES.NULL,
+    where: GENERIC_DEFAULT_VALUES.NULL,
   });
-  const [openInput, setOpenInput] = useState<string>(DEFAULT_STRING);
+  const [openInput, setOpenInput] = useState<string>(GENERIC_DEFAULT_VALUES.INPUT);
   const [openAtHour, setopenAtHour] = useState<string>("00:00");
   // open_at YELP API attribute only supports 2 days after or before the current day
   const LIMIT_DAY = 2;
@@ -112,10 +118,10 @@ export function Header(props: Props): JSX.Element {
   const [price4, setPrice4] = useState<boolean>(false);
   const [priceStr, setPriceStr] = useState<priceStrType>({
     base: `&price=`,
-    prc1: "",
-    prc2: "",
-    prc3: "",
-    prc4: "",
+    prc1: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    prc2: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    prc3: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    prc4: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
   });
 
   const [hotNew, setHotNew] = useState<boolean>(false);
@@ -129,13 +135,13 @@ export function Header(props: Props): JSX.Element {
   const [sortByInput, setSortByInput] = useState<string>(``);
   const [attributesInput, setAttributesInput] = useState<attrStrType>({
     base: `&attributes="`,
-    hotNew: "",
-    requestQuote: "",
-    reservation: "",
-    deals: "",
-    genderNeutral: "",
-    openAll: "",
-    wheelchair: "",
+    hotNew: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    requestQuote: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    reservation: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    deals: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    genderNeutral: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    openAll: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+    wheelchair: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
     endBase: `"`,
   });
 
@@ -145,8 +151,8 @@ export function Header(props: Props): JSX.Element {
    * request current location and set latitud and longitud in where value
    */
   const getCurrentLocation = () => {
-    setWhereInput("");
-    setSearchValues({ ...searchValues, where: DEFAULT_VALUE });
+    setWhereInput(GENERIC_DEFAULT_VALUES.EMPTY_STRING);
+    setSearchValues({ ...searchValues, where: GENERIC_DEFAULT_VALUES.NULL });
     navigator.geolocation.getCurrentPosition(
       function (position: GeolocationPosition) {
         setGeolocationInput(
@@ -163,22 +169,34 @@ export function Header(props: Props): JSX.Element {
   };
 
   useEffect(
-    () => (price1 ? setPriceStr({ ...priceStr, prc1: 1 }) : setPriceStr({ ...priceStr, prc1: "" })),
+    () =>
+      price1
+        ? setPriceStr({ ...priceStr, prc1: 1 })
+        : setPriceStr({ ...priceStr, prc1: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [price1],
   );
 
   useEffect(
-    () => (price2 ? setPriceStr({ ...priceStr, prc2: 2 }) : setPriceStr({ ...priceStr, prc2: "" })),
+    () =>
+      price2
+        ? setPriceStr({ ...priceStr, prc2: 2 })
+        : setPriceStr({ ...priceStr, prc2: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [price2],
   );
 
   useEffect(
-    () => (price3 ? setPriceStr({ ...priceStr, prc3: 3 }) : setPriceStr({ ...priceStr, prc3: "" })),
+    () =>
+      price3
+        ? setPriceStr({ ...priceStr, prc3: 3 })
+        : setPriceStr({ ...priceStr, prc3: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [price3],
   );
 
   useEffect(
-    () => (price4 ? setPriceStr({ ...priceStr, prc4: 4 }) : setPriceStr({ ...priceStr, prc4: "" })),
+    () =>
+      price4
+        ? setPriceStr({ ...priceStr, prc4: 4 })
+        : setPriceStr({ ...priceStr, prc4: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [price4],
   );
 
@@ -200,7 +218,7 @@ export function Header(props: Props): JSX.Element {
     () =>
       hotNew
         ? setAttributesInput({ ...attributesInput, hotNew: "hot_and_new" })
-        : setAttributesInput({ ...attributesInput, hotNew: "" }),
+        : setAttributesInput({ ...attributesInput, hotNew: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [hotNew],
   );
 
@@ -208,7 +226,10 @@ export function Header(props: Props): JSX.Element {
     () =>
       requestQuote
         ? setAttributesInput({ ...attributesInput, requestQuote: "request_a_quote" })
-        : setAttributesInput({ ...attributesInput, requestQuote: "" }),
+        : setAttributesInput({
+            ...attributesInput,
+            requestQuote: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+          }),
     [requestQuote],
   );
 
@@ -216,7 +237,10 @@ export function Header(props: Props): JSX.Element {
     () =>
       reservation
         ? setAttributesInput({ ...attributesInput, reservation: "reservation" })
-        : setAttributesInput({ ...attributesInput, reservation: "" }),
+        : setAttributesInput({
+            ...attributesInput,
+            reservation: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+          }),
     [reservation],
   );
 
@@ -224,7 +248,7 @@ export function Header(props: Props): JSX.Element {
     () =>
       deals
         ? setAttributesInput({ ...attributesInput, deals: "deals" })
-        : setAttributesInput({ ...attributesInput, deals: "" }),
+        : setAttributesInput({ ...attributesInput, deals: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [deals],
   );
 
@@ -232,7 +256,10 @@ export function Header(props: Props): JSX.Element {
     () =>
       genderNeutral
         ? setAttributesInput({ ...attributesInput, genderNeutral: "gender_neutral_restrooms" })
-        : setAttributesInput({ ...attributesInput, genderNeutral: "" }),
+        : setAttributesInput({
+            ...attributesInput,
+            genderNeutral: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+          }),
     [genderNeutral],
   );
 
@@ -240,7 +267,7 @@ export function Header(props: Props): JSX.Element {
     () =>
       openAll
         ? setAttributesInput({ ...attributesInput, openAll: "open_to_all" })
-        : setAttributesInput({ ...attributesInput, openAll: "" }),
+        : setAttributesInput({ ...attributesInput, openAll: GENERIC_DEFAULT_VALUES.EMPTY_STRING }),
     [openAll],
   );
 
@@ -248,7 +275,10 @@ export function Header(props: Props): JSX.Element {
     () =>
       wheelchair
         ? setAttributesInput({ ...attributesInput, wheelchair: "wheelchair_accessible" })
-        : setAttributesInput({ ...attributesInput, wheelchair: "" }),
+        : setAttributesInput({
+            ...attributesInput,
+            wheelchair: GENERIC_DEFAULT_VALUES.EMPTY_STRING,
+          }),
     [wheelchair],
   );
 
@@ -271,7 +301,7 @@ export function Header(props: Props): JSX.Element {
   useEffect(
     () =>
       !where && !currentGeolocation
-        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
+        ? setSearchValues({ ...searchValues, where: GENERIC_DEFAULT_VALUES.NULL })
         : setSearchValues({ ...searchValues, where: `&location=${where}` }),
     [where],
   );
@@ -279,7 +309,7 @@ export function Header(props: Props): JSX.Element {
   useEffect(
     () =>
       !where && !currentGeolocation
-        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
+        ? setSearchValues({ ...searchValues, where: GENERIC_DEFAULT_VALUES.NULL })
         : setSearchValues({ ...searchValues, where: currentGeolocation }),
 
     [currentGeolocation],
@@ -287,7 +317,7 @@ export function Header(props: Props): JSX.Element {
 
   useEffect(
     () =>
-      openInput === DEFAULT_STRING
+      openInput === GENERIC_DEFAULT_VALUES.INPUT
         ? setFilterValue({ ...props.filterVal, openFilter: `` })
         : setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` }),
     [openInput],
@@ -303,23 +333,23 @@ export function Header(props: Props): JSX.Element {
   );
 
   useEffect(() => {
-    if (sortByInput !== "")
+    if (sortByInput !== GENERIC_DEFAULT_VALUES.EMPTY_STRING)
       setFilterValue({ ...props.filterVal, sortByFilter: `&sort_by=${sortByInput}` });
   }, [sortByInput]);
 
   useEffect(() => {
-    if (searchValues.where !== DEFAULT_VALUE) setSearchInputs(searchValues);
+    if (searchValues.where !== GENERIC_DEFAULT_VALUES.NULL) setSearchInputs(searchValues);
   }, [searchValues]);
 
   useEffect(() => {
     if (props.isErrorLocation) {
-      setWhereInput("");
+      setWhereInput(GENERIC_DEFAULT_VALUES.EMPTY_STRING);
       setWhereInPlaceholder("Please, fill a correct location");
     }
   }, [props.isErrorLocation]);
 
   useEffect(() => {
-    if (searchValues.where === "") {
+    if (searchValues.where === GENERIC_DEFAULT_VALUES.EMPTY_STRING) {
       setWhereInPlaceholder("Please, fill location field.");
     }
   }, [searchValues.where]);
@@ -338,12 +368,16 @@ export function Header(props: Props): JSX.Element {
         <Link to="/profile" id="profile">
           <img
             id="img-avatar"
-            src={props.avatar !== "" ? props.avatar : "/img/nullUser.png"}
+            src={
+              props.avatar !== GENERIC_DEFAULT_VALUES.EMPTY_STRING
+                ? props.avatar
+                : "/img/nullUser.png"
+            }
             alt="avatar image"
           />
         </Link>
 
-        {props.password === "" ? (
+        {props.password === GENERIC_DEFAULT_VALUES.EMPTY_STRING ? (
           <div>
             <Link to="/login" id="login">
               <h3>{`Log In`}</h3>
@@ -373,7 +407,7 @@ export function Header(props: Props): JSX.Element {
             <input
               type="text"
               id="where"
-              className={props.isErrorLocation ? "error" : ""}
+              className={props.isErrorLocation ? "error" : GENERIC_DEFAULT_VALUES.EMPTY_STRING}
               name="where"
               placeholder={whereInPlaceholder}
               value={whereInput}
@@ -388,7 +422,7 @@ export function Header(props: Props): JSX.Element {
         </div>
         <button
           onClick={() => {
-            if (where === "") setIsErrorLocation(true);
+            if (where === GENERIC_DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
             setSearchInputs(searchValues);
           }}
         >
@@ -398,11 +432,11 @@ export function Header(props: Props): JSX.Element {
       <div id="filter-container">
         <select
           id="select-open"
-          defaultValue={DEFAULT_STRING}
+          defaultValue={GENERIC_DEFAULT_VALUES.INPUT}
           name="open"
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setOpenInput(e.target.value)}
         >
-          <option value={DEFAULT_STRING}>Choose open option</option>
+          <option value={GENERIC_DEFAULT_VALUES.INPUT}>Choose open option</option>
           <option value="openNow">Open Now</option>
           <option value="openAt">Open At</option>
         </select>
@@ -430,7 +464,7 @@ export function Header(props: Props): JSX.Element {
           />
         </div>
       ) : (
-        DEFAULT_VALUE
+        GENERIC_DEFAULT_VALUES.NULL
       )}
 
       <div id="price-input-container">
@@ -445,11 +479,11 @@ export function Header(props: Props): JSX.Element {
       </div>
       <select
         id="select-sortBy"
-        defaultValue={""}
+        defaultValue={GENERIC_DEFAULT_VALUES.EMPTY_STRING}
         name="sortBy"
         onChange={(e: ChangeEvent<HTMLSelectElement>) => setSortByInput(e.target.value)}
       >
-        <option value="">Sort By</option>
+        <option value={GENERIC_DEFAULT_VALUES.EMPTY_STRING}>Sort By</option>
         <option value="rating">Rating</option>
         <option value="review_count">Review count</option>
         <option value="distance">distance</option>
