@@ -574,7 +574,7 @@ function App() {
         currentUsersId.avatar,
       );
 
-      setRegisterCount((prev: number) => prev + 1);
+      setRegisterCount((prev) => prev + 1);
     }
   }, [currentUsersId]);
 
