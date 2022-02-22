@@ -616,6 +616,7 @@ function App() {
         <Route exact path="/">
           <div id="home-container">
             <Header
+              searchInputs={searchInputs}
               setSearchInputs={setSearchInputs}
               setFilterValue={setFilterValue}
               filterVal={filterValue}
