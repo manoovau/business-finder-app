@@ -528,7 +528,7 @@ export function Header(props: Props): JSX.Element {
           <option value={OPEN_SELECT.OPEN_AT}>Open At</option>
         </select>
       </div>
-      {openInput === OPEN_SELECT.OPEN_AT ? (
+      {openInput === OPEN_SELECT.OPEN_AT && (
         <div id="openAt-container">
           <input
             type="time"
@@ -550,8 +550,6 @@ export function Header(props: Props): JSX.Element {
             onChange={(e: ChangeEvent<HTMLInputElement>) => setOpenAtDate(e.target.value)}
           />
         </div>
-      ) : (
-        DEFAULT_VALUES.NULL
       )}
 
       <div id="price-input-container">

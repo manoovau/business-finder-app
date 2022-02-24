@@ -32,30 +32,19 @@ const getCategories = (data: categoriesType[]): JSX.Element => {
 };
 
 export const BasicInfoProd = (props: Props): JSX.Element => {
-  const DEFAULT_VALUE = null;
   return (
     <div id="basic-info-container">
       <h2>{props?.name}</h2>
       <div className="rating">
-        {props?.rating ? (
-          <div data-testid="rating-test">{createIconReview(props.rating)}</div>
-        ) : (
-          DEFAULT_VALUE
-        )}{" "}
+        {props?.rating && <div data-testid="rating-test">{createIconReview(props.rating)}</div>}{" "}
         {props?.review_count}
       </div>
 
       <div id="price-categ-container">
-        {props?.price ? <p className="price">{props.price}</p> : DEFAULT_VALUE}
-        <div id="categories-container">
-          {props?.categories ? getCategories(props.categories) : DEFAULT_VALUE}
-        </div>
+        {props?.price && <p className="price">{props.price}</p>}
+        <div id="categories-container">{props?.categories && getCategories(props.categories)}</div>
       </div>
-      {props?.is_closed ? (
-        <p data-testid="is-perm-closed">Sorry, it is permanently closed</p>
-      ) : (
-        DEFAULT_VALUE
-      )}
+      {props?.is_closed && <p data-testid="is-perm-closed">Sorry, it is permanently closed</p>}
     </div>
   );
 };

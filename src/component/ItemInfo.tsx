@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { OpenType, HoursType, CenterType } from "../interface";
-import { MapPageItem } from "./index";
 
 type Props = {
   id: string;
@@ -84,8 +83,6 @@ export const getAddress = (data: string[]): JSX.Element => {
 export const ItemInfo = (props: Props): JSX.Element => {
   const { setIdReviewData, setShowReview } = props;
 
-  const DEFAULT_VALUE = null;
-
   const [showOpenHours, setShowOpenHours] = useState<boolean>(false);
   const [showPhone, setShowPhone] = useState<boolean>(false);
   const [mainSrc, setMainSrc] = useState<string>("");
@@ -101,37 +98,31 @@ export const ItemInfo = (props: Props): JSX.Element => {
   return (
     <div id="item-info-container">
       <div id="info-container">
-        {props?.hours ? (
+        {props?.hours && (
           <p data-testid="is-open">{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
-        ) : (
-          DEFAULT_VALUE
         )}
-        <p id="open-hours-el" onClick={() => setShowOpenHours(!showOpenHours)}>
-          Open hours
-        </p>
-        <div id="open-hours-ele" className={showOpenHours ? "show" : "hide"}>
-          {getOpenHours(props.hours)}
-        </div>
-        <div id="address-container">
-          {props?.location_disp ? getAddress(props.location_disp) : DEFAULT_VALUE}
-        </div>
+        {props?.hours && (
+          <div id="open-hours-el" onClick={() => setShowOpenHours(!showOpenHours)}>
+            Open hours
+            <div id="open-hours-ele" className={showOpenHours ? "show" : "hide"}>
+              {getOpenHours(props.hours)}
+            </div>
+          </div>
+        )}
+        <div id="address-container">{props?.location_disp && getAddress(props.location_disp)}</div>
         <div id="icon-container">
-          {!props?.url ? (
-            DEFAULT_VALUE
-          ) : (
+          {props?.url && (
             <a href={props.url}>
               <i className="fas fa-link"></i>
             </a>
           )}
-          {!props?.phone ? (
-            DEFAULT_VALUE
-          ) : (
+          {props?.phone && (
             <i
               data-testid="phone-element"
               className="fas fa-phone-alt"
               onClick={() => setShowPhone(!showPhone)}
             >
-              {showPhone ? <p>{props.phone}</p> : DEFAULT_VALUE}
+              {showPhone && <p>{props.phone}</p>}
             </i>
           )}
 
@@ -147,24 +138,14 @@ export const ItemInfo = (props: Props): JSX.Element => {
         </div>
       </div>
       <div id="images-container">
-        <div id="main-img-container">
-          {props?.photosArr ? <img id="main-img" src={mainSrc} /> : DEFAULT_VALUE}
-        </div>
+        <div id="main-img-container">{props?.photosArr && <img id="main-img" src={mainSrc} />}</div>
         <div id="img-carousel">
-          {props?.photosArr
-            ? props.photosArr.map((item: string, index: number) => (
-                <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />
-              ))
-            : DEFAULT_VALUE}
+          {props?.photosArr &&
+            props.photosArr.map((item: string, index: number) => (
+              <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />
+            ))}
         </div>
       </div>
-      {props?.coordinates ? (
-        <div id="map-item">
-          <MapPageItem region={props.coordinates} />
-        </div>
-      ) : (
-        DEFAULT_VALUE
-      )}
     </div>
   );
 };

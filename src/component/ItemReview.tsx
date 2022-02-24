@@ -58,56 +58,51 @@ export const getLanguage = (possibLanguage: string): string => {
 };
 
 export const ItemReview = (props: Props): JSX.Element => {
-  const DEFAULT_VALUE = null;
   return (
     <div id="id-review-container">
-      <h4>Available languages</h4>
-      {props?.revPos_lang ? (
+      {props?.revPos_lang && (
         <div id="possib-lang" data-testid="possib-lang-test-id">
+          <h4>Available languages</h4>
           {props.revPos_lang.map((item: string, index: number) => {
             return <p key={`lang${index}`}>{getLanguage(item)}</p>;
           })}
         </div>
-      ) : (
-        DEFAULT_VALUE
       )}
       <div id="reviews-container">
         <h5>Review Highlights</h5>
-        {props?.revArr
-          ? props.revArr.map((item: reviewsType, index: number) => {
-              return (
-                <div className="review" key={`review${index}`}>
-                  <div className="review-user">
-                    {!item.user.profile_url ? (
+        {props?.revArr &&
+          props.revArr.map((item: reviewsType, index: number) => {
+            return (
+              <div className="review" key={`review${index}`}>
+                <div className="review-user">
+                  {!item.user.profile_url ? (
+                    <h5>{item.user.name}</h5>
+                  ) : (
+                    <a data-testid="profile-url" href={item.user.profile_url}>
                       <h5>{item.user.name}</h5>
-                    ) : (
-                      <a data-testid="profile-url" href={item.user.profile_url}>
-                        <h5>{item.user.name}</h5>
-                      </a>
-                    )}
-                    {!item.user.image_url ? (
-                      <img className="img-user" src={"/img/nullUser.png"} alt="user image url" />
-                    ) : (
-                      <img className="img-user" src={item.user.image_url} alt="user image url" />
-                    )}
-                  </div>
-                  <div className="rating-time-container">
-                    {createIconReview(item.rating)}
-                    <p>{item.time_created}</p>
-                  </div>
-                  <div id="review-text-container">
-                    <p className="review-text">{item.text}</p>
-                    {item?.text?.substr(item?.text?.length - 3) === "..." && props.url ? (
-                      <a href={props.url}>See more</a>
-                    ) : (
-                      DEFAULT_VALUE
-                    )}
-                  </div>
+                    </a>
+                  )}
+                  {!item.user.image_url ? (
+                    <img className="img-user" src={"/img/nullUser.png"} alt="user image url" />
+                  ) : (
+                    <img className="img-user" src={item.user.image_url} alt="user image url" />
+                  )}
                 </div>
-              );
-            })
-          : DEFAULT_VALUE}
-        {!props.url ? DEFAULT_VALUE : <a href={props.url}>See more reviews ({props.revTotal})</a>}
+                <div className="rating-time-container">
+                  {createIconReview(item.rating)}
+                  <p>{item.time_created}</p>
+                </div>
+                <div id="review-text-container">
+                  <p className="review-text">{item.text}</p>
+                  {item?.text?.substr(item?.text?.length - 3) === "..." && props.url && (
+                    <a href={props.url}>See more</a>
+                  )}
+                  {console.log(item?.text?.substr(item?.text?.length - 3))}
+                </div>
+              </div>
+            );
+          })}
+        {props.url && <a href={props.url}>See more reviews ({props.revTotal})</a>}
       </div>
     </div>
   );

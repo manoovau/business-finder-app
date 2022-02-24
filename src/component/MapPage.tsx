@@ -13,13 +13,13 @@ type prop = {
 
 export const MapPage = (props: prop): JSX.Element => {
   const { setIdSelected, updateLocationClick } = props;
-  const DEFAULT_VALUE = null;
+
   // leaflet resize issue
   window.dispatchEvent(new Event("resize"));
 
   return (
     <div id="map-container">
-      {props?.region && props?.region?.latitude !== 0 && props?.region?.longitude !== 0 ? (
+      {props?.region && props?.region?.latitude !== 0 && props?.region?.longitude !== 0 && (
         <MapContainer
           id="map"
           center={[props.region.latitude, props.region.longitude]}
@@ -34,26 +34,23 @@ export const MapPage = (props: prop): JSX.Element => {
             longitude={props.region.longitude}
             updateLocationClick={updateLocationClick}
           />
-          {props?.markers
-            ? props.markers.map((item: MarkerType, index: number) => {
-                return (
-                  <MarkerResult
-                    setIdSelected={setIdSelected}
-                    key={`marker${index}`}
-                    lat={item.coord.latitude}
-                    long={item.coord.longitude}
-                    idCoord={item.idCoord}
-                    name={item.nameCoord}
-                    rating={item.ratingCoord}
-                    img={item.imgCoord}
-                    markerType={"result"}
-                  />
-                );
-              })
-            : DEFAULT_VALUE}
+          {props?.markers &&
+            props.markers.map((item: MarkerType, index: number) => {
+              return (
+                <MarkerResult
+                  setIdSelected={setIdSelected}
+                  key={`marker${index}`}
+                  lat={item.coord.latitude}
+                  long={item.coord.longitude}
+                  idCoord={item.idCoord}
+                  name={item.nameCoord}
+                  rating={item.ratingCoord}
+                  img={item.imgCoord}
+                  markerType={"result"}
+                />
+              );
+            })}
         </MapContainer>
-      ) : (
-        DEFAULT_VALUE
       )}
     </div>
   );

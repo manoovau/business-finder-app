@@ -9,6 +9,7 @@ import {
   BasicInfoProd,
   ItemReview,
   Pagination,
+  MapPageItem,
 } from "./component/index";
 import {
   InputType,
@@ -612,227 +613,231 @@ function App() {
 
   return (
     <div className="App">
-      <Switch>
-        <Route exact path="/">
-          <div id="home-container">
-            <Header
-              searchInputs={searchInputs}
-              setSearchInputs={setSearchInputs}
-              setFilterValue={setFilterValue}
-              filterVal={filterValue}
-              password={currentUsersId.password}
-              avatar={currentUsersId.avatar}
-              logOut={logOut}
-              isErrorLocation={isErrorLocation}
-              setIsErrorLocation={setIsErrorLocation}
-            />
-            {!businesses.total ? (
-              DEFAULT_VALUE
-            ) : (
-              <button onClick={() => setIsMapView(!isMapView)}>
-                {isMapView ? `See Results view` : `See Map View`}
-              </button>
-            )}
-            {!businesses.total ? (
-              DEFAULT_VALUE
-            ) : (
-              <div id="result-container">
-                <div className={isMapView ? "show" : "hide"}>
-                  <MapPage
-                    setIdSelected={setIdSelected}
-                    markers={markerResArr}
-                    region={businesses.region.center}
-                    updateLocationClick={updateLocationClick}
-                  />
-                </div>
-                <div className={isMapView ? "hide" : "show"}>
-                  <div id="item-pagin-result-container">
-                    <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
-                    <Pagination
-                      incrementPage={incrementPage}
-                      decrementPage={decrementPage}
-                      currentPage={pageInfo.currentPage}
-                      totalPage={pageInfo.totalPage}
+      <div id="content-container">
+        <Switch>
+          <Route exact path="/">
+            <div id="home-container">
+              <Header
+                searchInputs={searchInputs}
+                setSearchInputs={setSearchInputs}
+                setFilterValue={setFilterValue}
+                filterVal={filterValue}
+                password={currentUsersId.password}
+                avatar={currentUsersId.avatar}
+                logOut={logOut}
+                isErrorLocation={isErrorLocation}
+                setIsErrorLocation={setIsErrorLocation}
+              />
+              {businesses.total !== 0 && (
+                <button onClick={() => setIsMapView(!isMapView)}>
+                  {isMapView ? `See Results view` : `See Map View`}
+                </button>
+              )}
+              {businesses.total !== 0 && (
+                <div id="result-container">
+                  <div className={isMapView ? "show" : "hide"}>
+                    <MapPage
+                      setIdSelected={setIdSelected}
+                      markers={markerResArr}
+                      region={businesses.region.center}
+                      updateLocationClick={updateLocationClick}
                     />
                   </div>
+                  <div className={isMapView ? "hide" : "show"}>
+                    <div id="item-pagin-result-container">
+                      <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
+                      <Pagination
+                        incrementPage={incrementPage}
+                        decrementPage={decrementPage}
+                        currentPage={pageInfo.currentPage}
+                        totalPage={pageInfo.totalPage}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </Route>
-        <Route path="/login">
-          {currentUsersId !== userLocalInit ? (
-            <Redirect to="/" />
-          ) : (
-            <div>
-              <Link to="/">
-                <h3>{`< Go Back `}</h3>
-              </Link>
-              <input
-                id="username-login"
-                type="text"
-                className={isUserInError ? "error" : ""}
-                value={user}
-                placeholder={userInPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
-                required
-              />
-              <input
-                id="password-login"
-                type="text"
-                className={isPwInError ? "error" : ""}
-                value={password}
-                placeholder={pwInPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
-                required
-              />
-              <button onClick={loginUser}>Login</button>
+              )}
             </div>
-          )}
-        </Route>
-        <Route path="/register">
-          {currentUsersId !== userLocalInit ? (
-            <Redirect to="/" />
-          ) : (
-            <div>
-              <Link to="/">
-                <h3>{`< Go Back `}</h3>
-              </Link>
-              <input
-                id="username-register"
-                type="text"
-                className={isUserInError ? "error" : ""}
-                value={user}
-                placeholder={userInPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
-              />
-              <input
-                id="password-register"
-                type="text"
-                className={isPwInError ? "error" : ""}
-                value={password}
-                placeholder={pwInPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
-              />
-              <input
-                id="email-register"
-                type="text"
-                className={isEmailInError ? "error" : ""}
-                value={email}
-                placeholder={emailInPlaceholder}
-                onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
-              />
-              <div id="add-img" onClick={() => setAddImg(!addImg)}>
-                <form onSubmit={formHandler}>
-                  <input type="file" className="input" />
-                  <button type="submit">Upload</button>
-                </form>
-                <hr />
-                <h2>Uploading {progress}%</h2>
-              </div>
-              <button onClick={registerUser}>Register</button>
-            </div>
-          )}
-        </Route>
-        <Route path="/profile">
-          {currentUsersId === userLocalInit ? (
-            <Redirect to="/" />
-          ) : (
-            <div id="profile-contaimer">
-              <div id="change-pw-container">
+          </Route>
+          <Route path="/login">
+            {currentUsersId !== userLocalInit ? (
+              <Redirect to="/" />
+            ) : (
+              <div>
                 <Link to="/">
                   <h3>{`< Go Back `}</h3>
                 </Link>
                 <input
-                  id="current-password"
+                  id="username-login"
                   type="text"
-                  className={isCurrentPwError ? "error" : ""}
-                  value={currentPw}
-                  placeholder={currentPwPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void =>
-                    setCurrentPw(e.target.value)
-                  }
+                  className={isUserInError ? "error" : ""}
+                  value={user}
+                  placeholder={userInPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
                   required
                 />
                 <input
-                  id="new-password"
+                  id="password-login"
                   type="text"
-                  className={isNewPwPw1Error ? "error" : ""}
-                  value={newPw1}
-                  placeholder={newPw1Placeholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
+                  className={isPwInError ? "error" : ""}
+                  value={password}
+                  placeholder={pwInPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
                   required
                 />
-                <input
-                  id="new-password"
-                  type="text"
-                  className={isNewPwPw1Error ? "error" : ""}
-                  value={newPw2}
-                  placeholder={newPw2Placeholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
-                  required
-                />
-                <Link to="/">
-                  <button onClick={updatePw}>Change Password</button>
-                </Link>
+                <button onClick={loginUser}>Login</button>
               </div>
-              <div id="remove-account-container">
-                <button
-                  className={isDelConf ? "hide" : "show"}
-                  onClick={() => setIsDelConf(!isDelConf)}
-                >
-                  REMOVE ACCOUNT
-                </button>
-                <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
-                  <p>Are you sure ?</p>
+            )}
+          </Route>
+          <Route path="/register">
+            {currentUsersId !== userLocalInit ? (
+              <Redirect to="/" />
+            ) : (
+              <div>
+                <Link to="/">
+                  <h3>{`< Go Back `}</h3>
+                </Link>
+                <input
+                  id="username-register"
+                  type="text"
+                  className={isUserInError ? "error" : ""}
+                  value={user}
+                  placeholder={userInPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
+                />
+                <input
+                  id="password-register"
+                  type="text"
+                  className={isPwInError ? "error" : ""}
+                  value={password}
+                  placeholder={pwInPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
+                />
+                <input
+                  id="email-register"
+                  type="text"
+                  className={isEmailInError ? "error" : ""}
+                  value={email}
+                  placeholder={emailInPlaceholder}
+                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
+                />
+                <div id="add-img" onClick={() => setAddImg(!addImg)}>
+                  <form onSubmit={formHandler}>
+                    <input type="file" className="input" />
+                    <button type="submit">Upload</button>
+                  </form>
+                  <hr />
+                  <h2>Uploading {progress}%</h2>
+                </div>
+                <button onClick={registerUser}>Register</button>
+              </div>
+            )}
+          </Route>
+          <Route path="/profile">
+            {currentUsersId === userLocalInit ? (
+              <Redirect to="/" />
+            ) : (
+              <div id="profile-contaimer">
+                <div id="change-pw-container">
                   <Link to="/">
-                    <button onClick={deleteUser}>yes</button>
+                    <h3>{`< Go Back `}</h3>
                   </Link>
+                  <input
+                    id="current-password"
+                    type="text"
+                    className={isCurrentPwError ? "error" : ""}
+                    value={currentPw}
+                    placeholder={currentPwPlaceholder}
+                    onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                      setCurrentPw(e.target.value)
+                    }
+                    required
+                  />
+                  <input
+                    id="new-password"
+                    type="text"
+                    className={isNewPwPw1Error ? "error" : ""}
+                    value={newPw1}
+                    placeholder={newPw1Placeholder}
+                    onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
+                    required
+                  />
+                  <input
+                    id="new-password"
+                    type="text"
+                    className={isNewPwPw1Error ? "error" : ""}
+                    value={newPw2}
+                    placeholder={newPw2Placeholder}
+                    onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
+                    required
+                  />
                   <Link to="/">
-                    <button>no</button>
+                    <button onClick={updatePw}>Change Password</button>
                   </Link>
                 </div>
+                <div id="remove-account-container">
+                  <button
+                    className={isDelConf ? "hide" : "show"}
+                    onClick={() => setIsDelConf(!isDelConf)}
+                  >
+                    REMOVE ACCOUNT
+                  </button>
+                  <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
+                    <p>Are you sure ?</p>
+                    <Link to="/">
+                      <button onClick={deleteUser}>yes</button>
+                    </Link>
+                    <Link to="/">
+                      <button>no</button>
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </Route>
-        <Route path={`/${selectedBusiness.id}`}>
-          <div>
-            <Link to="/" id="title">
-              <h3>{`< Go Back `}</h3>
-            </Link>
-            <BasicInfoProd
-              name={selectedBusiness.name}
-              rating={selectedBusiness?.rating}
-              review_count={selectedBusiness?.review_count}
-              price={selectedBusiness?.price}
-              categories={selectedBusiness?.categories}
-              is_closed={selectedBusiness?.is_closed}
-            />
-            <ItemInfo
-              id={selectedBusiness.id}
-              hours={selectedBusiness?.hours}
-              location_disp={selectedBusiness?.location?.display_address}
-              url={selectedBusiness?.url}
-              phone={selectedBusiness?.phone}
-              photosArr={selectedBusiness?.photos}
-              coordinates={selectedBusiness?.coordinates}
-              showReview={showReview}
-              setIdReviewData={setIdReviewData}
-              setShowReview={setShowReview}
-            />
-
-            <div className={showReview ? "show" : "hide"}>
-              <ItemReview
-                url={selectedBusiness?.url}
-                revPos_lang={reviewData?.possible_languages}
-                revArr={reviewData?.reviews}
-                revTotal={reviewData.total}
+            )}
+          </Route>
+          <Route path={`/${selectedBusiness.id}`}>
+            <div>
+              <Link to="/" id="title">
+                <h3>{`< Go Back `}</h3>
+              </Link>
+              <BasicInfoProd
+                name={selectedBusiness.name}
+                rating={selectedBusiness?.rating}
+                review_count={selectedBusiness?.review_count}
+                price={selectedBusiness?.price}
+                categories={selectedBusiness?.categories}
+                is_closed={selectedBusiness?.is_closed}
               />
+              <ItemInfo
+                id={selectedBusiness.id}
+                hours={selectedBusiness?.hours}
+                location_disp={selectedBusiness?.location?.display_address}
+                url={selectedBusiness?.url}
+                phone={selectedBusiness?.phone}
+                photosArr={selectedBusiness?.photos}
+                coordinates={selectedBusiness?.coordinates}
+                showReview={showReview}
+                setIdReviewData={setIdReviewData}
+                setShowReview={setShowReview}
+              />
+
+              <div className={showReview ? "show" : "hide"}>
+                <ItemReview
+                  url={selectedBusiness?.url}
+                  revPos_lang={reviewData?.possible_languages}
+                  revArr={reviewData?.reviews}
+                  revTotal={reviewData.total}
+                />
+              </div>
+              {selectedBusiness?.coordinates && (
+                <div className={showReview ? "hide" : "show"}>
+                  <MapPageItem region={selectedBusiness?.coordinates} />
+                </div>
+              )}
             </div>
-          </div>
-        </Route>
-      </Switch>
+          </Route>
+        </Switch>
+      </div>
+
       <Footer />
     </div>
   );
