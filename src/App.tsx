@@ -172,7 +172,7 @@ export function getTotalPages(totalItem: number, itemByPage: number): number {
 
 function App() {
   const DEFAULT_VALUE = null;
-  const DEFAULT_STRING = "default_string";
+  const DEFAULT_STRING = "DEFAULT";
   const DEFAULT_NUMBER = 0;
   const DEFAULT_CURRENT_PAGE = 1;
   const ITEMS_BY_PAGE = 10;
@@ -352,14 +352,6 @@ function App() {
     setMarkerResArr([...coorResArr]);
     setBusinessPage([...businessPageArr]);
   }, [itemsPage.min, businesses.businesses]);
-
-  /**
-   * set searchInputs values and check if where field is not filled.
-   * @param objectIn Object with business and where input fields.
-   */
-  const updateSearchInputs = (objectIn: InputType): void => {
-    setSearchInputs({ ...searchInputs, business: objectIn.business, where: objectIn.where });
-  };
 
   /**
    * increment PageInfo Object, key currentPage value
@@ -547,7 +539,7 @@ function App() {
       },
       (err: StorageError) => console.error(err),
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => setAvatarUrl(url));
+        getDownloadURL(uploadTask.snapshot.ref).then((url: string) => setAvatarUrl(url));
       },
     );
   };
@@ -624,7 +616,8 @@ function App() {
         <Route exact path="/">
           <div id="home-container">
             <Header
-              updateSearchInputs={updateSearchInputs}
+              searchInputs={searchInputs}
+              setSearchInputs={setSearchInputs}
               setFilterValue={setFilterValue}
               filterVal={filterValue}
               password={currentUsersId.password}

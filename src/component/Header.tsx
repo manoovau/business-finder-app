@@ -4,35 +4,47 @@ import { InputType } from "../interface";
 import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
 
-type updateSearchInputsType = {
+type Props = {
   filterVal: FilterInputType;
   password: string | null;
   avatar: string;
-  updateSearchInputs: (objectIn: InputType) => void;
+  searchInputs: InputType;
+  setSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   logOut: () => void;
   isErrorLocation: boolean;
   setIsErrorLocation: (typo: boolean) => void;
 };
 
-type priceStrType = {
+type attrType = {
   base: string;
-  prc1: number | string;
-  prc2: number | string;
-  prc3: number | string;
-  prc4: number | string;
+  hotNew: attrFilterInType;
+  requestQuote: attrFilterInType;
+  reservation: attrFilterInType;
+  deals: attrFilterInType;
+  genderNeutral: attrFilterInType;
+  openAll: attrFilterInType;
+  wheelchair: attrFilterInType;
+  endBase: string;
 };
 
-type attrStrType = {
+type priceType = {
   base: string;
-  hotNew: string;
-  requestQuote: string;
-  reservation: string;
-  deals: string;
-  genderNeutral: string;
-  openAll: string;
-  wheelchair: string;
-  endBase: string;
+  prc1: attrFilterInType;
+  prc2: attrFilterInType;
+  prc3: attrFilterInType;
+  prc4: attrFilterInType;
+};
+
+type attrFilterInType = {
+  isChecked: boolean;
+  str: number | string;
+};
+
+const DEFAULT_VALUES = {
+  NULL: null,
+  INPUT_SELECT: "DEFAULT",
+  EMPTY_STRING: "",
 };
 
 /**
@@ -40,21 +52,21 @@ type attrStrType = {
  * @param objectInput Input values Object
  * @returns parameter filter string
  */
-const getParameterFilterStr = (objectInput: priceStrType | attrStrType): string => {
-  const PriceArr = Object.values(objectInput);
-  let htmlStr = ``;
+const getParameterFilterStr = (objectInput: attrType | priceType): string => {
+  const valArr = Object.values(objectInput);
+  let htmlStr = DEFAULT_VALUES.EMPTY_STRING;
 
-  PriceArr.forEach((item: number | string, index: number) => {
+  valArr.forEach((item: attrFilterInType | string, index: number) => {
     if (index === 0 || item === `"`) {
       htmlStr += `${item}`;
     } else {
-      if (item !== "") htmlStr += `,${item}`;
+      if (typeof item !== "string" && item.str !== DEFAULT_VALUES.EMPTY_STRING)
+        htmlStr += `,${item.str}`;
     }
   });
 
   htmlStr = htmlStr.replace(/&price=,/g, "&price=");
   htmlStr = htmlStr.replace(/&attributes=",/g, `&attributes="`);
-
   return htmlStr;
 };
 
@@ -79,21 +91,30 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
   return `0${dateArr[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
 };
 
-export function Header(props: updateSearchInputsType): JSX.Element {
-  const { updateSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
+export function Header(props: Props): JSX.Element {
+  const { setSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
 
-  const DEFAULT_VALUE = null;
-  const [businessInput, setBusinessInput] = useState<string>("");
-  const [whereInput, setWhereInput] = useState<string>("");
-  const [geolocationInput, setGeolocationInput] = useState<string>("");
+  const [businessInput, setBusinessInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
+  const [whereInput, setWhereInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
+  const [geolocationInput, setGeolocationInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [business] = useDebounce(businessInput, 500);
   const [where] = useDebounce(whereInput, 500);
   const [currentGeolocation] = useDebounce(geolocationInput, 500);
-  const [searchValues, setSearchValues] = useState<InputType>({
-    business: DEFAULT_VALUE,
-    where: DEFAULT_VALUE,
-  });
-  const [openInput, setOpenInput] = useState<string>("DEFAULT");
+
+  const OPEN_SELECT = {
+    DEFAULT: DEFAULT_VALUES.INPUT_SELECT,
+    OPEN_AT: "OpenAt",
+    OPEN_NOW: "OpenNow",
+  };
+
+  const SORT_BY_SELECT = {
+    DEFAULT: DEFAULT_VALUES.INPUT_SELECT,
+    RATING: "rating",
+    REVIEW_COUNT: "review_count",
+    DISTANCE: "distance",
+  };
+
+  const [openInput, setOpenInput] = useState<string>(DEFAULT_VALUES.INPUT_SELECT);
   const [openAtHour, setopenAtHour] = useState<string>("00:00");
   // open_at YELP API attribute only supports 2 days after or before the current day
   const LIMIT_DAY = 2;
@@ -105,54 +126,71 @@ export function Header(props: updateSearchInputsType): JSX.Element {
     `${new Date().getFullYear()}/${new Date().getMonth() + 1}/${new Date().getDate()}`,
   );
 
-  const [price1, setPrice1] = useState<boolean>(false);
-  const [price2, setPrice2] = useState<boolean>(false);
-  const [price3, setPrice3] = useState<boolean>(false);
-  const [price4, setPrice4] = useState<boolean>(false);
-  const [priceStr, setPriceStr] = useState<priceStrType>({
-    base: `&price=`,
-    prc1: "",
-    prc2: "",
-    prc3: "",
-    prc4: "",
+  const PRICE_OPTIONS_STR = {
+    base: "&price=",
+    prc1: 1,
+    prc2: 2,
+    prc3: 3,
+    prc4: 4,
+  };
+
+  const [priceIn, setpriceIn] = useState<priceType>({
+    base: PRICE_OPTIONS_STR.base,
+    prc1: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    prc2: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    prc3: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    prc4: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
   });
 
-  const [hotNew, setHotNew] = useState<boolean>(false);
-  const [requestQuote, setRequestQuote] = useState<boolean>(false);
-  const [reservation, setReservation] = useState<boolean>(false);
-  const [deals, setDeals] = useState<boolean>(false);
-  const [genderNeutral, setGenderNeutral] = useState<boolean>(false);
-  const [openAll, setOpenAll] = useState<boolean>(false);
-  const [wheelchair, setWheelchair] = useState<boolean>(false);
+  const [sortByInput, setSortByInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
 
-  const [sortByInput, setSortByInput] = useState<string>(``);
-  const [attributesInput, setAttributesInput] = useState<attrStrType>({
+  const FILTER_VALUES_TRUE = {
+    hotNew: "hot_and_new",
+    deals: "deals",
+    wheelchair: "wheelchair_accessible",
+    requestQuote: "request_a_quote",
+    reservation: "reservation",
+    genderNeutral: "gender_neutral_restrooms",
+    openAll: "open_to_all",
+  };
+
+  const [attributesIn, setAttributesIn] = useState<attrType>({
     base: `&attributes="`,
-    hotNew: "",
-    requestQuote: "",
-    reservation: "",
-    deals: "",
-    genderNeutral: "",
-    openAll: "",
-    wheelchair: "",
+    hotNew: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    deals: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    wheelchair: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    requestQuote: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    reservation: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    genderNeutral: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
+    openAll: { isChecked: false, str: DEFAULT_VALUES.EMPTY_STRING },
     endBase: `"`,
   });
 
   const [whereInPlaceholder, setWhereInPlaceholder] = useState<string>("Where...");
 
+  const LABEL_TITLE = {
+    hotNew: "Popular businesses which recently joined Yelp",
+    deals: "Businesses offering Yelp Deals on their profile page",
+    wheelchair: "Businesses which are Wheelchair Accessible",
+    requestQuote: "Businesses which actively reply to Request a Quote inquiries",
+    reservation: "Businesses with Yelp Reservations bookings enabled on their profile page",
+    genderNeutral: "Businesses which provide gender neutral restrooms",
+    openAll: "Businesses which are Open To All",
+  };
+
   /**
-   * request current location and set latitud and longitud in where value
+   * get current location and set latitud and longitud in where value
    */
   const getCurrentLocation = () => {
-    setWhereInput("");
-    setSearchValues({ ...searchValues, where: DEFAULT_VALUE });
+    setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
+    setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL });
     navigator.geolocation.getCurrentPosition(
-      function (position) {
+      (position: GeolocationPosition) => {
         setGeolocationInput(
           `&latitude=${position.coords.latitude}&longitude=${position.coords.longitude}`,
         );
       },
-      function (error) {
+      (error: GeolocationPositionError) => {
         console.error(error);
       },
       {
@@ -162,132 +200,219 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   };
 
   useEffect(
-    () => (price1 ? setPriceStr({ ...priceStr, prc1: 1 }) : setPriceStr({ ...priceStr, prc1: "" })),
-    [price1],
-  );
-
-  useEffect(
-    () => (price2 ? setPriceStr({ ...priceStr, prc2: 2 }) : setPriceStr({ ...priceStr, prc2: "" })),
-    [price2],
-  );
-
-  useEffect(
-    () => (price3 ? setPriceStr({ ...priceStr, prc3: 3 }) : setPriceStr({ ...priceStr, prc3: "" })),
-    [price3],
-  );
-
-  useEffect(
-    () => (price4 ? setPriceStr({ ...priceStr, prc4: 4 }) : setPriceStr({ ...priceStr, prc4: "" })),
-    [price4],
+    () =>
+      priceIn.prc1.isChecked
+        ? setpriceIn({
+            ...priceIn,
+            prc1: { ...priceIn.prc1, str: PRICE_OPTIONS_STR.prc1 },
+          })
+        : setpriceIn({
+            ...priceIn,
+            prc1: { ...priceIn.prc1, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [priceIn.prc1.isChecked],
   );
 
   useEffect(
     () =>
-      price1 || price2 || price3 || price4
+      priceIn.prc2.isChecked
+        ? setpriceIn({
+            ...priceIn,
+            prc2: { ...priceIn.prc2, str: PRICE_OPTIONS_STR.prc2 },
+          })
+        : setpriceIn({
+            ...priceIn,
+            prc2: { ...priceIn.prc2, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [priceIn.prc2.isChecked],
+  );
+
+  useEffect(
+    () =>
+      priceIn.prc3.isChecked
+        ? setpriceIn({
+            ...priceIn,
+            prc3: { ...priceIn.prc3, str: PRICE_OPTIONS_STR.prc3 },
+          })
+        : setpriceIn({
+            ...priceIn,
+            prc3: { ...priceIn.prc3, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [priceIn.prc3.isChecked],
+  );
+
+  useEffect(
+    () =>
+      priceIn.prc4.isChecked
+        ? setpriceIn({
+            ...priceIn,
+            prc4: { ...priceIn.prc4, str: PRICE_OPTIONS_STR.prc4 },
+          })
+        : setpriceIn({
+            ...priceIn,
+            prc4: { ...priceIn.prc4, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [priceIn.prc4.isChecked],
+  );
+
+  useEffect(
+    () =>
+      priceIn.prc1.isChecked ||
+      priceIn.prc2.isChecked ||
+      priceIn.prc3.isChecked ||
+      priceIn.prc4.isChecked
         ? setFilterValue({
             ...props.filterVal,
-            priceFilter: getParameterFilterStr(priceStr),
+            priceFilter: getParameterFilterStr(priceIn),
           })
         : setFilterValue({
             ...props.filterVal,
-            priceFilter: ``,
+            priceFilter: DEFAULT_VALUES.EMPTY_STRING,
           }),
-    [priceStr],
+    [priceIn],
   );
 
   useEffect(
     () =>
-      hotNew
-        ? setAttributesInput({ ...attributesInput, hotNew: "hot_and_new" })
-        : setAttributesInput({ ...attributesInput, hotNew: "" }),
-    [hotNew],
+      attributesIn.hotNew.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            hotNew: { ...attributesIn.hotNew, str: FILTER_VALUES_TRUE.hotNew },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            hotNew: { ...attributesIn.hotNew, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.hotNew.isChecked],
   );
 
   useEffect(
     () =>
-      requestQuote
-        ? setAttributesInput({ ...attributesInput, requestQuote: "request_a_quote" })
-        : setAttributesInput({ ...attributesInput, requestQuote: "" }),
-    [requestQuote],
+      attributesIn.deals.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            deals: { ...attributesIn.deals, str: FILTER_VALUES_TRUE.deals },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            deals: { ...attributesIn.deals, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.deals.isChecked],
   );
 
   useEffect(
     () =>
-      reservation
-        ? setAttributesInput({ ...attributesInput, reservation: "reservation" })
-        : setAttributesInput({ ...attributesInput, reservation: "" }),
-    [reservation],
+      attributesIn.wheelchair.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            wheelchair: { ...attributesIn.wheelchair, str: FILTER_VALUES_TRUE.wheelchair },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            wheelchair: { ...attributesIn.wheelchair, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.wheelchair.isChecked],
   );
 
   useEffect(
     () =>
-      deals
-        ? setAttributesInput({ ...attributesInput, deals: "deals" })
-        : setAttributesInput({ ...attributesInput, deals: "" }),
-    [deals],
+      attributesIn.requestQuote.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            requestQuote: { ...attributesIn.requestQuote, str: FILTER_VALUES_TRUE.requestQuote },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            requestQuote: { ...attributesIn.requestQuote, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.requestQuote.isChecked],
   );
 
   useEffect(
     () =>
-      genderNeutral
-        ? setAttributesInput({ ...attributesInput, genderNeutral: "gender_neutral_restrooms" })
-        : setAttributesInput({ ...attributesInput, genderNeutral: "" }),
-    [genderNeutral],
+      attributesIn.reservation.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            reservation: { ...attributesIn.reservation, str: FILTER_VALUES_TRUE.reservation },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            reservation: { ...attributesIn.reservation, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.reservation.isChecked],
   );
 
   useEffect(
     () =>
-      openAll
-        ? setAttributesInput({ ...attributesInput, openAll: "open_to_all" })
-        : setAttributesInput({ ...attributesInput, openAll: "" }),
-    [openAll],
+      attributesIn.genderNeutral.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            genderNeutral: { ...attributesIn.genderNeutral, str: FILTER_VALUES_TRUE.genderNeutral },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            genderNeutral: { ...attributesIn.genderNeutral, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.genderNeutral.isChecked],
   );
 
   useEffect(
     () =>
-      wheelchair
-        ? setAttributesInput({ ...attributesInput, wheelchair: "wheelchair_accessible" })
-        : setAttributesInput({ ...attributesInput, wheelchair: "" }),
-    [wheelchair],
+      attributesIn.openAll.isChecked
+        ? setAttributesIn({
+            ...attributesIn,
+            openAll: { ...attributesIn.openAll, str: FILTER_VALUES_TRUE.openAll },
+          })
+        : setAttributesIn({
+            ...attributesIn,
+            openAll: { ...attributesIn.openAll, str: DEFAULT_VALUES.EMPTY_STRING },
+          }),
+    [attributesIn.openAll.isChecked],
   );
 
   useEffect(
     () =>
-      hotNew || requestQuote || reservation || deals || genderNeutral || openAll || wheelchair
+      attributesIn.hotNew.isChecked ||
+      attributesIn.deals.isChecked ||
+      attributesIn.wheelchair.isChecked ||
+      attributesIn.requestQuote.isChecked ||
+      attributesIn.reservation.isChecked ||
+      attributesIn.genderNeutral.isChecked ||
+      attributesIn.openAll.isChecked
         ? setFilterValue({
             ...props.filterVal,
-            attrFilter: getParameterFilterStr(attributesInput),
+            attrFilter: getParameterFilterStr(attributesIn),
           })
         : setFilterValue({
             ...props.filterVal,
-            attrFilter: ``,
+            attrFilter: DEFAULT_VALUES.EMPTY_STRING,
           }),
-    [attributesInput],
+    [attributesIn],
   );
 
-  useEffect(() => setSearchValues({ ...searchValues, business: business }), [business]);
+  useEffect(() => setSearchInputs({ ...props.searchInputs, business: business }), [business]);
 
   useEffect(
     () =>
       !where && !currentGeolocation
-        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
-        : setSearchValues({ ...searchValues, where: `&location=${where}` }),
+        ? setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL })
+        : setSearchInputs({ ...props.searchInputs, where: `&location=${where}` }),
     [where],
   );
 
   useEffect(
     () =>
       !where && !currentGeolocation
-        ? setSearchValues({ ...searchValues, where: DEFAULT_VALUE })
-        : setSearchValues({ ...searchValues, where: currentGeolocation }),
+        ? setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL })
+        : setSearchInputs({ ...props.searchInputs, where: currentGeolocation }),
 
     [currentGeolocation],
   );
 
   useEffect(
     () =>
-      openInput === "DEFAULT"
-        ? setFilterValue({ ...props.filterVal, openFilter: `` })
+      openInput === DEFAULT_VALUES.INPUT_SELECT
+        ? setFilterValue({ ...props.filterVal, openFilter: DEFAULT_VALUES.EMPTY_STRING })
         : setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` }),
     [openInput],
   );
@@ -302,26 +427,24 @@ export function Header(props: updateSearchInputsType): JSX.Element {
   );
 
   useEffect(() => {
-    if (sortByInput !== "")
+    if (sortByInput !== DEFAULT_VALUES.EMPTY_STRING)
       setFilterValue({ ...props.filterVal, sortByFilter: `&sort_by=${sortByInput}` });
   }, [sortByInput]);
 
   useEffect(() => {
-    if (searchValues.where !== DEFAULT_VALUE) updateSearchInputs(searchValues);
-  }, [searchValues]);
+    if (props.searchInputs.where !== DEFAULT_VALUES.NULL) setIsErrorLocation(false);
+    if (props.searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
+  }, [props.searchInputs]);
 
   useEffect(() => {
     if (props.isErrorLocation) {
-      setWhereInput("");
+      setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
       setWhereInPlaceholder("Please, fill a correct location");
+    } else {
+      setSearchInputs(props.searchInputs);
+      setWhereInPlaceholder("Where...");
     }
   }, [props.isErrorLocation]);
-
-  useEffect(() => {
-    if (searchValues.where === "") {
-      setWhereInPlaceholder("Please, fill location field.");
-    }
-  }, [searchValues.where]);
 
   return (
     <div
@@ -337,12 +460,12 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         <Link to="/profile" id="profile">
           <img
             id="img-avatar"
-            src={props.avatar !== "" ? props.avatar : "/img/nullUser.png"}
+            src={props.avatar !== DEFAULT_VALUES.EMPTY_STRING ? props.avatar : "/img/nullUser.png"}
             alt="avatar image"
           />
         </Link>
 
-        {props.password === "" ? (
+        {props.password === DEFAULT_VALUES.EMPTY_STRING ? (
           <div>
             <Link to="/login" id="login">
               <h3>{`Log In`}</h3>
@@ -372,7 +495,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
             <input
               type="text"
               id="where"
-              className={props.isErrorLocation ? "error" : ""}
+              className={props.isErrorLocation ? "error" : DEFAULT_VALUES.EMPTY_STRING}
               name="where"
               placeholder={whereInPlaceholder}
               value={whereInput}
@@ -387,8 +510,7 @@ export function Header(props: updateSearchInputsType): JSX.Element {
         </div>
         <button
           onClick={() => {
-            if (where === "") setIsErrorLocation(true);
-            updateSearchInputs(searchValues);
+            if (where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
           }}
         >
           Search
@@ -397,16 +519,16 @@ export function Header(props: updateSearchInputsType): JSX.Element {
       <div id="filter-container">
         <select
           id="select-open"
-          defaultValue={"DEFAULT"}
+          defaultValue={DEFAULT_VALUES.INPUT_SELECT}
           name="open"
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setOpenInput(e.target.value)}
         >
-          <option value="DEFAULT">Choose open option</option>
-          <option value="openNow">Open Now</option>
-          <option value="openAt">Open At</option>
+          <option value={OPEN_SELECT.DEFAULT}>Choose open option</option>
+          <option value={OPEN_SELECT.OPEN_NOW}>Open Now</option>
+          <option value={OPEN_SELECT.OPEN_AT}>Open At</option>
         </select>
       </div>
-      {openInput === "openAt" ? (
+      {openInput === OPEN_SELECT.OPEN_AT ? (
         <div id="openAt-container">
           <input
             type="time"
@@ -429,77 +551,181 @@ export function Header(props: updateSearchInputsType): JSX.Element {
           />
         </div>
       ) : (
-        DEFAULT_VALUE
+        DEFAULT_VALUES.NULL
       )}
 
       <div id="price-input-container">
-        <input type="checkbox" id="price1" value="1" onChange={() => setPrice1(!price1)} />
+        <input
+          type="checkbox"
+          id="price1"
+          value={PRICE_OPTIONS_STR.prc1}
+          onChange={() =>
+            setpriceIn({
+              ...priceIn,
+              prc1: { ...priceIn.prc1, isChecked: !priceIn.prc1.isChecked },
+            })
+          }
+        />
         <label htmlFor="price1">€</label>
-        <input type="checkbox" id="price2" value="2" onChange={() => setPrice2(!price2)} />
+        <input
+          type="checkbox"
+          id="price2"
+          value={PRICE_OPTIONS_STR.prc2}
+          onChange={() =>
+            setpriceIn({
+              ...priceIn,
+              prc2: { ...priceIn.prc2, isChecked: !priceIn.prc2.isChecked },
+            })
+          }
+        />
         <label htmlFor="price2">€€</label>
-        <input type="checkbox" id="price3" value="3" onChange={() => setPrice3(!price3)} />
+        <input
+          type="checkbox"
+          id="price3"
+          value={PRICE_OPTIONS_STR.prc3}
+          onChange={() =>
+            setpriceIn({
+              ...priceIn,
+              prc3: { ...priceIn.prc3, isChecked: !priceIn.prc3.isChecked },
+            })
+          }
+        />
         <label htmlFor="price3">€€€</label>
-        <input type="checkbox" id="price4" value="4" onChange={() => setPrice4(!price4)} />
+        <input
+          type="checkbox"
+          id="price4"
+          value={PRICE_OPTIONS_STR.prc4}
+          onChange={() =>
+            setpriceIn({
+              ...priceIn,
+              prc4: { ...priceIn.prc4, isChecked: !priceIn.prc4.isChecked },
+            })
+          }
+        />
         <label htmlFor="price4">€€€€</label>
       </div>
       <select
         id="select-sortBy"
-        defaultValue={""}
+        defaultValue={SORT_BY_SELECT.DEFAULT}
         name="sortBy"
         onChange={(e: ChangeEvent<HTMLSelectElement>) => setSortByInput(e.target.value)}
       >
-        <option value="">Sort By</option>
-        <option value="rating">Rating</option>
-        <option value="review_count">Review count</option>
-        <option value="distance">distance</option>
+        <option value={SORT_BY_SELECT.DEFAULT}>Sort By</option>
+        <option value={SORT_BY_SELECT.RATING}>Rating</option>
+        <option value={SORT_BY_SELECT.REVIEW_COUNT}>Review count</option>
+        <option value={SORT_BY_SELECT.DISTANCE}>Distance</option>
       </select>
       <div id="attributes-input-container">
         <input
           type="checkbox"
-          id="hot_and_new"
-          value="hot_and_new"
-          onChange={() => setHotNew(!hotNew)}
+          id={FILTER_VALUES_TRUE.hotNew}
+          value={FILTER_VALUES_TRUE.hotNew}
+          onChange={() =>
+            setAttributesIn({
+              ...attributesIn,
+              hotNew: { ...attributesIn.hotNew, isChecked: !attributesIn.hotNew.isChecked },
+            })
+          }
         />
-        <label htmlFor="hot_and_new">{`Hot&New`}</label>
-        <input type="checkbox" id="deals" value="deals" onChange={() => setDeals(!deals)} />
-        <label htmlFor="deals">Deals</label>
+        <label title={LABEL_TITLE.hotNew} htmlFor={FILTER_VALUES_TRUE.hotNew}>{`Hot&New`}</label>
         <input
           type="checkbox"
-          id="wheelchair_accessible"
-          value="wheelchair_accessible"
-          onChange={() => setWheelchair(!wheelchair)}
+          id={FILTER_VALUES_TRUE.deals}
+          value={FILTER_VALUES_TRUE.deals}
+          onChange={() =>
+            setAttributesIn({
+              ...attributesIn,
+              deals: { ...attributesIn.deals, isChecked: !attributesIn.deals.isChecked },
+            })
+          }
         />
-        <label htmlFor="wheelchair_accessible">Wheelchair</label>
+        <label title={LABEL_TITLE.deals} htmlFor={FILTER_VALUES_TRUE.deals}>
+          Deals
+        </label>
+        <input
+          type="checkbox"
+          id={FILTER_VALUES_TRUE.wheelchair}
+          value={FILTER_VALUES_TRUE.wheelchair}
+          onChange={() =>
+            setAttributesIn({
+              ...attributesIn,
+              wheelchair: {
+                ...attributesIn.wheelchair,
+                isChecked: !attributesIn.wheelchair.isChecked,
+              },
+            })
+          }
+        />
+        <label title={LABEL_TITLE.wheelchair} htmlFor={FILTER_VALUES_TRUE.wheelchair}>
+          Wheelchair
+        </label>
         <div id="att-in-big-screen">
           <input
             type="checkbox"
-            id="request_a_quote"
-            value="request_a_quote"
-            onChange={() => setRequestQuote(!requestQuote)}
+            id={FILTER_VALUES_TRUE.requestQuote}
+            value={FILTER_VALUES_TRUE.requestQuote}
+            onChange={() =>
+              setAttributesIn({
+                ...attributesIn,
+                requestQuote: {
+                  ...attributesIn.requestQuote,
+                  isChecked: !attributesIn.requestQuote.isChecked,
+                },
+              })
+            }
           />
-          <label htmlFor="request_a_quote">Quote</label>
+          <label title={LABEL_TITLE.requestQuote} htmlFor={FILTER_VALUES_TRUE.requestQuote}>
+            Quote
+          </label>
           <input
             type="checkbox"
-            id="reservation"
-            value="reservation"
-            onChange={() => setReservation(!reservation)}
+            id={FILTER_VALUES_TRUE.reservation}
+            value={FILTER_VALUES_TRUE.reservation}
+            onChange={() =>
+              setAttributesIn({
+                ...attributesIn,
+                reservation: {
+                  ...attributesIn.reservation,
+                  isChecked: !attributesIn.reservation.isChecked,
+                },
+              })
+            }
           />
-          <label htmlFor="reservation">Reservation</label>
+          <label title={LABEL_TITLE.reservation} htmlFor={FILTER_VALUES_TRUE.reservation}>
+            Reservation
+          </label>
 
           <input
             type="checkbox"
-            id="gender_neutral_restrooms"
-            value="gender_neutral_restrooms"
-            onChange={() => setGenderNeutral(!genderNeutral)}
+            id={FILTER_VALUES_TRUE.genderNeutral}
+            value={FILTER_VALUES_TRUE.genderNeutral}
+            onChange={() =>
+              setAttributesIn({
+                ...attributesIn,
+                genderNeutral: {
+                  ...attributesIn.genderNeutral,
+                  isChecked: !attributesIn.genderNeutral.isChecked,
+                },
+              })
+            }
           />
-          <label htmlFor="gender_neutral_restrooms">Gender Neutral</label>
+          <label title={LABEL_TITLE.genderNeutral} htmlFor={FILTER_VALUES_TRUE.genderNeutral}>
+            Gender Neutral
+          </label>
           <input
             type="checkbox"
-            id="open_to_all"
-            value="open_to_all"
-            onChange={() => setOpenAll(!openAll)}
+            id={FILTER_VALUES_TRUE.openAll}
+            value={FILTER_VALUES_TRUE.openAll}
+            onChange={() =>
+              setAttributesIn({
+                ...attributesIn,
+                openAll: { ...attributesIn.openAll, isChecked: !attributesIn.openAll.isChecked },
+              })
+            }
           />
-          <label htmlFor="open_to_all">open to all</label>
+          <label title={LABEL_TITLE.openAll} htmlFor={FILTER_VALUES_TRUE.openAll}>
+            open to all
+          </label>
         </div>
       </div>
     </div>
