@@ -1,8 +1,9 @@
-import React, { ChangeEvent, useState, useEffect } from "react";
+import React, { ChangeEvent, useState, useEffect, useContext } from "react";
 import { useDebounce } from "use-debounce/lib";
 import { InputType } from "../interface";
 import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
+import { UserContext } from "../context/UserContext";
 
 type Props = {
   filterVal: FilterInputType;
@@ -11,7 +12,6 @@ type Props = {
   searchInputs: InputType;
   setSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
-  logOut: () => void;
   isErrorLocation: boolean;
   setIsErrorLocation: (typo: boolean) => void;
 };
@@ -92,7 +92,9 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 };
 
 export function Header(props: Props): JSX.Element {
-  const { setSearchInputs, setFilterValue, logOut, setIsErrorLocation } = props;
+  const { setSearchInputs, setFilterValue, setIsErrorLocation } = props;
+
+  const { logOut } = useContext(UserContext);
 
   const [businessInput, setBusinessInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [whereInput, setWhereInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);

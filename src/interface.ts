@@ -1,3 +1,11 @@
+export interface userLocalType {
+  id: string;
+  username: string;
+  password: string;
+  email: string;
+  avatar: string;
+}
+
 export interface MapPageChildrenType {
   region?: CenterType;
   markers?: MarkerType[];

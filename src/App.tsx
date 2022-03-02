@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState, FormEvent } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./App.css";
 import {
   Header,
@@ -10,6 +10,9 @@ import {
   ItemReview,
   Pagination,
   MapPageItem,
+  ProfileContainer,
+  LoginPage,
+  RegisterPage,
 } from "./component/index";
 import {
   InputType,
@@ -23,29 +26,7 @@ import {
 } from "./interface";
 import { URL_BASE, BEARER } from "./authentication/yelp-api/index";
 import { Switch, Route, Link, Redirect } from "react-router-dom";
-
-import {
-  CollectionReference,
-  DocumentData,
-  QueryDocumentSnapshot,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  QuerySnapshot,
-} from "firebase/firestore";
-
-import { db, storage } from "./firebase-config";
-
-import {
-  getDownloadURL,
-  ref,
-  StorageError,
-  uploadBytesResumable,
-  UploadTaskSnapshot,
-} from "firebase/storage";
+import { UserContext } from "./context/UserContext";
 
 const requestHeaders: HeadersInit = {
   Authorization: BEARER,
@@ -69,22 +50,6 @@ type itemsPageType = {
   max: number;
 };
 
-type userLocalType = {
-  id: string;
-  username: string;
-  password: string;
-  email: string;
-  avatar: string;
-};
-
-const userLocalInit = {
-  id: "",
-  username: "",
-  password: "",
-  email: "",
-  avatar: "",
-};
-
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
@@ -106,19 +71,6 @@ const fetchYELP = async (
 };
 
 /**
- * get data from firebase
- * @param usersCollecRef firebase collection
- * @returns users firebase response
- */
-const getUsers = async (
-  usersCollecRef: CollectionReference<DocumentData>,
-): Promise<QuerySnapshot<DocumentData>> => {
-  const data = await getDocs(usersCollecRef);
-
-  return data;
-};
-
-/**
  * get data from YELP APi
  * @param url fetch YELP API url
  * @returns YELP API response or void
@@ -130,20 +82,6 @@ export const fetchYELPAsyncFunc = async (
     return await fetchYELP(url);
   } catch (err: unknown) {
     return { error: { ok: false, description: err } };
-  }
-};
-
-/**
- * get users list from firebase
- * @returns users firebase array response
- */
-export const getUsersAsyncFunc = async (
-  collectRef: CollectionReference<DocumentData>,
-): Promise<void | QuerySnapshot<DocumentData>> => {
-  try {
-    return await getUsers(collectRef);
-  } catch (err: unknown) {
-    console.error(err);
   }
 };
 
@@ -239,26 +177,7 @@ function App() {
 
   const coorResArr: MarkerType[] = [];
 
-  const [user, setUser] = useState<string>("");
-  const [userInPlaceholder, setUserInPlaceholder] = useState<string>("username");
-  const [isUserInError, setIsUserInError] = useState<boolean>(false);
-  const [password, setPassword] = useState<string>("");
-  const [pwInPlaceholder, setPwInPlaceholder] = useState<string>("password");
-  const [isPwInError, setIsPwInError] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
-  const [emailInPlaceholder, setEmailInPlaceholder] = useState<string>("email");
-  const [isEmailInError, setIsEmailInError] = useState<boolean>(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
-  const [registerCount, setRegisterCount] = useState<number>(0);
-  const [currentPw, setCurrentPw] = useState<string>("");
-  const [currentPwPlaceholder, setCurrentPwPlaceholder] = useState<string>("Fill current password");
-  const [isCurrentPwError, setIsCurrentPwError] = useState<boolean>(false);
-  const [newPw1, setNewPw1] = useState<string>("");
-  const [newPw1Placeholder, setNewPw1Placeholder] = useState<string>("Fill new password");
-  const [isNewPwPw1Error, setIsNewPwPw1Error] = useState<boolean>(false);
-  const [newPw2, setNewPw2] = useState<string>("");
-  const [newPw2Placeholder, setNewPw2Placeholder] = useState<string>("Repeat new password");
-  const [isDelConf, setIsDelConf] = useState<boolean>(false);
+  const { currentUsersId, userLocalInit } = useContext(UserContext);
 
   useEffect(
     () =>
@@ -381,236 +300,6 @@ function App() {
     });
   };
 
-  /**
-   * create user inside users firebase collection
-   */
-  const createUser = async (
-    user: string,
-    password: string,
-    email: string,
-    avatar: string,
-  ): Promise<void> => {
-    await addDoc(usersCollecRef, {
-      email: email,
-      password: password,
-      username: user,
-      avatar: avatar,
-    });
-  };
-
-  /**
-   * update password field inside users firebase collection
-   */
-  const updateUser = async (pw: string): Promise<void> => {
-    const userDoc = doc(db, "users", currentUsersId.id);
-    await updateDoc(userDoc, { password: pw });
-  };
-
-  /**
-   * delete user inside firebase collection
-   */
-  const deleteUser = async (): Promise<void> => {
-    const userDoc = doc(db, "users", currentUsersId.id);
-    await deleteDoc(userDoc);
-    logOut();
-  };
-
-  /**
-   * identify errors inside login input values and allow to access user account
-   */
-  const loginUser = (): void => {
-    setIsUserInError(false);
-    setIsPwInError(false);
-
-    if (!password) {
-      setPwInPlaceholder("password is empty");
-      setIsPwInError(true);
-    }
-    if (!user) {
-      setUserInPlaceholder("username is empty");
-      setIsUserInError(true);
-    } else {
-      const usernameFilter = usersLocal.filter((item: userLocalType) => item.username === user);
-      if (usernameFilter.length === 0) {
-        setUserInPlaceholder("username is not correct");
-        setIsUserInError(true);
-        setUser("");
-      } else if (usernameFilter.length > 0 && usernameFilter[0].password === password) {
-        setCurrentUsersId(usernameFilter[0]);
-        setIsUserInError(false);
-      } else if (usernameFilter.length > 0 && usernameFilter[0].password !== password) {
-        setIsPwInError(true);
-        setPwInPlaceholder("password is not correct");
-        setPassword("");
-        setCurrentUsersId(userLocalInit);
-      }
-    }
-  };
-
-  /**
-   * identify errors inside register input values and store correct user registration information
-   */
-  const registerUser = (): void => {
-    setIsUserInError(false);
-    setIsPwInError(false);
-    setIsEmailInError(false);
-
-    if (!password) {
-      setIsPwInError(true);
-      setPwInPlaceholder("password is empty");
-    }
-
-    if (!user) {
-      setUserInPlaceholder("username is empty");
-      setIsUserInError(true);
-    }
-    if (!email) {
-      setEmailInPlaceholder("email is empty");
-      setIsEmailInError(true);
-    } else {
-      const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
-      if (checkEmailInput.length > 0) {
-        setEmailInPlaceholder("You are register");
-
-        setIsEmailInError(true);
-        setEmail("");
-      } else {
-        const checkUsernameInput = usersLocal.filter(
-          (item: userLocalType) => item.username === user,
-        );
-        if (checkUsernameInput.length > 0) {
-          setUser("");
-          setUserInPlaceholder("Please, use other username");
-          setIsUserInError(true);
-        }
-      }
-
-      if (user && password && email)
-        setCurrentUsersId({
-          ...currentUsersId,
-          username: user,
-          password: password,
-          email: email,
-          avatar: avatarUrl,
-        });
-    }
-  };
-
-  /**
-   * identify errors inside change password inputs and replace old password with new password
-   */
-  const updatePw = (): void => {
-    if (currentPw !== currentUsersId.password) {
-      setIsCurrentPwError(true);
-      setCurrentPwPlaceholder("Password is not correct");
-    } else {
-      setIsCurrentPwError(false);
-      setCurrentPwPlaceholder("Fill current password");
-      if (newPw1 !== newPw2) {
-        setIsNewPwPw1Error(true);
-        setNewPw1Placeholder("New Password is not equal");
-        setNewPw2Placeholder("");
-      } else {
-        setIsNewPwPw1Error(false);
-        setCurrentPw("");
-
-        setCurrentUsersId({ ...currentUsersId, password: newPw1 });
-        setNewPw1Placeholder("Fill new password");
-        setNewPw2Placeholder("Repeat new password");
-
-        updateUser(newPw1);
-      }
-    }
-  };
-
-  /**
-   * store local file in firebase database
-   * @param file local file
-   */
-  const uploadFile = (file: File | undefined): void => {
-    if (!file) return;
-
-    const storageRef = ref(storage, `/files/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot: UploadTaskSnapshot) => {
-        setProgress(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-      },
-      (err: StorageError) => console.error(err),
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((url: string) => setAvatarUrl(url));
-      },
-    );
-  };
-
-  /**
-   * extract file input and run firebase upload function
-   * @param e file input value
-   */
-  const formHandler = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    const target = e.target as HTMLInputElement;
-    if (target.files !== null) {
-      const file = target.files[0];
-      uploadFile(file);
-    }
-  };
-
-  const [users, setUsers] = useState<[] | QueryDocumentSnapshot<DocumentData>[]>([]);
-  const [currentUsersId, setCurrentUsersId] = useState<userLocalType>(userLocalInit);
-  const usersCollecRef = collection(db, "users");
-  const usersLocal: userLocalType[] = [];
-
-  const [addImg, setAddImg] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-
-  useEffect(() => {
-    if (user && password && email) {
-      createUser(
-        currentUsersId.username,
-        currentUsersId.password,
-        currentUsersId.email,
-        currentUsersId.avatar,
-      );
-
-      setRegisterCount((prev) => prev + 1);
-    }
-  }, [currentUsersId]);
-
-  useEffect(() => {
-    if (currentUsersId.id === "" && currentUsersId.username !== "") {
-      const usernameFilter: userLocalType[] = usersLocal.filter(
-        (item: userLocalType) => item.username === user,
-      );
-
-      if (usernameFilter[0] !== undefined)
-        setCurrentUsersId({ ...currentUsersId, id: usernameFilter[0].id });
-    }
-  }, [usersLocal]);
-
-  useEffect(() => {
-    const getUsersData = async (): Promise<void> => {
-      const resp = await getUsersAsyncFunc(usersCollecRef);
-      if (resp !== undefined) setUsers(resp.docs);
-    };
-    getUsersData();
-  }, [user, registerCount]);
-
-  if (users.length > 0)
-    users.map((doc: DocumentData) => usersLocal.push({ ...doc.data(), id: doc.id }));
-
-  /**
-   * set initial values for user, password, email amd currentUsersId
-   */
-  const logOut = (): void => {
-    setUser("");
-    setPassword("");
-    setEmail("");
-    setCurrentUsersId(userLocalInit);
-  };
-
   return (
     <div className="App">
       <div id="content-container">
@@ -624,7 +313,6 @@ function App() {
                 filterVal={filterValue}
                 password={currentUsersId.password}
                 avatar={currentUsersId.avatar}
-                logOut={logOut}
                 isErrorLocation={isErrorLocation}
                 setIsErrorLocation={setIsErrorLocation}
               />
@@ -659,140 +347,13 @@ function App() {
             </div>
           </Route>
           <Route path="/login">
-            {currentUsersId !== userLocalInit ? (
-              <Redirect to="/" />
-            ) : (
-              <div>
-                <Link to="/">
-                  <h3>{`< Go Back `}</h3>
-                </Link>
-                <input
-                  id="username-login"
-                  type="text"
-                  className={isUserInError ? "error" : ""}
-                  value={user}
-                  placeholder={userInPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
-                  required
-                />
-                <input
-                  id="password-login"
-                  type="text"
-                  className={isPwInError ? "error" : ""}
-                  value={password}
-                  placeholder={pwInPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
-                  required
-                />
-                <button onClick={loginUser}>Login</button>
-              </div>
-            )}
+            {currentUsersId !== userLocalInit ? <Redirect to="/" /> : <LoginPage />}
           </Route>
           <Route path="/register">
-            {currentUsersId !== userLocalInit ? (
-              <Redirect to="/" />
-            ) : (
-              <div>
-                <Link to="/">
-                  <h3>{`< Go Back `}</h3>
-                </Link>
-                <input
-                  id="username-register"
-                  type="text"
-                  className={isUserInError ? "error" : ""}
-                  value={user}
-                  placeholder={userInPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
-                />
-                <input
-                  id="password-register"
-                  type="text"
-                  className={isPwInError ? "error" : ""}
-                  value={password}
-                  placeholder={pwInPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
-                />
-                <input
-                  id="email-register"
-                  type="text"
-                  className={isEmailInError ? "error" : ""}
-                  value={email}
-                  placeholder={emailInPlaceholder}
-                  onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
-                />
-                <div id="add-img" onClick={() => setAddImg(!addImg)}>
-                  <form onSubmit={formHandler}>
-                    <input type="file" className="input" />
-                    <button type="submit">Upload</button>
-                  </form>
-                  <hr />
-                  <h2>Uploading {progress}%</h2>
-                </div>
-                <button onClick={registerUser}>Register</button>
-              </div>
-            )}
+            {currentUsersId !== userLocalInit ? <Redirect to="/" /> : <RegisterPage />}
           </Route>
           <Route path="/profile">
-            {currentUsersId === userLocalInit ? (
-              <Redirect to="/" />
-            ) : (
-              <div id="profile-contaimer">
-                <div id="change-pw-container">
-                  <Link to="/">
-                    <h3>{`< Go Back `}</h3>
-                  </Link>
-                  <input
-                    id="current-password"
-                    type="text"
-                    className={isCurrentPwError ? "error" : ""}
-                    value={currentPw}
-                    placeholder={currentPwPlaceholder}
-                    onChange={(e: ChangeEvent<HTMLInputElement>): void =>
-                      setCurrentPw(e.target.value)
-                    }
-                    required
-                  />
-                  <input
-                    id="new-password"
-                    type="text"
-                    className={isNewPwPw1Error ? "error" : ""}
-                    value={newPw1}
-                    placeholder={newPw1Placeholder}
-                    onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
-                    required
-                  />
-                  <input
-                    id="new-password"
-                    type="text"
-                    className={isNewPwPw1Error ? "error" : ""}
-                    value={newPw2}
-                    placeholder={newPw2Placeholder}
-                    onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}
-                    required
-                  />
-                  <Link to="/">
-                    <button onClick={updatePw}>Change Password</button>
-                  </Link>
-                </div>
-                <div id="remove-account-container">
-                  <button
-                    className={isDelConf ? "hide" : "show"}
-                    onClick={() => setIsDelConf(!isDelConf)}
-                  >
-                    REMOVE ACCOUNT
-                  </button>
-                  <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
-                    <p>Are you sure ?</p>
-                    <Link to="/">
-                      <button onClick={deleteUser}>yes</button>
-                    </Link>
-                    <Link to="/">
-                      <button>no</button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
+            {currentUsersId === userLocalInit ? <Redirect to="/" /> : <ProfileContainer />}
           </Route>
           <Route path={`/${selectedBusiness.id}`}>
             <div>
