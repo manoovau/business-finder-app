@@ -7,8 +7,6 @@ import { UserContext } from "../context/UserContext";
 
 type Props = {
   filterVal: FilterInputType;
-  password: string | null;
-  avatar: string;
   searchInputs: InputType;
   setSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
@@ -94,7 +92,7 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
 export function Header(props: Props): JSX.Element {
   const { setSearchInputs, setFilterValue, setIsErrorLocation } = props;
 
-  const { logOut } = useContext(UserContext);
+  const { currentUsersId, logOut } = useContext(UserContext);
 
   const [businessInput, setBusinessInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [whereInput, setWhereInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
@@ -462,12 +460,16 @@ export function Header(props: Props): JSX.Element {
         <Link to="/profile" id="profile">
           <img
             id="img-avatar"
-            src={props.avatar !== DEFAULT_VALUES.EMPTY_STRING ? props.avatar : "/img/nullUser.png"}
+            src={
+              currentUsersId.avatar !== DEFAULT_VALUES.EMPTY_STRING
+                ? currentUsersId.avatar
+                : "/img/nullUser.png"
+            }
             alt="avatar image"
           />
         </Link>
 
-        {props.password === DEFAULT_VALUES.EMPTY_STRING ? (
+        {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
           <div>
             <Link to="/login" id="login">
               <h3>{`Log In`}</h3>

@@ -311,8 +311,6 @@ function App() {
                 setSearchInputs={setSearchInputs}
                 setFilterValue={setFilterValue}
                 filterVal={filterValue}
-                password={currentUsersId.password}
-                avatar={currentUsersId.avatar}
                 isErrorLocation={isErrorLocation}
                 setIsErrorLocation={setIsErrorLocation}
               />
