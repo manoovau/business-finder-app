@@ -3,6 +3,8 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
+const EMPTY_STRING = "";
+
 export const RegisterPage = (): JSX.Element => {
   const {
     isUserInError,
@@ -32,7 +34,7 @@ export const RegisterPage = (): JSX.Element => {
       <input
         id="username-register"
         type="text"
-        className={isUserInError ? "error" : ""}
+        className={isUserInError ? "error" : EMPTY_STRING}
         value={user}
         placeholder={userInPlaceholder}
         onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
@@ -40,7 +42,7 @@ export const RegisterPage = (): JSX.Element => {
       <input
         id="password-register"
         type="text"
-        className={isPwInError ? "error" : ""}
+        className={isPwInError ? "error" : EMPTY_STRING}
         value={password}
         placeholder={pwInPlaceholder}
         onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
@@ -48,7 +50,7 @@ export const RegisterPage = (): JSX.Element => {
       <input
         id="email-register"
         type="text"
-        className={isEmailInError ? "error" : ""}
+        className={isEmailInError ? "error" : EMPTY_STRING}
         value={email}
         placeholder={emailInPlaceholder}
         onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}

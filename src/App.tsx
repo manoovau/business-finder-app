@@ -50,6 +50,15 @@ type itemsPageType = {
   max: number;
 };
 
+const DEFAULT_VALUES = {
+  NULL: null,
+  STRING: "DEFAULT",
+  EMPTY_STRING: "",
+  NUMBER: 0,
+  UNIT: 1,
+  ITEMS_BY_PAGE: 10,
+};
+
 /**
  * fetch function. Get YELP API data from YELP API
  * @param url YELP API URL
@@ -92,8 +101,8 @@ export const fetchYELPAsyncFunc = async (
  * @returns Object with min and max items per page value
  */
 export const setMaxMinItemsPage = (page: number, itemsByPage: number): itemsPageType => {
-  if (page === 1) return { min: 0, max: itemsByPage };
-  return { min: (page - 1) * itemsByPage, max: page * itemsByPage };
+  if (page === DEFAULT_VALUES.UNIT) return { min: DEFAULT_VALUES.NUMBER, max: itemsByPage };
+  return { min: (page - DEFAULT_VALUES.UNIT) * itemsByPage, max: page * itemsByPage };
 };
 
 /**
@@ -103,33 +112,27 @@ export const setMaxMinItemsPage = (page: number, itemsByPage: number): itemsPage
  * @returns total amount of pages needed
  */
 export function getTotalPages(totalItem: number, itemByPage: number): number {
-  if (totalItem <= itemByPage) return 1;
-  return (totalItem / itemByPage) % 1 === 0
+  if (totalItem <= itemByPage) return DEFAULT_VALUES.UNIT;
+  return (totalItem / itemByPage) % DEFAULT_VALUES.UNIT === DEFAULT_VALUES.NUMBER
     ? totalItem / itemByPage
-    : Math.floor(totalItem / itemByPage) + 1;
+    : Math.floor(totalItem / itemByPage) + DEFAULT_VALUES.UNIT;
 }
 
 function App() {
-  const DEFAULT_VALUE = null;
-  const DEFAULT_STRING = "DEFAULT";
-  const DEFAULT_NUMBER = 0;
-  const DEFAULT_CURRENT_PAGE = 1;
-  const ITEMS_BY_PAGE = 10;
-
   const init_YELP_API: BusinessesType = {
     businesses: [],
     region: {
       center: {
-        latitude: DEFAULT_NUMBER,
-        longitude: DEFAULT_NUMBER,
+        latitude: DEFAULT_VALUES.NUMBER,
+        longitude: DEFAULT_VALUES.NUMBER,
       },
     },
-    total: DEFAULT_NUMBER,
+    total: DEFAULT_VALUES.NUMBER,
   };
 
   const [searchInputs, setSearchInputs] = useState<InputType>({
-    business: DEFAULT_VALUE,
-    where: DEFAULT_VALUE,
+    business: DEFAULT_VALUES.NULL,
+    where: DEFAULT_VALUES.NULL,
   });
 
   const [isErrorLocation, setIsErrorLocation] = useState<boolean>(false);
@@ -140,21 +143,21 @@ function App() {
     `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}`,
   );
   const [filterValue, setFilterValue] = useState<FilterInputType>({
-    openFilter: ``,
-    priceFilter: ``,
-    sortByFilter: ``,
-    attrFilter: ``,
+    openFilter: DEFAULT_VALUES.EMPTY_STRING,
+    priceFilter: DEFAULT_VALUES.EMPTY_STRING,
+    sortByFilter: DEFAULT_VALUES.EMPTY_STRING,
+    attrFilter: DEFAULT_VALUES.EMPTY_STRING,
   });
   const PATH = "/businesses/search";
   const [businesses, setBusinesses] = useState<BusinessesType>(init_YELP_API);
 
   const [selectedBusiness, setSelectedBusiness] = useState<ItemInfoType>({
-    id: DEFAULT_STRING,
-    name: DEFAULT_STRING,
+    id: DEFAULT_VALUES.STRING,
+    name: DEFAULT_VALUES.STRING,
   });
   const [idSelected, setIdSelected] = useState<string>();
   const [idReviewData, setIdReviewData] = useState<string>();
-  const [reviewData, setReviewData] = useState<reviewMainType>({ total: DEFAULT_NUMBER });
+  const [reviewData, setReviewData] = useState<reviewMainType>({ total: DEFAULT_VALUES.NUMBER });
 
   const [markerResArr, setMarkerResArr] = useState<MarkerType[]>([]);
   const [businessPage, setBusinessPage] = useState<ItemInfoType[]>([]);
@@ -164,13 +167,13 @@ function App() {
   const [showReview, setShowReview] = useState<boolean>(false);
 
   const [pageInfo, setPageInfo] = useState<pageInfoType>({
-    currentPage: DEFAULT_CURRENT_PAGE,
-    totalPage: DEFAULT_NUMBER,
+    currentPage: DEFAULT_VALUES.UNIT,
+    totalPage: DEFAULT_VALUES.NUMBER,
   });
 
   const [itemsPage, setItemsPage] = useState<itemsPageType>({
-    min: DEFAULT_NUMBER,
-    max: ITEMS_BY_PAGE,
+    min: DEFAULT_VALUES.NUMBER,
+    max: DEFAULT_VALUES.ITEMS_BY_PAGE,
   });
 
   const businessPageArr: ItemInfoType[] = [];
@@ -188,7 +191,7 @@ function App() {
   );
 
   useEffect(() => {
-    if (searchInputs.where === "") setIsErrorLocation(true);
+    if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
 
     if (!searchInputs.where) {
       setBusinesses(init_YELP_API);
@@ -199,7 +202,7 @@ function App() {
         if ("error" in resp) {
           setBusinesses(init_YELP_API);
           setIsErrorLocation(true);
-          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUE });
+          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
         } else {
           if ("businesses" in resp) setBusinesses(resp);
           setIsErrorLocation(false);
@@ -234,23 +237,26 @@ function App() {
     if (businesses.businesses !== [] || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
-        currentPage: DEFAULT_CURRENT_PAGE,
-        totalPage: getTotalPages(businesses.businesses.length, ITEMS_BY_PAGE),
+        currentPage: DEFAULT_VALUES.UNIT,
+        totalPage: getTotalPages(businesses.businesses.length, DEFAULT_VALUES.ITEMS_BY_PAGE),
       });
   }, [businesses.businesses]);
 
   useEffect(() => {
-    const result: itemsPageType = setMaxMinItemsPage(pageInfo.currentPage, ITEMS_BY_PAGE);
+    const result: itemsPageType = setMaxMinItemsPage(
+      pageInfo.currentPage,
+      DEFAULT_VALUES.ITEMS_BY_PAGE,
+    );
     setItemsPage({ ...itemsPage, min: result.min, max: result.max });
   }, [pageInfo.currentPage]);
 
   useEffect(() => {
-    businessPageArr.length = 0;
-    coorResArr.length = 0;
+    businessPageArr.length = DEFAULT_VALUES.NUMBER;
+    coorResArr.length = DEFAULT_VALUES.NUMBER;
     if (businesses.businesses !== [] || businesses.businesses !== undefined)
       businesses.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
-          let url = "";
+          let url = DEFAULT_VALUES.EMPTY_STRING;
           if (!item?.image_url) {
             url = `/img/nullPicture.png`;
           } else {
@@ -277,16 +283,16 @@ function App() {
    * increment PageInfo Object, key currentPage value
    */
   const incrementPage = (): void => {
-    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage + 1 });
-    window.scrollTo(0, 0);
+    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage + DEFAULT_VALUES.UNIT });
+    window.scrollTo(DEFAULT_VALUES.NUMBER, DEFAULT_VALUES.NUMBER);
   };
 
   /**
    * decrement PageInfo Object, key currentPage value
    */
   const decrementPage = (): void => {
-    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage - 1 });
-    window.scrollTo(0, 0);
+    setPageInfo({ ...pageInfo, currentPage: pageInfo.currentPage - DEFAULT_VALUES.UNIT });
+    window.scrollTo(DEFAULT_VALUES.NUMBER, DEFAULT_VALUES.NUMBER);
   };
 
   /**
@@ -314,12 +320,12 @@ function App() {
                 isErrorLocation={isErrorLocation}
                 setIsErrorLocation={setIsErrorLocation}
               />
-              {businesses.total !== 0 && (
+              {businesses.total !== DEFAULT_VALUES.NUMBER && (
                 <button onClick={() => setIsMapView(!isMapView)}>
                   {isMapView ? `See Results view` : `See Map View`}
                 </button>
               )}
-              {businesses.total !== 0 && (
+              {businesses.total !== DEFAULT_VALUES.NUMBER && (
                 <div id="result-container">
                   <div className={isMapView ? "show" : "hide"}>
                     <MapPage

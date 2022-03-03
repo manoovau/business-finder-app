@@ -70,32 +70,34 @@ type userLocalType = {
   avatar: string;
 };
 
+const EMPTY_STRING = "";
+
 const userLocalInit = {
-  id: "",
-  username: "",
-  password: "",
-  email: "",
-  avatar: "",
+  id: EMPTY_STRING,
+  username: EMPTY_STRING,
+  password: EMPTY_STRING,
+  email: EMPTY_STRING,
+  avatar: EMPTY_STRING,
 };
 
 const defaultContext = {
   isCurrentPwError: false,
-  currentPw: "",
+  currentPw: EMPTY_STRING,
   currentPwPlaceholder: "Fill current password",
   isNewPw1Error: false,
-  newPw1: "",
+  newPw1: EMPTY_STRING,
   newPw1Placeholder: "Fill new password",
-  newPw2: "",
+  newPw2: EMPTY_STRING,
   newPw2Placeholder: "Repeat new password",
   isDelConf: false,
   isUserInError: false,
-  user: "",
+  user: EMPTY_STRING,
   userInPlaceholder: "username",
   isPwInError: false,
-  password: "",
+  password: EMPTY_STRING,
   pwInPlaceholder: "password",
   isEmailInError: false,
-  email: "",
+  email: EMPTY_STRING,
   emailInPlaceholder: "email",
   isAddImg: false,
   progress: 0,
@@ -147,24 +149,24 @@ export const getUsersAsyncFunc = async (
 const UserContext = createContext<UserContextType>(defaultContext);
 
 function UserContextProvider({ children }: { children?: React.ReactNode }) {
-  const [user, setUser] = useState<string>("");
+  const [user, setUser] = useState<string>(EMPTY_STRING);
   const [userInPlaceholder, setUserInPlaceholder] = useState<string>("username");
   const [isUserInError, setIsUserInError] = useState<boolean>(false);
-  const [password, setPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>(EMPTY_STRING);
   const [pwInPlaceholder, setPwInPlaceholder] = useState<string>("password");
   const [isPwInError, setIsPwInError] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>(EMPTY_STRING);
   const [emailInPlaceholder, setEmailInPlaceholder] = useState<string>("email");
   const [isEmailInError, setIsEmailInError] = useState<boolean>(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>(EMPTY_STRING);
   const [registerCount, setRegisterCount] = useState<number>(0);
-  const [currentPw, setCurrentPw] = useState<string>("");
+  const [currentPw, setCurrentPw] = useState<string>(EMPTY_STRING);
   const [currentPwPlaceholder, setCurrentPwPlaceholder] = useState<string>("Fill current password");
   const [isCurrentPwError, setIsCurrentPwError] = useState<boolean>(false);
-  const [newPw1, setNewPw1] = useState<string>("");
+  const [newPw1, setNewPw1] = useState<string>(EMPTY_STRING);
   const [newPw1Placeholder, setNewPw1Placeholder] = useState<string>("Fill new password");
   const [isNewPw1Error, setIsNewPw1Error] = useState<boolean>(false);
-  const [newPw2, setNewPw2] = useState<string>("");
+  const [newPw2, setNewPw2] = useState<string>(EMPTY_STRING);
   const [newPw2Placeholder, setNewPw2Placeholder] = useState<string>("Repeat new password");
   const [isDelConf, setIsDelConf] = useState<boolean>(false);
 
@@ -229,14 +231,14 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
       if (usernameFilter.length === 0) {
         setUserInPlaceholder("username is not correct");
         setIsUserInError(true);
-        setUser("");
+        setUser(EMPTY_STRING);
       } else if (usernameFilter.length > 0 && usernameFilter[0].password === password) {
         setCurrentUsersId(usernameFilter[0]);
         setIsUserInError(false);
       } else if (usernameFilter.length > 0 && usernameFilter[0].password !== password) {
         setIsPwInError(true);
         setPwInPlaceholder("password is not correct");
-        setPassword("");
+        setPassword(EMPTY_STRING);
         setCurrentUsersId(userLocalInit);
       }
     }
@@ -268,13 +270,13 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
         setEmailInPlaceholder("You are register");
 
         setIsEmailInError(true);
-        setEmail("");
+        setEmail(EMPTY_STRING);
       } else {
         const checkUsernameInput = usersLocal.filter(
           (item: userLocalType) => item.username === user,
         );
         if (checkUsernameInput.length > 0) {
-          setUser("");
+          setUser(EMPTY_STRING);
           setUserInPlaceholder("Please, use other username");
           setIsUserInError(true);
         }
@@ -304,10 +306,10 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
       if (newPw1 !== newPw2) {
         setIsNewPw1Error(true);
         setNewPw1Placeholder("New Password is not equal");
-        setNewPw2Placeholder("");
+        setNewPw2Placeholder(EMPTY_STRING);
       } else {
         setIsNewPw1Error(false);
-        setCurrentPw("");
+        setCurrentPw(EMPTY_STRING);
 
         setCurrentUsersId({ ...currentUsersId, password: newPw1 });
         setNewPw1Placeholder("Fill new password");
@@ -367,7 +369,7 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
   }, [currentUsersId]);
 
   useEffect(() => {
-    if (currentUsersId.id === "" && currentUsersId.username !== "") {
+    if (currentUsersId.id === EMPTY_STRING && currentUsersId.username !== EMPTY_STRING) {
       const usernameFilter: userLocalType[] = usersLocal.filter(
         (item: userLocalType) => item.username === user,
       );
@@ -392,9 +394,9 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
    * set initial values for user, password, email amd currentUsersId
    */
   const logOut = (): void => {
-    setUser("");
-    setPassword("");
-    setEmail("");
+    setUser(EMPTY_STRING);
+    setPassword(EMPTY_STRING);
+    setEmail(EMPTY_STRING);
     setCurrentUsersId(userLocalInit);
   };
 

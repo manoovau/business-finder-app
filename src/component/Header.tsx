@@ -43,6 +43,7 @@ const DEFAULT_VALUES = {
   NULL: null,
   INPUT_SELECT: "DEFAULT",
   EMPTY_STRING: "",
+  UNIT: 1,
 };
 
 /**
@@ -84,7 +85,7 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
   }
 
   const MIN_DAY_INPUT = `0${dateArr[0].getDate()}`.slice(-2);
-  const MIN_MONTH_INPUT = `0${dateArr[0].getMonth() + 1}`.slice(-2);
+  const MIN_MONTH_INPUT = `0${dateArr[0].getMonth() + DEFAULT_VALUES.UNIT}`.slice(-2);
 
   return `0${dateArr[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
 };
@@ -123,12 +124,14 @@ export function Header(props: Props): JSX.Element {
   const MAX_DATE_INPUT = getDateInputLimit("max", LIMIT_DAY);
 
   const [openAtDate, setOpenAtDate] = useState<string>(
-    `${new Date().getFullYear()}/${new Date().getMonth() + 1}/${new Date().getDate()}`,
+    `${new Date().getFullYear()}/${
+      new Date().getMonth() + DEFAULT_VALUES.UNIT
+    }/${new Date().getDate()}`,
   );
 
   const PRICE_OPTIONS_STR = {
     base: "&price=",
-    prc1: 1,
+    prc1: DEFAULT_VALUES.UNIT,
     prc2: 2,
     prc3: 3,
     prc4: 4,

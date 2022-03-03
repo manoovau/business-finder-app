@@ -2,6 +2,8 @@ import React, { ChangeEvent, useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
+const EMPTY_STRING = "";
+
 export const ProfileContainer = (): JSX.Element => {
   const {
     isCurrentPwError,
@@ -30,7 +32,7 @@ export const ProfileContainer = (): JSX.Element => {
         <input
           id="current-password"
           type="text"
-          className={isCurrentPwError ? "error" : ""}
+          className={isCurrentPwError ? "error" : EMPTY_STRING}
           value={currentPw}
           placeholder={currentPwPlaceholder}
           onChange={(e: ChangeEvent<HTMLInputElement>): void => setCurrentPw(e.target.value)}
@@ -39,7 +41,7 @@ export const ProfileContainer = (): JSX.Element => {
         <input
           id="new-password"
           type="text"
-          className={isNewPw1Error ? "error" : ""}
+          className={isNewPw1Error ? "error" : EMPTY_STRING}
           value={newPw1}
           placeholder={newPw1Placeholder}
           onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw1(e.target.value)}
@@ -48,7 +50,7 @@ export const ProfileContainer = (): JSX.Element => {
         <input
           id="new-password"
           type="text"
-          className={isNewPw1Error ? "error" : ""}
+          className={isNewPw1Error ? "error" : EMPTY_STRING}
           value={newPw2}
           placeholder={newPw2Placeholder}
           onChange={(e: ChangeEvent<HTMLInputElement>): void => setNewPw2(e.target.value)}

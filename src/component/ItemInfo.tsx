@@ -14,6 +14,8 @@ type Props = {
   setIdReviewData: (id: string) => void;
 };
 
+const EMPTY_STRING = "";
+
 /**
  * Get Week day
  * @param index number (week day)
@@ -36,7 +38,7 @@ export const getDay = (index: number): string => {
     case 6:
       return "Sunday";
     default:
-      return "";
+      return EMPTY_STRING;
   }
 };
 
@@ -66,7 +68,7 @@ export const getOpenHours = (itemInfo: HoursType[] | undefined) => {
  * @returns p element with address inside display_address array
  */
 export const getAddress = (data: string[]): JSX.Element => {
-  let htmlText = "";
+  let htmlText = EMPTY_STRING;
   if (data) {
     data.map((item: string, index: number) => {
       if (index !== 0) {
@@ -85,7 +87,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
 
   const [showOpenHours, setShowOpenHours] = useState<boolean>(false);
   const [showPhone, setShowPhone] = useState<boolean>(false);
-  const [mainSrc, setMainSrc] = useState<string>("");
+  const [mainSrc, setMainSrc] = useState<string>(EMPTY_STRING);
 
   useEffect(() => {
     setShowOpenHours(false);
