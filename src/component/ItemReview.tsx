@@ -97,7 +97,6 @@ export const ItemReview = (props: Props): JSX.Element => {
                   {item?.text?.substr(item?.text?.length - 3) === "..." && props.url && (
                     <a href={props.url}>See more</a>
                   )}
-                  {console.log(item?.text?.substr(item?.text?.length - 3))}
                 </div>
               </div>
             );

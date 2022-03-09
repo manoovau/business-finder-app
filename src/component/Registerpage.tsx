@@ -2,6 +2,7 @@ import React, { ChangeEvent } from "react";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 const EMPTY_STRING = "";
 
@@ -25,6 +26,16 @@ export const RegisterPage = (): JSX.Element => {
     formHandler,
     registerUser,
   } = useContext(UserContext);
+
+  type Inputs = {
+    avatarName: File[];
+  };
+
+  const { register, handleSubmit } = useForm<Inputs>();
+
+  const onSub: SubmitHandler<Inputs> = (data) => {
+    formHandler(data.avatarName[0]);
+  };
 
   return (
     <div>
@@ -56,9 +67,9 @@ export const RegisterPage = (): JSX.Element => {
         onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
       />
       <div id="add-img" onClick={() => setIsAddImg(!isAddImg)}>
-        <form onSubmit={formHandler}>
-          <input type="file" className="input" />
-          <button type="submit">Upload</button>
+        <form onSubmit={handleSubmit(onSub)}>
+          <input {...register("avatarName")} type="file" className="input" />
+          <button>Upload</button>
         </form>
         <hr />
         <h2>Uploading {progress}%</h2>

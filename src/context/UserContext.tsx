@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, FormEvent } from "react";
+import React, { useState, useEffect, createContext } from "react";
 
 import {
   CollectionReference,
@@ -56,7 +56,7 @@ type UserContextType = {
   setPassword: (password: string) => void;
   setEmail: (email: string) => void;
   setIsAddImg: (isAddImg: boolean) => void;
-  formHandler: (e: FormEvent<HTMLFormElement>) => void;
+  formHandler: (file: File | undefined) => void;
   registerUser: () => void;
   loginUser: () => void;
   logOut: () => void;
@@ -148,7 +148,7 @@ export const getUsersAsyncFunc = async (
 
 const UserContext = createContext<UserContextType>(defaultContext);
 
-function UserContextProvider({ children }: { children?: React.ReactNode }) {
+const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<string>(EMPTY_STRING);
   const [userInPlaceholder, setUserInPlaceholder] = useState<string>("username");
   const [isUserInError, setIsUserInError] = useState<boolean>(false);
@@ -346,13 +346,8 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
    * extract file input and run firebase upload function
    * @param e file input value
    */
-  const formHandler = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    const target = e.target as HTMLInputElement;
-    if (target.files !== null) {
-      const file = target.files[0];
-      uploadFile(file);
-    }
+  const formHandler = (file: File | undefined): void => {
+    if (file !== null && file !== undefined) uploadFile(file);
   };
 
   useEffect(() => {
@@ -444,6 +439,6 @@ function UserContextProvider({ children }: { children?: React.ReactNode }) {
       {children}
     </UserContext.Provider>
   );
-}
+};
 
 export { UserContextProvider, UserContext };

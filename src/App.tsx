@@ -64,7 +64,6 @@ const DEFAULT_VALUES = {
  * @param url YELP API URL
  * @returns YELP API response
  */
-
 const fetchYELP = async (
   fetchParameter: string,
 ): Promise<BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType> => {
@@ -111,14 +110,16 @@ export const setMaxMinItemsPage = (page: number, itemsByPage: number): itemsPage
  * @param itemByPage item/s allowed by page
  * @returns total amount of pages needed
  */
-export function getTotalPages(totalItem: number, itemByPage: number): number {
+export const getTotalPages = (totalItem: number, itemByPage: number): number => {
   if (totalItem <= itemByPage) return DEFAULT_VALUES.UNIT;
   return (totalItem / itemByPage) % DEFAULT_VALUES.UNIT === DEFAULT_VALUES.NUMBER
     ? totalItem / itemByPage
     : Math.floor(totalItem / itemByPage) + DEFAULT_VALUES.UNIT;
-}
+};
 
-function App() {
+const App = (): JSX.Element => {
+  const { currentUsersId, userLocalInit } = useContext(UserContext);
+
   const init_YELP_API: BusinessesType = {
     businesses: [],
     region: {
@@ -180,17 +181,15 @@ function App() {
 
   const coorResArr: MarkerType[] = [];
 
-  const { currentUsersId, userLocalInit } = useContext(UserContext);
-
   useEffect(
-    () =>
+    (): void =>
       setTerm(
         `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
       ),
     [searchInputs, filterValue],
   );
 
-  useEffect(() => {
+  useEffect((): void => {
     if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
 
     if (!searchInputs.where) {
@@ -213,7 +212,7 @@ function App() {
     }
   }, [term]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (idSelected !== undefined) {
       const fetchSelBusiness = async (): Promise<void> => {
         const resp = await fetchYELPAsyncFunc(`/businesses/${idSelected}`);
@@ -223,7 +222,7 @@ function App() {
     }
   }, [idSelected]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (idReviewData !== undefined) {
       const fetchRevData = async (): Promise<void> => {
         const resp = await fetchYELPAsyncFunc(`/businesses/${idReviewData}/reviews`);
@@ -233,7 +232,7 @@ function App() {
     }
   }, [idReviewData]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (businesses.businesses !== [] || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
@@ -242,7 +241,7 @@ function App() {
       });
   }, [businesses.businesses]);
 
-  useEffect(() => {
+  useEffect((): void => {
     const result: itemsPageType = setMaxMinItemsPage(
       pageInfo.currentPage,
       DEFAULT_VALUES.ITEMS_BY_PAGE,
@@ -250,7 +249,7 @@ function App() {
     setItemsPage({ ...itemsPage, min: result.min, max: result.max });
   }, [pageInfo.currentPage]);
 
-  useEffect(() => {
+  useEffect((): void => {
     businessPageArr.length = DEFAULT_VALUES.NUMBER;
     coorResArr.length = DEFAULT_VALUES.NUMBER;
     if (businesses.businesses !== [] || businesses.businesses !== undefined)
@@ -406,6 +405,6 @@ function App() {
       <Footer />
     </div>
   );
-}
+};
 
 export default App;
