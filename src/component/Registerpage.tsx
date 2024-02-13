@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -8,13 +8,10 @@ const EMPTY_STRING = "";
 
 export const RegisterPage = (): JSX.Element => {
   const {
-    isUserInError,
     user,
     userInPlaceholder,
-    isPwInError,
     password,
     pwInPlaceholder,
-    isEmailInError,
     email,
     emailInPlaceholder,
     isAddImg,
@@ -28,13 +25,35 @@ export const RegisterPage = (): JSX.Element => {
   } = useContext(UserContext);
 
   type Inputs = {
+    usernameIn: string;
+    passwordIn: string;
+    emailIn: string;
     avatarName: File[];
   };
 
-  const { register, handleSubmit } = useForm<Inputs>();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<Inputs>({
+    defaultValues: { usernameIn: user, passwordIn: password, emailIn: email },
+  });
 
   const onSub: SubmitHandler<Inputs> = (data) => {
-    formHandler(data.avatarName[0]);
+    try {
+      formHandler(data.avatarName[0]);
+
+      setEmail(data.emailIn);
+
+      setUser(data.usernameIn);
+      setPassword(data.passwordIn);
+      console.log(data);
+    } catch (error) {
+      setError("emailIn", {
+        message: "This email is already taken",
+      });
+    }
   };
 
   return (
@@ -42,39 +61,68 @@ export const RegisterPage = (): JSX.Element => {
       <Link to="/">
         <h3>{`< Go Back `}</h3>
       </Link>
-      <input
-        id="username-register"
-        type="text"
-        className={isUserInError ? "error" : EMPTY_STRING}
-        value={user}
-        placeholder={userInPlaceholder}
-        onChange={(e: ChangeEvent<HTMLInputElement>): void => setUser(e.target.value)}
-      />
-      <input
-        id="password-register"
-        type="text"
-        className={isPwInError ? "error" : EMPTY_STRING}
-        value={password}
-        placeholder={pwInPlaceholder}
-        onChange={(e: ChangeEvent<HTMLInputElement>): void => setPassword(e.target.value)}
-      />
-      <input
-        id="email-register"
-        type="text"
-        className={isEmailInError ? "error" : EMPTY_STRING}
-        value={email}
-        placeholder={emailInPlaceholder}
-        onChange={(e: ChangeEvent<HTMLInputElement>): void => setEmail(e.target.value)}
-      />
-      <div id="add-img" onClick={() => setIsAddImg(!isAddImg)}>
-        <form onSubmit={handleSubmit(onSub)}>
-          <input {...register("avatarName")} type="file" className="input" />
-          <button>Upload</button>
-        </form>
-        <hr />
-        <h2>Uploading {progress}%</h2>
+      <div className={user && password && email ? "register-popup" : EMPTY_STRING}>
+        <div className={user && password && email ? "register-popup-inner" : EMPTY_STRING}>
+          {user && password && email ? (
+            <p>Your Details has been Succesfully Submitted. You are register. Thanks!</p>
+          ) : null}
+          {user && password && email ? (
+            <button type="button" onClick={registerUser}>
+              Go Home
+            </button>
+          ) : null}
+        </div>
       </div>
-      <button onClick={registerUser}>Register</button>
+
+      <form onSubmit={handleSubmit(onSub)}>
+        <input
+          id="username-register"
+          type="text"
+          {...register("usernameIn", {
+            required: {
+              value: true,
+              message: "username is required",
+            },
+          })}
+          className={errors.usernameIn ? "error" : EMPTY_STRING}
+          placeholder={errors.usernameIn ? "username is empty" : userInPlaceholder}
+        />
+        <p className={errors.usernameIn ? "error" : EMPTY_STRING}>{errors.usernameIn?.message}</p>
+        <input
+          id="password-register"
+          type="text"
+          {...register("passwordIn", {
+            required: "Password is required",
+            minLength: { value: 8, message: "Password must have at least 8 characters" },
+          })}
+          className={errors.passwordIn ? "error" : EMPTY_STRING}
+          placeholder={errors.passwordIn ? "password is empty" : pwInPlaceholder}
+        />
+        <p className={errors.passwordIn ? "error" : EMPTY_STRING}>{errors.passwordIn?.message}</p>
+        <input
+          id="email-register"
+          type="email"
+          {...register("emailIn", {
+            required: "Email is required",
+            pattern: {
+              value:
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              message: "Please enter a valid email",
+            },
+          })}
+          className={errors.emailIn ? "error" : EMPTY_STRING}
+          placeholder={errors.emailIn ? "email is empty" : emailInPlaceholder}
+        />
+        <p className={errors.emailIn ? "error" : EMPTY_STRING}>{errors.emailIn?.message}</p>
+        <div id="add-img" onClick={() => setIsAddImg(!isAddImg)}>
+          <input {...register("avatarName")} type="file" className="input" />
+          <hr />
+          <h2>Uploading {progress}%</h2>
+        </div>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Loading" : "Register"}
+        </button>
+      </form>
     </div>
   );
 };

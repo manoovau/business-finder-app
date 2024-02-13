@@ -281,6 +281,27 @@ i,
   outline: none;
 }
 
+.register-popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.register-popup-inner {
+  visibility: visible;
+  width: 550px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -300px;
+  position: absolute;
+}
+
 @keyframes shake {
   0% {
     left: -5px;

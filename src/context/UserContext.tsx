@@ -252,22 +252,17 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
     setIsPwInError(false);
     setIsEmailInError(false);
 
-    if (!password) {
-      setIsPwInError(true);
-      setPwInPlaceholder("password is empty");
-    }
+    if (!user) setIsUserInError(true);
 
-    if (!user) {
-      setUserInPlaceholder("username is empty");
-      setIsUserInError(true);
-    }
+    if (!password) setIsPwInError(true);
+
     if (!email) {
-      setEmailInPlaceholder("email is empty");
       setIsEmailInError(true);
     } else {
       const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
+      // Email used by other user
       if (checkEmailInput.length > 0) {
-        setEmailInPlaceholder("You are register");
+        setEmailInPlaceholder("E-mail address already in use");
 
         setIsEmailInError(true);
         setEmail(EMPTY_STRING);

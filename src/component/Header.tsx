@@ -470,6 +470,7 @@ export function Header(props: Props): JSX.Element {
             }
             alt="avatar image"
           />
+          {currentUsersId.username}
         </Link>
 
         {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
