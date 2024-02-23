@@ -60,6 +60,7 @@ type UserContextType = {
   registerUser: () => void;
   loginUser: () => void;
   logOut: () => void;
+  setProgress: (progress: number) => void;
 };
 
 type userLocalType = {
@@ -117,6 +118,7 @@ const defaultContext = {
   registerUser: () => undefined,
   loginUser: () => undefined,
   logOut: () => undefined,
+  setProgress: () => undefined,
 };
 
 /**
@@ -333,6 +335,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
       (err: StorageError) => console.error(err),
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((url: string) => setAvatarUrl(url));
+        setIsAddImg(true);
       },
     );
   };
@@ -342,7 +345,12 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
    * @param e file input value
    */
   const formHandler = (file: File | undefined): void => {
-    if (file !== null && file !== undefined) uploadFile(file);
+    if (file !== null && file !== undefined) {
+      uploadFile(file);
+    } else {
+      setAvatarUrl(EMPTY_STRING);
+      setIsAddImg(false);
+    }
   };
 
   useEffect(() => {
@@ -429,6 +437,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
         registerUser,
         loginUser,
         logOut,
+        setProgress,
       }}
     >
       {children}

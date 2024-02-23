@@ -30,7 +30,11 @@ Go to https://cors-anywhere.herokuapp.com/corsdemo and click the button.
 
 ## Install package(s).
 
-run `npm install` from the command line.
+From the command line run:
+
+1. `npm install`
+2. `npm install @hookform/resolvers`
+3. `npm i zod`
 
 ## Open project.
 

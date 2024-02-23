@@ -23,6 +23,10 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 p {
   font-size: 1rem;
 }
@@ -282,24 +286,31 @@ i,
 }
 
 .register-popup {
-  position: relative;
+  transform: scale(1);
+  animation-name: popin;
+  animation-duration: 350ms;
+  opacity: 1;
+  max-width: 480px;
+  top: 157px;
+  left: 810px;
+  z-index: 1100;
   display: inline-block;
-  cursor: pointer;
+  position: absolute;
+  padding: 0;
+  outline: 0;
+  transform-origin: 50% 50%;
+  color: #333;
+  text-shadow: 0 1px 0 #f3f3f3;
 }
 
 .register-popup-inner {
-  visibility: visible;
-  width: 550px;
-  background-color: #555;
+  width: 402.4px;
+  padding: 5px;
+  position: relative;
+  background-color: #2a2a2a;
+  border-color: #1d1d1d;
   color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px 0;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -300px;
-  position: absolute;
+  text-shadow: 0 1px 0 #111;
 }
 
 @keyframes shake {
