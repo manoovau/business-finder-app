@@ -233,7 +233,7 @@ const App = (): JSX.Element => {
   }, [idReviewData]);
 
   useEffect((): void => {
-    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+    if (businesses.businesses.length > 0 || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
         currentPage: DEFAULT_VALUES.UNIT,
@@ -252,7 +252,7 @@ const App = (): JSX.Element => {
   useEffect((): void => {
     businessPageArr.length = DEFAULT_VALUES.NUMBER;
     coorResArr.length = DEFAULT_VALUES.NUMBER;
-    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+    if (businesses.businesses.length > 0 || businesses.businesses !== undefined)
       businesses.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
           let url = DEFAULT_VALUES.EMPTY_STRING;

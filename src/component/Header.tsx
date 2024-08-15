@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState, useEffect, useContext } from "react";
-import { useDebounce } from "use-debounce/lib";
+import { useDebounce } from "use-debounce";
 import { InputType } from "../interface";
 import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
@@ -730,7 +730,7 @@ export function Header(props: Props): JSX.Element {
             }
           />
           <label title={LABEL_TITLE.openAll} htmlFor={FILTER_VALUES_TRUE.openAll}>
-            open to all
+            Open to all
           </label>
         </div>
       </div>

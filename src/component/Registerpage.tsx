@@ -15,7 +15,7 @@ const schema = z.object({
   usernameIn: z.string().min(4),
   passwordIn: z.string().min(8),
   emailIn: z.string().email(),
-  avatarName: z
+  avatarFile: z
     .any()
     .optional()
     .refine(
@@ -58,16 +58,16 @@ export const RegisterPage = (): JSX.Element => {
       usernameIn: EMPTY_STRING,
       passwordIn: EMPTY_STRING,
       emailIn: EMPTY_STRING,
-      avatarName: undefined,
+      avatarFile: undefined,
     },
     resolver: zodResolver(schema),
   });
 
   const onSub: SubmitHandler<Inputs> = (data) => {
-    if (data.avatarName.length !== 0) isAvatarFilled = true;
+    if (data.avatarFile.length !== 0) isAvatarFilled = true;
 
     try {
-      formHandler(data.avatarName[0]);
+      formHandler(data.avatarFile[0]);
       setEmail(data.emailIn);
       setUser(data.usernameIn);
       setPassword(data.passwordIn);
@@ -136,11 +136,11 @@ export const RegisterPage = (): JSX.Element => {
         />
         <p className={errors.emailIn ? "error" : EMPTY_STRING}>{errors.emailIn?.message}</p>
         <div id="add-img">
-          <input {...register("avatarName")} type="file" className="input" />
+          <input {...register("avatarFile")} type="file" className="input" />
           <hr />
           <h2>Uploading {progress}%</h2>
         </div>
-        <p className={errors.avatarName ? "error" : EMPTY_STRING}>{errors.avatarName?.message}</p>
+        <p className={errors.avatarFile ? "error" : EMPTY_STRING}>{errors.avatarFile?.message}</p>
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Loading" : "Register"}
         </button>

@@ -261,20 +261,24 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
     if (!email) {
       setIsEmailInError(true);
     } else {
-      const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
-      // Email used by other user
-      if (checkEmailInput.length > 0) {
+      const existingUsersWithThisEmail = usersLocal.find(
+        (item: userLocalType) => item.email === email,
+      );
+      console.log(existingUsersWithThisEmail);
+      console.log(existingUsersWithThisEmail !== undefined);
+
+      if (existingUsersWithThisEmail !== undefined) {
         setEmailInPlaceholder("E-mail address already in use");
+        console.log("email in used");
 
         setIsEmailInError(true);
         setEmail(EMPTY_STRING);
       } else {
-        const checkUsernameInput = usersLocal.filter(
-          (item: userLocalType) => item.username === user,
-        );
-        if (checkUsernameInput.length > 0) {
+        const checkUsernameInput = usersLocal.find((item: userLocalType) => item.username === user);
+        if (checkUsernameInput !== undefined) {
           setUser(EMPTY_STRING);
           setUserInPlaceholder("Please, use other username");
+          console.log("username in used");
           setIsUserInError(true);
         }
       }
