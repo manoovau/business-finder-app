@@ -29,12 +29,11 @@ export const ItemContainer = (props: Props): JSX.Element => {
               categories={item.categories}
               is_closed={item.is_closed}
             />
-            <div id="element-img">
-              {!item.image_url ? (
-                <img className="img-res-container-item" src={`/img/nullPicture.png`} />
-              ) : (
-                <img className="img-res-container-item" src={item.image_url} />
-              )}
+            <div id="element-img" className="mr-4">
+              <img
+                className="w-40 h-40 object-cover cursor-pointer"
+                src={!item.image_url ? `/img/nullPicture.png` : item.image_url}
+              />
             </div>
           </Link>
         );

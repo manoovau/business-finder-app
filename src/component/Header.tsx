@@ -14,6 +14,18 @@ type Props = {
   setIsErrorLocation: (typo: boolean) => void;
 };
 
+type SearchProps = {
+  whereInput: string;
+  businessInput: string;
+  setBusinessInput: (value: string) => void;
+  setBusiness: (value: string) => void;
+  whereInPlaceholder: string;
+  setWhereInput: (value: string) => void;
+  setWhere: (value: string) => void;
+  getCurrentLocation: () => void;
+  setIsErrorLocation: (typo: boolean) => void;
+};
+
 type attrType = {
   base: string;
   hotNew: attrFilterInType;
@@ -90,6 +102,66 @@ const getDateInputLimit = (min_max: string, dayLimit: number): string => {
   return `0${dateArr[0].getFullYear()}-${MIN_MONTH_INPUT}-${MIN_DAY_INPUT}`;
 };
 
+const SearchEle = (props: SearchProps): JSX.Element => {
+  const {
+    whereInput,
+    businessInput,
+    setBusinessInput,
+    setBusiness,
+    whereInPlaceholder,
+    setWhereInput,
+    setWhere,
+    getCurrentLocation,
+    setIsErrorLocation,
+  } = props;
+
+  return (
+    <div className="flex flex-col items-center  text-black m-3">
+      <input
+        type="text"
+        name="business"
+        id="business"
+        placeholder="Search business..."
+        value={businessInput}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setBusinessInput(e.target.value.toLowerCase())
+        }
+        className="w-[224px]"
+      />
+      <div className="mt-3">
+        <input
+          type="text"
+          id="where"
+          // className={props.isErrorLocation ? "error" : DEFAULT_VALUES.EMPTY_STRING}
+          className="w-[200px]"
+          name="where"
+          placeholder={whereInPlaceholder}
+          value={whereInput}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setWhereInput(e.target.value.toLowerCase())
+          }
+        />
+
+        <button id="gps-btn" title="Use my Location" onClick={getCurrentLocation}>
+          <img src="/img/gps.png" className="relative top-1 h-5 ml-1 " />
+        </button>
+      </div>
+
+      <button
+        className="text-white border border-solid border-white p-2 mt-3 hover:bg-gray-400"
+        onClick={() => {
+          whereInput === DEFAULT_VALUES.EMPTY_STRING
+            ? setIsErrorLocation(true)
+            : setWhere(whereInput);
+          if (businessInput !== DEFAULT_VALUES.EMPTY_STRING) setBusiness(businessInput);
+        }}
+      >
+        Search
+      </button>
+    </div>
+  );
+};
+
 export function Header(props: Props): JSX.Element {
   const { setSearchInputs, setFilterValue, setIsErrorLocation } = props;
 
@@ -98,9 +170,10 @@ export function Header(props: Props): JSX.Element {
   const [businessInput, setBusinessInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [whereInput, setWhereInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [geolocationInput, setGeolocationInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
-  const [business] = useDebounce(businessInput, 500);
-  const [where] = useDebounce(whereInput, 500);
+  const [business, setBusiness] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
+  const [where, setWhere] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [currentGeolocation] = useDebounce(geolocationInput, 500);
+  const [filterSide, setFilterSide] = useState<boolean>(false);
 
   const OPEN_SELECT = {
     DEFAULT: DEFAULT_VALUES.INPUT_SELECT,
@@ -441,6 +514,7 @@ export function Header(props: Props): JSX.Element {
 
   useEffect(() => {
     if (props.isErrorLocation) {
+      console.log("IS ERROR LOCATION");
       setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
       setWhereInPlaceholder("Please, fill a correct location");
     } else {
@@ -449,289 +523,348 @@ export function Header(props: Props): JSX.Element {
     }
   }, [props.isErrorLocation]);
 
-  return (
-    <div
-      id="header-container"
-      style={{
-        backgroundImage: `url("https://source.unsplash.com/1600x900/?food")`,
-      }}
-    >
-      <div id="search-container">
-        <Link to="/" id="title">
-          <h1>Business Finder</h1>
-        </Link>
-        <Link to="/profile" id="profile">
-          <img
-            id="img-avatar"
-            src={
-              currentUsersId.avatar !== DEFAULT_VALUES.EMPTY_STRING
-                ? currentUsersId.avatar
-                : "/img/nullUser.png"
-            }
-            alt="avatar image"
-          />
-          {currentUsersId.username}
-        </Link>
-
+  const UserContainer = (): JSX.Element => {
+    return (
+      <div className="m-3">
         {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
           <div>
-            <Link to="/login" id="login">
+            <Link to="/login">
+              <img className="h-5 mr-1" src="/img/nullUser.png" alt="avatar image" />
+            </Link>
+          </div>
+        ) : (
+          <Link to="/profile" id="profile">
+            <img
+              className="h-5 mr-1"
+              src={
+                currentUsersId.avatar !== DEFAULT_VALUES.EMPTY_STRING
+                  ? currentUsersId.avatar
+                  : "/img/nullUser.png"
+              }
+              alt="avatar image"
+            />
+            {currentUsersId.username}
+          </Link>
+        )}
+        {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
+          <div>
+            <Link to="/login" className="hidden sm:block">
               <h3>{`Log In`}</h3>
             </Link>
-            <Link to="/register" id="register">
+            <Link to="/register" className="hidden">
               <h3>{`Register`}</h3>
             </Link>
           </div>
         ) : (
-          <Link to="/" id="register" onClick={logOut}>
+          <Link to="/" onClick={logOut}>
             <h3>{`Log Out`}</h3>
           </Link>
         )}
+      </div>
+    );
+  };
 
-        <div id="input-container">
-          <input
-            type="text"
-            id="business"
-            name="business"
-            placeholder="Search business..."
-            value={businessInput}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setBusinessInput(e.target.value.toLowerCase())
-            }
-          />
-          <div id="where-container">
-            <input
-              type="text"
-              id="where"
-              className={props.isErrorLocation ? "error" : DEFAULT_VALUES.EMPTY_STRING}
-              name="where"
-              placeholder={whereInPlaceholder}
-              value={whereInput}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setWhereInput(e.target.value.toLowerCase())
-              }
+  return (
+    <div>
+      <div className="flex justify-between bg-gray-500 text-white p-4">
+        <div className="w-full">
+          <div className="flex flex-wrap justify-between">
+            <Link to="/" className="self-center m-3">
+              <h1>Business Finder</h1>
+            </Link>
+            <div className="hidden sm:block">
+              <SearchEle
+                whereInput={whereInput}
+                businessInput={businessInput}
+                setBusinessInput={setBusinessInput}
+                setBusiness={setBusiness}
+                whereInPlaceholder={whereInPlaceholder}
+                setWhereInput={setWhereInput}
+                setWhere={setWhere}
+                getCurrentLocation={getCurrentLocation}
+                setIsErrorLocation={setIsErrorLocation}
+              />
+            </div>
+
+            <div className="block sm:hidden">
+              <UserContainer />
+            </div>
+            <div className="hidden sm:block sm:self-center">
+              <UserContainer />
+            </div>
+          </div>
+          <div className="sm:hidden">
+            <SearchEle
+              whereInput={whereInput}
+              businessInput={businessInput}
+              setBusinessInput={setBusinessInput}
+              setBusiness={setBusiness}
+              whereInPlaceholder={whereInPlaceholder}
+              setWhereInput={setWhereInput}
+              setWhere={setWhere}
+              getCurrentLocation={getCurrentLocation}
+              setIsErrorLocation={setIsErrorLocation}
             />
-            <button id="gps-btn" title="Use my Location" onClick={getCurrentLocation}>
-              <img id="gps-img" src="/img/gps.png" />
-            </button>
           </div>
         </div>
-        <button
-          onClick={() => {
-            if (where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
-          }}
-        >
-          Search
-        </button>
       </div>
-      <div id="filter-container">
-        <select
-          id="select-open"
-          defaultValue={DEFAULT_VALUES.INPUT_SELECT}
-          name="open"
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => setOpenInput(e.target.value)}
-        >
-          <option value={OPEN_SELECT.DEFAULT}>Choose open option</option>
-          <option value={OPEN_SELECT.OPEN_NOW}>Open Now</option>
-          <option value={OPEN_SELECT.OPEN_AT}>Open At</option>
-        </select>
-      </div>
-      {openInput === OPEN_SELECT.OPEN_AT && (
-        <div id="openAt-container">
-          <input
-            type="time"
-            id="openAtHour"
-            name="openAtHour"
-            value={openAtHour}
-            min="00:00"
-            max="23:59"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setopenAtHour(e.target.value)}
-            required
-          />
-          <input
-            type="date"
-            id="opentAt-date"
-            name="openAtDate"
-            value={openAtDate}
-            min={MIN_DATE_INPUT}
-            max={MAX_DATE_INPUT}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setOpenAtDate(e.target.value)}
-          />
-        </div>
-      )}
-
-      <div id="price-input-container">
-        <input
-          type="checkbox"
-          id="price1"
-          value={PRICE_OPTIONS_STR.prc1}
-          onChange={() =>
-            setpriceIn({
-              ...priceIn,
-              prc1: { ...priceIn.prc1, isChecked: !priceIn.prc1.isChecked },
-            })
-          }
-        />
-        <label htmlFor="price1">€</label>
-        <input
-          type="checkbox"
-          id="price2"
-          value={PRICE_OPTIONS_STR.prc2}
-          onChange={() =>
-            setpriceIn({
-              ...priceIn,
-              prc2: { ...priceIn.prc2, isChecked: !priceIn.prc2.isChecked },
-            })
-          }
-        />
-        <label htmlFor="price2">€€</label>
-        <input
-          type="checkbox"
-          id="price3"
-          value={PRICE_OPTIONS_STR.prc3}
-          onChange={() =>
-            setpriceIn({
-              ...priceIn,
-              prc3: { ...priceIn.prc3, isChecked: !priceIn.prc3.isChecked },
-            })
-          }
-        />
-        <label htmlFor="price3">€€€</label>
-        <input
-          type="checkbox"
-          id="price4"
-          value={PRICE_OPTIONS_STR.prc4}
-          onChange={() =>
-            setpriceIn({
-              ...priceIn,
-              prc4: { ...priceIn.prc4, isChecked: !priceIn.prc4.isChecked },
-            })
-          }
-        />
-        <label htmlFor="price4">€€€€</label>
-      </div>
-      <select
-        id="select-sortBy"
-        defaultValue={SORT_BY_SELECT.DEFAULT}
-        name="sortBy"
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => setSortByInput(e.target.value)}
+      <button
+        className=" bg-gray-500 text-white border border-solid border-white p-2 m-3 hover:bg-gray-400"
+        onClick={() => setFilterSide(!filterSide)}
       >
-        <option value={SORT_BY_SELECT.DEFAULT}>Sort By</option>
-        <option value={SORT_BY_SELECT.RATING}>Rating</option>
-        <option value={SORT_BY_SELECT.REVIEW_COUNT}>Review count</option>
-        <option value={SORT_BY_SELECT.DISTANCE}>Distance</option>
-      </select>
-      <div id="attributes-input-container">
-        <input
-          type="checkbox"
-          id={FILTER_VALUES_TRUE.hotNew}
-          value={FILTER_VALUES_TRUE.hotNew}
-          onChange={() =>
-            setAttributesIn({
-              ...attributesIn,
-              hotNew: { ...attributesIn.hotNew, isChecked: !attributesIn.hotNew.isChecked },
-            })
-          }
-        />
-        <label title={LABEL_TITLE.hotNew} htmlFor={FILTER_VALUES_TRUE.hotNew}>{`Hot&New`}</label>
-        <input
-          type="checkbox"
-          id={FILTER_VALUES_TRUE.deals}
-          value={FILTER_VALUES_TRUE.deals}
-          onChange={() =>
-            setAttributesIn({
-              ...attributesIn,
-              deals: { ...attributesIn.deals, isChecked: !attributesIn.deals.isChecked },
-            })
-          }
-        />
-        <label title={LABEL_TITLE.deals} htmlFor={FILTER_VALUES_TRUE.deals}>
-          Deals
-        </label>
-        <input
-          type="checkbox"
-          id={FILTER_VALUES_TRUE.wheelchair}
-          value={FILTER_VALUES_TRUE.wheelchair}
-          onChange={() =>
-            setAttributesIn({
-              ...attributesIn,
-              wheelchair: {
-                ...attributesIn.wheelchair,
-                isChecked: !attributesIn.wheelchair.isChecked,
-              },
-            })
-          }
-        />
-        <label title={LABEL_TITLE.wheelchair} htmlFor={FILTER_VALUES_TRUE.wheelchair}>
-          Wheelchair
-        </label>
-        <div id="att-in-big-screen">
-          <input
-            type="checkbox"
-            id={FILTER_VALUES_TRUE.requestQuote}
-            value={FILTER_VALUES_TRUE.requestQuote}
-            onChange={() =>
-              setAttributesIn({
-                ...attributesIn,
-                requestQuote: {
-                  ...attributesIn.requestQuote,
-                  isChecked: !attributesIn.requestQuote.isChecked,
-                },
-              })
-            }
-          />
-          <label title={LABEL_TITLE.requestQuote} htmlFor={FILTER_VALUES_TRUE.requestQuote}>
-            Quote
-          </label>
-          <input
-            type="checkbox"
-            id={FILTER_VALUES_TRUE.reservation}
-            value={FILTER_VALUES_TRUE.reservation}
-            onChange={() =>
-              setAttributesIn({
-                ...attributesIn,
-                reservation: {
-                  ...attributesIn.reservation,
-                  isChecked: !attributesIn.reservation.isChecked,
-                },
-              })
-            }
-          />
-          <label title={LABEL_TITLE.reservation} htmlFor={FILTER_VALUES_TRUE.reservation}>
-            Reservation
-          </label>
+        {filterSide ? `Hide filters` : `See all filters`}
+      </button>
 
+      <div
+        className={
+          filterSide
+            ? ` text-gray-500 mt-2  p-4  bg-slate-400 border-b border-solid border-cyan-500`
+            : `hidden`
+        }
+      >
+        <div className="mb-2 ">
+          <select
+            className="pr-12  border-0 border-b-2 bg-transparent border-gray-500 "
+            id="select-open"
+            defaultValue={DEFAULT_VALUES.INPUT_SELECT}
+            name="open"
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setOpenInput(e.target.value)}
+          >
+            <option value={OPEN_SELECT.DEFAULT}> Select opening hours</option>
+            <option value={OPEN_SELECT.OPEN_NOW}>Open Now</option>
+            <option value={OPEN_SELECT.OPEN_AT}>Open At</option>
+          </select>
+        </div>
+        {openInput === OPEN_SELECT.OPEN_AT && (
+          <div id="openAt-container" className="text-gray-500 mb-2">
+            <input
+              type="time"
+              id="openAtHour"
+              className="text-gray-500  bg-transparent "
+              name="openAtHour"
+              value={openAtHour}
+              min="00:00"
+              max="23:59"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setopenAtHour(e.target.value)}
+              required
+            />
+            <input
+              type="date"
+              id="opentAt-date"
+              className="text-gray-500  bg-transparent "
+              name="openAtDate"
+              value={openAtDate}
+              min={MIN_DATE_INPUT}
+              max={MAX_DATE_INPUT}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setOpenAtDate(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div id="price-input-container" className="m-2">
           <input
             type="checkbox"
-            id={FILTER_VALUES_TRUE.genderNeutral}
-            value={FILTER_VALUES_TRUE.genderNeutral}
+            id="price1"
+            className="mr-2"
+            value={PRICE_OPTIONS_STR.prc1}
             onChange={() =>
-              setAttributesIn({
-                ...attributesIn,
-                genderNeutral: {
-                  ...attributesIn.genderNeutral,
-                  isChecked: !attributesIn.genderNeutral.isChecked,
-                },
+              setpriceIn({
+                ...priceIn,
+                prc1: { ...priceIn.prc1, isChecked: !priceIn.prc1.isChecked },
               })
             }
           />
-          <label title={LABEL_TITLE.genderNeutral} htmlFor={FILTER_VALUES_TRUE.genderNeutral}>
-            Gender Neutral
+          <label htmlFor="price1" className="mr-2">
+            €
           </label>
           <input
             type="checkbox"
-            id={FILTER_VALUES_TRUE.openAll}
-            value={FILTER_VALUES_TRUE.openAll}
+            id="price2"
+            className="mr-2"
+            value={PRICE_OPTIONS_STR.prc2}
             onChange={() =>
-              setAttributesIn({
-                ...attributesIn,
-                openAll: { ...attributesIn.openAll, isChecked: !attributesIn.openAll.isChecked },
+              setpriceIn({
+                ...priceIn,
+                prc2: { ...priceIn.prc2, isChecked: !priceIn.prc2.isChecked },
               })
             }
           />
-          <label title={LABEL_TITLE.openAll} htmlFor={FILTER_VALUES_TRUE.openAll}>
-            Open to all
+          <label htmlFor="price2" className="mr-2">
+            €€
           </label>
+          <input
+            type="checkbox"
+            id="price3"
+            className="mr-2"
+            value={PRICE_OPTIONS_STR.prc3}
+            onChange={() =>
+              setpriceIn({
+                ...priceIn,
+                prc3: { ...priceIn.prc3, isChecked: !priceIn.prc3.isChecked },
+              })
+            }
+          />
+          <label htmlFor="price3" className="mr-2">
+            €€€
+          </label>
+          <input
+            type="checkbox"
+            id="price4"
+            className="mr-2"
+            value={PRICE_OPTIONS_STR.prc4}
+            onChange={() =>
+              setpriceIn({
+                ...priceIn,
+                prc4: { ...priceIn.prc4, isChecked: !priceIn.prc4.isChecked },
+              })
+            }
+          />
+          <label htmlFor="price4" className="mr-2">
+            €€€€
+          </label>
+        </div>
+        <select
+          id="select-sortBy"
+          className="mb-2 border-0 border-b-2 bg-transparent border-gray-500"
+          defaultValue={SORT_BY_SELECT.DEFAULT}
+          name="sortBy"
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => setSortByInput(e.target.value)}
+        >
+          <option value={SORT_BY_SELECT.DEFAULT}>Sort By</option>
+          <option value={SORT_BY_SELECT.RATING}>Rating</option>
+          <option value={SORT_BY_SELECT.REVIEW_COUNT}>Review count</option>
+          <option value={SORT_BY_SELECT.DISTANCE}>Distance</option>
+        </select>
+        <div id="attributes-input-container" className="flex flex-col items-start m-2">
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.hotNew}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.hotNew}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  hotNew: { ...attributesIn.hotNew, isChecked: !attributesIn.hotNew.isChecked },
+                })
+              }
+            />
+            <label
+              title={LABEL_TITLE.hotNew}
+              htmlFor={FILTER_VALUES_TRUE.hotNew}
+              className="mr-2"
+            >{`Hot&New`}</label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.deals}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.deals}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  deals: { ...attributesIn.deals, isChecked: !attributesIn.deals.isChecked },
+                })
+              }
+            />
+            <label title={LABEL_TITLE.deals} htmlFor={FILTER_VALUES_TRUE.deals} className="mr-2">
+              Deals
+            </label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.requestQuote}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.requestQuote}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  requestQuote: {
+                    ...attributesIn.requestQuote,
+                    isChecked: !attributesIn.requestQuote.isChecked,
+                  },
+                })
+              }
+            />
+            <label
+              title={LABEL_TITLE.requestQuote}
+              htmlFor={FILTER_VALUES_TRUE.requestQuote}
+              className="mr-2"
+            >
+              Quote
+            </label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.reservation}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.reservation}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  reservation: {
+                    ...attributesIn.reservation,
+                    isChecked: !attributesIn.reservation.isChecked,
+                  },
+                })
+              }
+            />
+            <label
+              title={LABEL_TITLE.reservation}
+              htmlFor={FILTER_VALUES_TRUE.reservation}
+              className="mr-2"
+            >
+              Reservation
+            </label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.genderNeutral}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.genderNeutral}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  genderNeutral: {
+                    ...attributesIn.genderNeutral,
+                    isChecked: !attributesIn.genderNeutral.isChecked,
+                  },
+                })
+              }
+            />
+            <label
+              title={LABEL_TITLE.genderNeutral}
+              htmlFor={FILTER_VALUES_TRUE.genderNeutral}
+              className="mr-2"
+            >
+              Gender Neutral
+            </label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id={FILTER_VALUES_TRUE.openAll}
+              className="mr-2"
+              value={FILTER_VALUES_TRUE.openAll}
+              onChange={() =>
+                setAttributesIn({
+                  ...attributesIn,
+                  openAll: { ...attributesIn.openAll, isChecked: !attributesIn.openAll.isChecked },
+                })
+              }
+            />
+            <label
+              title={LABEL_TITLE.openAll}
+              htmlFor={FILTER_VALUES_TRUE.openAll}
+              className="mr-2"
+            >
+              Open to all
+            </label>
+          </div>
         </div>
       </div>
     </div>

@@ -140,11 +140,20 @@ export const ItemInfo = (props: Props): JSX.Element => {
         </div>
       </div>
       <div id="images-container">
-        <div id="main-img-container">{props?.photosArr && <img id="main-img" src={mainSrc} />}</div>
+        <div id="main-img-container">
+          {props?.photosArr && (
+            <img id="main-img" className="w-30 h-30 object-cover cursor-pointer" src={mainSrc} />
+          )}
+        </div>
         <div id="img-carousel">
           {props?.photosArr &&
             props.photosArr.map((item: string, index: number) => (
-              <img key={`photo${index}`} onClick={() => setMainSrc(item)} src={item} />
+              <img
+                key={`photo${index}`}
+                onClick={() => setMainSrc(item)}
+                src={item}
+                className="w-40 h-40 object-cover cursor-pointer"
+              />
             ))}
         </div>
       </div>

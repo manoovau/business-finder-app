@@ -54,7 +54,7 @@ export const MarkerResult = (props: prop): JSX.Element => {
         <div className="rating">
           {props?.rating && <div>{createIconReview(props.rating)}</div>} {props?.rating}
         </div>
-        <div id="element-img">
+        <div id="element-img" className="mr-4">
           <img className="img-popup-container-item" src={props.img} />
         </div>
       </Popup>

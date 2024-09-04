@@ -306,7 +306,7 @@ const App = (): JSX.Element => {
   };
 
   return (
-    <div className="App">
+    <div className="App flex flex-col h-screen justify-between">
       <div id="content-container">
         <Switch>
           <Route exact path="/">
