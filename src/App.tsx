@@ -74,7 +74,8 @@ const fetchYELP = async (
   });
 
   const data: BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType = await resp.json();
-
+  console.log(fetchParameter);
+  console.log(data);
   return data;
 };
 
@@ -137,6 +138,7 @@ const App = (): JSX.Element => {
   });
 
   const [isErrorLocation, setIsErrorLocation] = useState<boolean>(false);
+  const [isErrorBusiness, setIsErrorBusiness] = useState<boolean>(false);
 
   // YELP API LIMIT is 50
   const LIMIT = 50;
@@ -181,13 +183,11 @@ const App = (): JSX.Element => {
 
   const coorResArr: MarkerType[] = [];
 
-  useEffect(
-    (): void =>
-      setTerm(
-        `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
-      ),
-    [searchInputs, filterValue],
-  );
+  useEffect((): void => {
+    setTerm(
+      `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
+    );
+  }, [searchInputs, filterValue]);
 
   useEffect((): void => {
     if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
@@ -317,7 +317,9 @@ const App = (): JSX.Element => {
                 setFilterValue={setFilterValue}
                 filterVal={filterValue}
                 isErrorLocation={isErrorLocation}
+                isErrorBusiness={isErrorBusiness}
                 setIsErrorLocation={setIsErrorLocation}
+                setIsErrorBusiness={setIsErrorBusiness}
               />
               {businesses.total !== DEFAULT_VALUES.NUMBER && (
                 <button onClick={() => setIsMapView(!isMapView)}>

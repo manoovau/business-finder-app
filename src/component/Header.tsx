@@ -4,6 +4,7 @@ import { InputType } from "../interface";
 import { Link } from "react-router-dom";
 import { FilterInputType } from "../interface";
 import { UserContext } from "../context/UserContext";
+import { where } from "firebase/firestore";
 
 type Props = {
   filterVal: FilterInputType;
@@ -11,19 +12,23 @@ type Props = {
   setSearchInputs: (objectIn: InputType) => void;
   setFilterValue: (value: FilterInputType) => void;
   isErrorLocation: boolean;
+  isErrorBusiness: boolean;
   setIsErrorLocation: (typo: boolean) => void;
+  setIsErrorBusiness: (typo: boolean) => void;
 };
 
 type SearchProps = {
   whereInput: string;
   businessInput: string;
   setBusinessInput: (value: string) => void;
-  setBusiness: (value: string) => void;
   whereInPlaceholder: string;
+  businessInPlaceholder: string;
   setWhereInput: (value: string) => void;
-  setWhere: (value: string) => void;
   getCurrentLocation: () => void;
   setIsErrorLocation: (typo: boolean) => void;
+  setIsErrorBusiness: (typo: boolean) => void;
+  setSearchInputs: (objectIn: InputType) => void;
+  searchInputs: InputType;
 };
 
 type attrType = {
@@ -107,12 +112,14 @@ const SearchEle = (props: SearchProps): JSX.Element => {
     whereInput,
     businessInput,
     setBusinessInput,
-    setBusiness,
     whereInPlaceholder,
+    businessInPlaceholder,
     setWhereInput,
-    setWhere,
     getCurrentLocation,
     setIsErrorLocation,
+    setIsErrorBusiness,
+    setSearchInputs,
+    searchInputs,
   } = props;
 
   return (
@@ -121,7 +128,7 @@ const SearchEle = (props: SearchProps): JSX.Element => {
         type="text"
         name="business"
         id="business"
-        placeholder="Search business..."
+        placeholder={businessInPlaceholder}
         value={businessInput}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setBusinessInput(e.target.value.toLowerCase())
@@ -132,7 +139,6 @@ const SearchEle = (props: SearchProps): JSX.Element => {
         <input
           type="text"
           id="where"
-          // className={props.isErrorLocation ? "error" : DEFAULT_VALUES.EMPTY_STRING}
           className="w-[200px]"
           name="where"
           placeholder={whereInPlaceholder}
@@ -150,10 +156,18 @@ const SearchEle = (props: SearchProps): JSX.Element => {
       <button
         className="text-white border border-solid border-white p-2 mt-3 hover:bg-gray-400"
         onClick={() => {
-          whereInput === DEFAULT_VALUES.EMPTY_STRING
-            ? setIsErrorLocation(true)
-            : setWhere(whereInput);
-          if (businessInput !== DEFAULT_VALUES.EMPTY_STRING) setBusiness(businessInput);
+          if (
+            whereInput !== DEFAULT_VALUES.EMPTY_STRING &&
+            businessInput !== DEFAULT_VALUES.EMPTY_STRING
+          )
+            setSearchInputs({
+              ...searchInputs,
+              where: `&location=${whereInput}`,
+              business: businessInput,
+            });
+
+          if (whereInput === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
+          if (businessInput === DEFAULT_VALUES.EMPTY_STRING) setIsErrorBusiness(true);
         }}
       >
         Search
@@ -163,15 +177,13 @@ const SearchEle = (props: SearchProps): JSX.Element => {
 };
 
 export function Header(props: Props): JSX.Element {
-  const { setSearchInputs, setFilterValue, setIsErrorLocation } = props;
+  const { setSearchInputs, setFilterValue, setIsErrorLocation, setIsErrorBusiness } = props;
 
   const { currentUsersId, logOut } = useContext(UserContext);
 
   const [businessInput, setBusinessInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [whereInput, setWhereInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [geolocationInput, setGeolocationInput] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
-  const [business, setBusiness] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
-  const [where, setWhere] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
   const [currentGeolocation] = useDebounce(geolocationInput, 500);
   const [filterSide, setFilterSide] = useState<boolean>(false);
 
@@ -242,8 +254,6 @@ export function Header(props: Props): JSX.Element {
     endBase: `"`,
   });
 
-  const [whereInPlaceholder, setWhereInPlaceholder] = useState<string>("Where...");
-
   const LABEL_TITLE = {
     hotNew: "Popular businesses which recently joined Yelp",
     deals: "Businesses offering Yelp Deals on their profile page",
@@ -254,6 +264,17 @@ export function Header(props: Props): JSX.Element {
     openAll: "Businesses which are Open To All",
   };
 
+  const PLACE_HOLDER = {
+    where_default: "Where...",
+    business_default: "Search business..",
+    business_error: "Please, fill business type",
+    where_error: "Please, fill a correct location",
+  };
+
+  const [whereInPlaceholder, setWhereInPlaceholder] = useState<string>(PLACE_HOLDER.where_default);
+  const [businessInPlaceholder, setbusinessInPlaceholder] = useState<string>(
+    PLACE_HOLDER.business_default,
+  );
   /**
    * get current location and set latitud and longitud in where value
    */
@@ -466,19 +487,9 @@ export function Header(props: Props): JSX.Element {
     [attributesIn],
   );
 
-  useEffect(() => setSearchInputs({ ...props.searchInputs, business: business }), [business]);
-
   useEffect(
     () =>
-      !where && !currentGeolocation
-        ? setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL })
-        : setSearchInputs({ ...props.searchInputs, where: `&location=${where}` }),
-    [where],
-  );
-
-  useEffect(
-    () =>
-      !where && !currentGeolocation
+      !whereInput && !currentGeolocation
         ? setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL })
         : setSearchInputs({ ...props.searchInputs, where: currentGeolocation }),
 
@@ -516,12 +527,23 @@ export function Header(props: Props): JSX.Element {
     if (props.isErrorLocation) {
       console.log("IS ERROR LOCATION");
       setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
-      setWhereInPlaceholder("Please, fill a correct location");
+      setWhereInPlaceholder(PLACE_HOLDER.where_error);
     } else {
       setSearchInputs(props.searchInputs);
-      setWhereInPlaceholder("Where...");
+      setWhereInPlaceholder(PLACE_HOLDER.where_default);
     }
   }, [props.isErrorLocation]);
+
+  useEffect(() => {
+    if (props.isErrorBusiness) {
+      console.log("IS ERROR BUSINESS");
+      setBusinessInput(DEFAULT_VALUES.EMPTY_STRING);
+      setbusinessInPlaceholder(PLACE_HOLDER.business_error);
+    } else {
+      setSearchInputs(props.searchInputs);
+      setbusinessInPlaceholder(PLACE_HOLDER.business_default);
+    }
+  }, [props.isErrorBusiness]);
 
   const UserContainer = (): JSX.Element => {
     return (
@@ -577,12 +599,14 @@ export function Header(props: Props): JSX.Element {
                 whereInput={whereInput}
                 businessInput={businessInput}
                 setBusinessInput={setBusinessInput}
-                setBusiness={setBusiness}
+                businessInPlaceholder={businessInPlaceholder}
                 whereInPlaceholder={whereInPlaceholder}
                 setWhereInput={setWhereInput}
-                setWhere={setWhere}
                 getCurrentLocation={getCurrentLocation}
                 setIsErrorLocation={setIsErrorLocation}
+                setIsErrorBusiness={setIsErrorBusiness}
+                setSearchInputs={setSearchInputs}
+                searchInputs={props.searchInputs}
               />
             </div>
 
@@ -598,12 +622,14 @@ export function Header(props: Props): JSX.Element {
               whereInput={whereInput}
               businessInput={businessInput}
               setBusinessInput={setBusinessInput}
-              setBusiness={setBusiness}
+              businessInPlaceholder={businessInPlaceholder}
               whereInPlaceholder={whereInPlaceholder}
               setWhereInput={setWhereInput}
-              setWhere={setWhere}
               getCurrentLocation={getCurrentLocation}
               setIsErrorLocation={setIsErrorLocation}
+              setIsErrorBusiness={setIsErrorBusiness}
+              setSearchInputs={setSearchInputs}
+              searchInputs={props.searchInputs}
             />
           </div>
         </div>
@@ -614,7 +640,6 @@ export function Header(props: Props): JSX.Element {
       >
         {filterSide ? `Hide filters` : `See all filters`}
       </button>
-
       <div
         className={
           filterSide
