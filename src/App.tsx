@@ -139,6 +139,7 @@ const App = (): JSX.Element => {
 
   const [isErrorLocation, setIsErrorLocation] = useState<boolean>(false);
   const [isErrorBusiness, setIsErrorBusiness] = useState<boolean>(false);
+  const [isErrorCors, setIsErrorCors] = useState<boolean>(false);
 
   // YELP API LIMIT is 50
   const LIMIT = 50;
@@ -200,8 +201,12 @@ const App = (): JSX.Element => {
 
         if ("error" in resp) {
           setBusinesses(init_YELP_API);
-          setIsErrorLocation(true);
-          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
+          if (resp.error.code === "LOCATION_NOT_FOUND") {
+            setIsErrorLocation(true);
+            setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
+          } else {
+            setIsErrorCors(true);
+          }
         } else {
           if ("businesses" in resp) setBusinesses(resp);
           setIsErrorLocation(false);
@@ -321,6 +326,14 @@ const App = (): JSX.Element => {
                 setIsErrorLocation={setIsErrorLocation}
                 setIsErrorBusiness={setIsErrorBusiness}
               />
+              {isErrorCors && (
+                <p>
+                  Please, visit the site: https://cors-anywhere.herokuapp.com/corsdemo cors-anywhere{" "}
+                </p>
+              )}
+              {businesses.total === 0 && searchInputs.where !== DEFAULT_VALUES.NULL && (
+                <p>No results for: {searchInputs.business}</p>
+              )}
               {businesses.total !== DEFAULT_VALUES.NUMBER && (
                 <button onClick={() => setIsMapView(!isMapView)}>
                   {isMapView ? `See Results view` : `See Map View`}
