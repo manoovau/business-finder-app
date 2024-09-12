@@ -74,7 +74,8 @@ const fetchYELP = async (
   });
 
   const data: BusinessesType | ApiErrorResponse | ItemInfoType | reviewMainType = await resp.json();
-
+  console.log(fetchParameter);
+  console.log(data);
   return data;
 };
 
@@ -89,7 +90,10 @@ export const fetchYELPAsyncFunc = async (
   try {
     return await fetchYELP(url);
   } catch (err: unknown) {
-    return { error: { ok: false, description: err } };
+    console.log("Error");
+    console.log(typeof err);
+    console.log(err);
+    return { error: { ok: true, description: err } };
   }
 };
 
@@ -137,6 +141,9 @@ const App = (): JSX.Element => {
   });
 
   const [isErrorLocation, setIsErrorLocation] = useState<boolean>(false);
+  const [isErrorBusiness, setIsErrorBusiness] = useState<boolean>(false);
+  const [isErrorCors, setIsErrorCors] = useState<boolean>(false);
+  const [locationError, setLocationError] = useState<string>(DEFAULT_VALUES.EMPTY_STRING);
 
   // YELP API LIMIT is 50
   const LIMIT = 50;
@@ -181,36 +188,56 @@ const App = (): JSX.Element => {
 
   const coorResArr: MarkerType[] = [];
 
-  useEffect(
-    (): void =>
-      setTerm(
-        `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
-      ),
-    [searchInputs, filterValue],
-  );
+  useEffect((): void => {
+    setTerm(
+      `?term=${searchInputs.business}${searchInputs.where}&limit=${LIMIT}${filterValue.openFilter}${filterValue.priceFilter}${filterValue.sortByFilter}${filterValue.attrFilter}`,
+    );
+  }, [searchInputs, filterValue]);
 
   useEffect((): void => {
-    if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
+    if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(false);
 
     if (!searchInputs.where) {
       setBusinesses(init_YELP_API);
     } else {
       const fetchResultsearch = async (): Promise<void> => {
         const resp = await fetchYELPAsyncFunc(`${PATH}${term}`);
-
+        console.log(resp);
         if ("error" in resp) {
           setBusinesses(init_YELP_API);
-          setIsErrorLocation(true);
-          setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
+          if (resp.error.code === "LOCATION_NOT_FOUND") {
+            setIsErrorLocation(true);
+            setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
+          } else {
+            // error: Object { ok: false, description: SyntaxError }
+            console.log("SET is error CORS");
+            setIsErrorCors(true);
+          }
         } else {
           if ("businesses" in resp) setBusinesses(resp);
           setIsErrorLocation(false);
+          setIsErrorCors(false);
+          setIsErrorCors(false);
         }
       };
 
       fetchResultsearch();
     }
   }, [term]);
+
+  useEffect((): void => {
+    setTimeout(() => {
+      if (
+        businesses.total === DEFAULT_VALUES.NUMBER &&
+        searchInputs.business !== DEFAULT_VALUES.NULL &&
+        !isErrorCors
+      ) {
+        setLocationError(`No results for: ${searchInputs.business}`);
+      } else if (businesses.total !== DEFAULT_VALUES.NUMBER) {
+        setLocationError(DEFAULT_VALUES.EMPTY_STRING);
+      }
+    }, 1000);
+  }, [businesses]);
 
   useEffect((): void => {
     if (idSelected !== undefined) {
@@ -233,7 +260,7 @@ const App = (): JSX.Element => {
   }, [idReviewData]);
 
   useEffect((): void => {
-    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+    if (businesses.businesses.length > 0 || businesses.businesses !== undefined)
       setPageInfo({
         ...pageInfo,
         currentPage: DEFAULT_VALUES.UNIT,
@@ -252,7 +279,7 @@ const App = (): JSX.Element => {
   useEffect((): void => {
     businessPageArr.length = DEFAULT_VALUES.NUMBER;
     coorResArr.length = DEFAULT_VALUES.NUMBER;
-    if (businesses.businesses !== [] || businesses.businesses !== undefined)
+    if (businesses.businesses.length > 0 || businesses.businesses !== undefined)
       businesses.businesses.map((item: ItemInfoType, index: number) => {
         if (index >= itemsPage.min && index < itemsPage.max) {
           let url = DEFAULT_VALUES.EMPTY_STRING;
@@ -306,7 +333,7 @@ const App = (): JSX.Element => {
   };
 
   return (
-    <div className="App">
+    <div className="App flex flex-col h-screen justify-between">
       <div id="content-container">
         <Switch>
           <Route exact path="/">
@@ -317,25 +344,25 @@ const App = (): JSX.Element => {
                 setFilterValue={setFilterValue}
                 filterVal={filterValue}
                 isErrorLocation={isErrorLocation}
+                isErrorBusiness={isErrorBusiness}
                 setIsErrorLocation={setIsErrorLocation}
+                setIsErrorBusiness={setIsErrorBusiness}
               />
+              {isErrorCors && (
+                <p>
+                  Please, visit the site: https://cors-anywhere.herokuapp.com/corsdemo cors-anywhere{" "}
+                </p>
+              )}
+              {!isErrorCors && <p>{locationError}</p>}
               {businesses.total !== DEFAULT_VALUES.NUMBER && (
-                <button onClick={() => setIsMapView(!isMapView)}>
+                <button className="block sm:hidden" onClick={() => setIsMapView(!isMapView)}>
                   {isMapView ? `See Results view` : `See Map View`}
                 </button>
               )}
               {businesses.total !== DEFAULT_VALUES.NUMBER && (
-                <div id="result-container">
-                  <div className={isMapView ? "show" : "hide"}>
-                    <MapPage
-                      setIdSelected={setIdSelected}
-                      markers={markerResArr}
-                      region={businesses.region.center}
-                      updateLocationClick={updateLocationClick}
-                    />
-                  </div>
-                  <div className={isMapView ? "hide" : "show"}>
-                    <div id="item-pagin-result-container">
+                <div id="result-container" className="flex flex-row flex-wrap">
+                  <div className="w-1/3">
+                    <div id="item-pagin-result-container" className="max-w-xlreact-hoo">
                       <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
                       <Pagination
                         incrementPage={incrementPage}
@@ -344,6 +371,14 @@ const App = (): JSX.Element => {
                         totalPage={pageInfo.totalPage}
                       />
                     </div>
+                  </div>
+                  <div className="w-2/3">
+                    <MapPage
+                      setIdSelected={setIdSelected}
+                      markers={markerResArr}
+                      region={businesses.region.center}
+                      updateLocationClick={updateLocationClick}
+                    />
                   </div>
                 </div>
               )}

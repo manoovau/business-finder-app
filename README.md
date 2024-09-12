@@ -1,6 +1,7 @@
 # Business finder App
 
 Project: Business finder App using YELP API.
+Work in Progress.
 
 ## Restrictions:
 
@@ -30,7 +31,9 @@ Go to https://cors-anywhere.herokuapp.com/corsdemo and click the button.
 
 ## Install package(s).
 
-run `npm install` from the command line.
+From the command line run:
+
+run script `npm install` in the command line.
 
 ## Open project.
 

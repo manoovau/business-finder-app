@@ -60,6 +60,7 @@ type UserContextType = {
   registerUser: () => void;
   loginUser: () => void;
   logOut: () => void;
+  setProgress: (progress: number) => void;
 };
 
 type userLocalType = {
@@ -117,6 +118,7 @@ const defaultContext = {
   registerUser: () => undefined,
   loginUser: () => undefined,
   logOut: () => undefined,
+  setProgress: () => undefined,
 };
 
 /**
@@ -259,20 +261,24 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
     if (!email) {
       setIsEmailInError(true);
     } else {
-      const checkEmailInput = usersLocal.filter((item: userLocalType) => item.email === email);
-      // Email used by other user
-      if (checkEmailInput.length > 0) {
+      const existingUsersWithThisEmail = usersLocal.find(
+        (item: userLocalType) => item.email === email,
+      );
+      console.log(existingUsersWithThisEmail);
+      console.log(existingUsersWithThisEmail !== undefined);
+
+      if (existingUsersWithThisEmail !== undefined) {
         setEmailInPlaceholder("E-mail address already in use");
+        console.log("email in used");
 
         setIsEmailInError(true);
         setEmail(EMPTY_STRING);
       } else {
-        const checkUsernameInput = usersLocal.filter(
-          (item: userLocalType) => item.username === user,
-        );
-        if (checkUsernameInput.length > 0) {
+        const checkUsernameInput = usersLocal.find((item: userLocalType) => item.username === user);
+        if (checkUsernameInput !== undefined) {
           setUser(EMPTY_STRING);
           setUserInPlaceholder("Please, use other username");
+          console.log("username in used");
           setIsUserInError(true);
         }
       }
@@ -333,6 +339,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
       (err: StorageError) => console.error(err),
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((url: string) => setAvatarUrl(url));
+        setIsAddImg(true);
       },
     );
   };
@@ -342,7 +349,12 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
    * @param e file input value
    */
   const formHandler = (file: File | undefined): void => {
-    if (file !== null && file !== undefined) uploadFile(file);
+    if (file !== null && file !== undefined) {
+      uploadFile(file);
+    } else {
+      setAvatarUrl(EMPTY_STRING);
+      setIsAddImg(false);
+    }
   };
 
   useEffect(() => {
@@ -429,6 +441,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
         registerUser,
         loginUser,
         logOut,
+        setProgress,
       }}
     >
       {children}

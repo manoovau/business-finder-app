@@ -33,16 +33,22 @@ const getCategories = (data: categoriesType[]): JSX.Element => {
 
 export const BasicInfoProd = (props: Props): JSX.Element => {
   return (
-    <div id="basic-info-container">
+    <div id="basic-info-container" className="flex flex-col w-full justify-start pl-6">
       <h2>{props?.name}</h2>
-      <div className="rating">
-        {props?.rating && <div data-testid="rating-test">{createIconReview(props.rating)}</div>}{" "}
+      <div className="flex flex-wrap">
+        {props?.rating && (
+          <div data-testid="rating-test" className="pr-4">
+            {createIconReview(props.rating)}
+          </div>
+        )}{" "}
         {props?.review_count}
       </div>
 
-      <div id="price-categ-container">
-        {props?.price && <p className="price">{props.price}</p>}
-        <div id="categories-container">{props?.categories && getCategories(props.categories)}</div>
+      <div id="price-categ-container" className="flex">
+        {props?.price && <p className="mr-4 price">{props.price}</p>}
+        <div id="categories-container" className="flex flex-wrap">
+          {props?.categories && getCategories(props.categories)}
+        </div>
       </div>
       {props?.is_closed && <p data-testid="is-perm-closed">Sorry, it is permanently closed</p>}
     </div>

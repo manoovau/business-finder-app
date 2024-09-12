@@ -18,12 +18,13 @@ export const MapPage = (props: prop): JSX.Element => {
   window.dispatchEvent(new Event("resize"));
 
   return (
-    <div id="map-container">
+    <div id="map-container" className="text-center mr-8 m-5">
       {props?.region && props?.region?.latitude !== 0 && props?.region?.longitude !== 0 && (
         <MapContainer
           id="map"
           center={[props.region.latitude, props.region.longitude]}
           zoom={window.screen.width > 600 ? 12 : 11}
+          className="h-screen"
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

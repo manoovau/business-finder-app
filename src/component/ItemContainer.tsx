@@ -18,6 +18,7 @@ export const ItemContainer = (props: Props): JSX.Element => {
           <Link
             key={item.id}
             id="element-container"
+            className="m-5 p-5 mb-2 flex flex-row-reverse justify-between bg-gray-50"
             to={`/${item.id}`}
             onClick={() => setIdSelected(item.id)}
           >
@@ -29,12 +30,11 @@ export const ItemContainer = (props: Props): JSX.Element => {
               categories={item.categories}
               is_closed={item.is_closed}
             />
-            <div id="element-img">
-              {!item.image_url ? (
-                <img className="img-res-container-item" src={`/img/nullPicture.png`} />
-              ) : (
-                <img className="img-res-container-item" src={item.image_url} />
-              )}
+            <div id="element-img" className="w-24 h-24 sm:w-48 sm:h-32">
+              <img
+                className=" cursor-pointer h-full w-full object-cover"
+                src={!item.image_url ? `/img/nullPicture.png` : item.image_url}
+              />
             </div>
           </Link>
         );

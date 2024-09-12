@@ -53,6 +53,7 @@ export interface ApiErrorResponse {
 export interface ApiError {
   ok: boolean;
   description?: string | unknown;
+  code?: string | unknown;
 }
 
 export interface ItemInfoType {
