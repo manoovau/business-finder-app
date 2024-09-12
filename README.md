@@ -1,6 +1,7 @@
 # Business finder App
 
 Project: Business finder App using YELP API.
+Work in Progress.
 
 ## Restrictions:
 
