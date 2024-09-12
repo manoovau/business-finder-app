@@ -167,6 +167,7 @@ const SearchEle = (props: SearchProps): JSX.Element => {
             });
 
           if (whereInput === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
+
           if (businessInput === DEFAULT_VALUES.EMPTY_STRING) setIsErrorBusiness(true);
         }}
       >
@@ -177,7 +178,14 @@ const SearchEle = (props: SearchProps): JSX.Element => {
 };
 
 export function Header(props: Props): JSX.Element {
-  const { setSearchInputs, setFilterValue, setIsErrorLocation, setIsErrorBusiness } = props;
+  const {
+    setSearchInputs,
+    setFilterValue,
+    setIsErrorLocation,
+    setIsErrorBusiness,
+    searchInputs,
+    filterVal,
+  } = props;
 
   const { currentUsersId, logOut } = useContext(UserContext);
 
@@ -268,7 +276,7 @@ export function Header(props: Props): JSX.Element {
     where_default: "Where...",
     business_default: "Search business..",
     business_error: "Please, fill business type",
-    where_error: "Please, fill a correct location",
+    where_error: "Please, fill with a correct location",
   };
 
   const [whereInPlaceholder, setWhereInPlaceholder] = useState<string>(PLACE_HOLDER.where_default);
@@ -280,7 +288,7 @@ export function Header(props: Props): JSX.Element {
    */
   const getCurrentLocation = () => {
     setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
-    setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL });
+    setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL });
     navigator.geolocation.getCurrentPosition(
       (position: GeolocationPosition) => {
         setGeolocationInput(
@@ -359,11 +367,11 @@ export function Header(props: Props): JSX.Element {
       priceIn.prc3.isChecked ||
       priceIn.prc4.isChecked
         ? setFilterValue({
-            ...props.filterVal,
+            ...filterVal,
             priceFilter: getParameterFilterStr(priceIn),
           })
         : setFilterValue({
-            ...props.filterVal,
+            ...filterVal,
             priceFilter: DEFAULT_VALUES.EMPTY_STRING,
           }),
     [priceIn],
@@ -477,11 +485,11 @@ export function Header(props: Props): JSX.Element {
       attributesIn.genderNeutral.isChecked ||
       attributesIn.openAll.isChecked
         ? setFilterValue({
-            ...props.filterVal,
+            ...filterVal,
             attrFilter: getParameterFilterStr(attributesIn),
           })
         : setFilterValue({
-            ...props.filterVal,
+            ...filterVal,
             attrFilter: DEFAULT_VALUES.EMPTY_STRING,
           }),
     [attributesIn],
@@ -490,8 +498,8 @@ export function Header(props: Props): JSX.Element {
   useEffect(
     () =>
       !whereInput && !currentGeolocation
-        ? setSearchInputs({ ...props.searchInputs, where: DEFAULT_VALUES.NULL })
-        : setSearchInputs({ ...props.searchInputs, where: currentGeolocation }),
+        ? setSearchInputs({ ...searchInputs, where: DEFAULT_VALUES.NULL })
+        : setSearchInputs({ ...searchInputs, where: currentGeolocation }),
 
     [currentGeolocation],
   );
@@ -499,15 +507,15 @@ export function Header(props: Props): JSX.Element {
   useEffect(
     () =>
       openInput === DEFAULT_VALUES.INPUT_SELECT
-        ? setFilterValue({ ...props.filterVal, openFilter: DEFAULT_VALUES.EMPTY_STRING })
-        : setFilterValue({ ...props.filterVal, openFilter: `&open_now=true` }),
+        ? setFilterValue({ ...filterVal, openFilter: DEFAULT_VALUES.EMPTY_STRING })
+        : setFilterValue({ ...filterVal, openFilter: `&open_now=true` }),
     [openInput],
   );
 
   useEffect(
     () =>
       setFilterValue({
-        ...props.filterVal,
+        ...filterVal,
         openFilter: `&open_at=${new Date(`${openAtDate} ${openAtHour}:00`).getTime() / 1000}`,
       }),
     [openAtDate, openAtHour],
@@ -515,13 +523,13 @@ export function Header(props: Props): JSX.Element {
 
   useEffect(() => {
     if (sortByInput !== DEFAULT_VALUES.EMPTY_STRING)
-      setFilterValue({ ...props.filterVal, sortByFilter: `&sort_by=${sortByInput}` });
+      setFilterValue({ ...filterVal, sortByFilter: `&sort_by=${sortByInput}` });
   }, [sortByInput]);
 
   useEffect(() => {
-    if (props.searchInputs.where !== DEFAULT_VALUES.NULL) setIsErrorLocation(false);
-    if (props.searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
-  }, [props.searchInputs]);
+    if (searchInputs.where !== DEFAULT_VALUES.NULL) setIsErrorLocation(false);
+    if (searchInputs.where === DEFAULT_VALUES.EMPTY_STRING) setIsErrorLocation(true);
+  }, [searchInputs]);
 
   useEffect(() => {
     if (props.isErrorLocation) {
@@ -529,7 +537,7 @@ export function Header(props: Props): JSX.Element {
       setWhereInput(DEFAULT_VALUES.EMPTY_STRING);
       setWhereInPlaceholder(PLACE_HOLDER.where_error);
     } else {
-      setSearchInputs(props.searchInputs);
+      setSearchInputs(searchInputs);
       setWhereInPlaceholder(PLACE_HOLDER.where_default);
     }
   }, [props.isErrorLocation]);
@@ -540,7 +548,7 @@ export function Header(props: Props): JSX.Element {
       setBusinessInput(DEFAULT_VALUES.EMPTY_STRING);
       setbusinessInPlaceholder(PLACE_HOLDER.business_error);
     } else {
-      setSearchInputs(props.searchInputs);
+      setSearchInputs(searchInputs);
       setbusinessInPlaceholder(PLACE_HOLDER.business_default);
     }
   }, [props.isErrorBusiness]);
@@ -606,7 +614,7 @@ export function Header(props: Props): JSX.Element {
                 setIsErrorLocation={setIsErrorLocation}
                 setIsErrorBusiness={setIsErrorBusiness}
                 setSearchInputs={setSearchInputs}
-                searchInputs={props.searchInputs}
+                searchInputs={searchInputs}
               />
             </div>
 
@@ -629,7 +637,7 @@ export function Header(props: Props): JSX.Element {
               setIsErrorLocation={setIsErrorLocation}
               setIsErrorBusiness={setIsErrorBusiness}
               setSearchInputs={setSearchInputs}
-              searchInputs={props.searchInputs}
+              searchInputs={searchInputs}
             />
           </div>
         </div>
