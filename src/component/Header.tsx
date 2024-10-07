@@ -133,13 +133,13 @@ const SearchEle = (props: SearchProps): JSX.Element => {
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setBusinessInput(e.target.value.toLowerCase())
         }
-        className="w-[224px]"
+        className="w-[224px] pl-1"
       />
       <div className="mt-3">
         <input
           type="text"
           id="where"
-          className="w-[200px]"
+          className="w-[200px]  pl-1"
           name="where"
           placeholder={whereInPlaceholder}
           value={whereInput}

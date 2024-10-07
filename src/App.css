@@ -1,3 +1,66 @@
 .price {
   display: block ruby;
 }
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-weight: 300;
+}
+
+@media (max-width: 640px) {
+  .h-screen-50vh {
+    height: 50vh;
+  }
+  .h-screen-25vh {
+    height: 25vh;
+  }
+
+  .w-screen-25vw {
+    width: 25vw;
+  }
+
+  .w-screen-33vw {
+    width: 33vw;
+  }
+
+  .w-screen-50vw {
+    width: 50vw;
+  }
+
+  .w-screen-66vw {
+    width: 66vw;
+  }
+
+  .text-xxs {
+    font-size: 0.55rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .h-screen-50vh {
+    height: 50vh;
+  }
+  .h-screen-25vh {
+    height: 25vh;
+  }
+
+  .w-screen-25vw {
+    width: 25vw;
+  }
+
+  .w-screen-33vw {
+    width: 33vw;
+  }
+
+  .w-screen-50vw {
+    width: 50vw;
+  }
+
+  .w-screen-66vw {
+    width: 66vw;
+  }
+
+  .text-xxs {
+    font-size: 0.55rem;
+  }
+}

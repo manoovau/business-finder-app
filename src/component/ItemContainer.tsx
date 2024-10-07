@@ -18,7 +18,7 @@ export const ItemContainer = (props: Props): JSX.Element => {
           <Link
             key={item.id}
             id="element-container"
-            className="m-5 p-5 mb-2 flex flex-row-reverse justify-between bg-gray-50"
+            className="m-5 p-5 mb-2 flex flex-row-reverse max-w-xl justify-between bg-gray-50"
             to={`/${item.id}`}
             onClick={() => setIdSelected(item.id)}
           >
@@ -29,6 +29,7 @@ export const ItemContainer = (props: Props): JSX.Element => {
               price={item.price}
               categories={item.categories}
               is_closed={item.is_closed}
+              is_item_info={false}
             />
             <div id="element-img" className="w-24 h-24 sm:w-48 sm:h-32">
               <img

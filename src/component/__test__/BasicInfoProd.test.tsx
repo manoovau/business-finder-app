@@ -9,7 +9,13 @@ describe(`BasicInfoProd components test`, () => {
       name: "Brandenburg Gate",
     };
 
-    render(<BasicInfoProd name={selectedBusiness?.name} is_closed={selectedBusiness?.is_closed} />);
+    render(
+      <BasicInfoProd
+        name={selectedBusiness?.name}
+        is_closed={selectedBusiness?.is_closed}
+        is_item_info={false}
+      />,
+    );
 
     expect(screen.queryByTestId("is-perm-closed")).toBeNull();
     expect(screen.queryByTestId("rating-test")).toBeNull();
@@ -30,6 +36,7 @@ describe(`BasicInfoProd components test`, () => {
         name={selectedBusiness.name}
         rating={selectedBusiness.rating}
         is_closed={selectedBusiness.is_closed}
+        is_item_info={false}
       />,
     );
 

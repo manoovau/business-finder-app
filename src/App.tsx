@@ -333,7 +333,7 @@ const App = (): JSX.Element => {
   };
 
   return (
-    <div className="App flex flex-col h-screen justify-between">
+    <div className="text-center flex flex-col h-screen justify-between">
       <div id="content-container">
         <Switch>
           <Route exact path="/">
@@ -361,18 +361,16 @@ const App = (): JSX.Element => {
               )}
               {businesses.total !== DEFAULT_VALUES.NUMBER && (
                 <div id="result-container" className="flex flex-row flex-wrap">
-                  <div className="w-1/3">
+                  <div
+                    className={isMapView ? "sm:block sm:w-1/3 hidden" : "sm:w-1/3 sm:block w-full"}
+                  >
                     <div id="item-pagin-result-container" className="max-w-xlreact-hoo">
                       <ItemContainer setIdSelected={setIdSelected} resultYELPBus={businessPage} />
-                      <Pagination
-                        incrementPage={incrementPage}
-                        decrementPage={decrementPage}
-                        currentPage={pageInfo.currentPage}
-                        totalPage={pageInfo.totalPage}
-                      />
                     </div>
                   </div>
-                  <div className="w-2/3">
+                  <div
+                    className={isMapView ? "sm:w-2/3 sm:block w-full " : "sm:block sm:w-2/3 hidden"}
+                  >
                     <MapPage
                       setIdSelected={setIdSelected}
                       markers={markerResArr}
@@ -380,6 +378,12 @@ const App = (): JSX.Element => {
                       updateLocationClick={updateLocationClick}
                     />
                   </div>
+                  <Pagination
+                    incrementPage={incrementPage}
+                    decrementPage={decrementPage}
+                    currentPage={pageInfo.currentPage}
+                    totalPage={pageInfo.totalPage}
+                  />
                 </div>
               )}
             </div>
@@ -394,18 +398,21 @@ const App = (): JSX.Element => {
             {currentUsersId === userLocalInit ? <Redirect to="/" /> : <ProfileContainer />}
           </Route>
           <Route path={`/${selectedBusiness.id}`}>
-            <div>
-              <Link to="/" id="title">
+            <div className="mt-0 mx-auto mb-40 flex flex-col justify-center sm:w-screen-33vw w-screen-66vw ">
+              <Link to="/" id="title" className="flex justify-center my-4">
                 <h3>{`< Go Back `}</h3>
               </Link>
-              <BasicInfoProd
-                name={selectedBusiness.name}
-                rating={selectedBusiness?.rating}
-                review_count={selectedBusiness?.review_count}
-                price={selectedBusiness?.price}
-                categories={selectedBusiness?.categories}
-                is_closed={selectedBusiness?.is_closed}
-              />
+              <div className="flex justify-center">
+                <BasicInfoProd
+                  name={selectedBusiness.name}
+                  rating={selectedBusiness?.rating}
+                  review_count={selectedBusiness?.review_count}
+                  price={selectedBusiness?.price}
+                  categories={selectedBusiness?.categories}
+                  is_closed={selectedBusiness?.is_closed}
+                  is_item_info={true}
+                />
+              </div>
               <ItemInfo
                 id={selectedBusiness.id}
                 hours={selectedBusiness?.hours}
@@ -419,7 +426,7 @@ const App = (): JSX.Element => {
                 setShowReview={setShowReview}
               />
 
-              <div className={showReview ? "show" : "hide"}>
+              <div className={showReview ? "block" : "hidden"}>
                 <ItemReview
                   url={selectedBusiness?.url}
                   revPos_lang={reviewData?.possible_languages}
@@ -428,7 +435,7 @@ const App = (): JSX.Element => {
                 />
               </div>
               {selectedBusiness?.coordinates && (
-                <div className={showReview ? "hide" : "show"}>
+                <div className={showReview ? "hidden" : "flex justify-center my-4"}>
                   <MapPageItem region={selectedBusiness?.coordinates} />
                 </div>
               )}

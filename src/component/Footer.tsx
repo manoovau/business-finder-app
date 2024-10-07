@@ -2,7 +2,10 @@ import React from "react";
 
 export const Footer = (): JSX.Element => {
   return (
-    <div id="footer-container" className="flex flex-col items-center p-6 bg-gray-500 text-white">
+    <div
+      id="footer-container"
+      className="text-sm text-xxs flex flex-col items-center p-6 bg-gray-500 text-white "
+    >
       <div>
         Icons made by{` `}
         <a href="https://www.flaticon.com/authors/payungkead" title="Payungkead">
