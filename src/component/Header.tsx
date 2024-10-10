@@ -133,13 +133,13 @@ const SearchEle = (props: SearchProps): JSX.Element => {
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setBusinessInput(e.target.value.toLowerCase())
         }
-        className="w-[224px]"
+        className="w-[224px] pl-1"
       />
       <div className="mt-3">
         <input
           type="text"
           id="where"
-          className="w-[200px]"
+          className="w-[200px]  pl-1"
           name="where"
           placeholder={whereInPlaceholder}
           value={whereInput}
@@ -596,10 +596,10 @@ export function Header(props: Props): JSX.Element {
 
   return (
     <div>
-      <div className="flex justify-between bg-gray-500 text-white p-4">
-        <div className="w-full">
+      <div className="bg-gray-500 text-white p-4">
+        <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap justify-between">
-            <Link to="/" className="self-center m-3">
+            <Link to="/" className="self-center my-3 mx-6">
               <h1>Business Finder</h1>
             </Link>
             <div className="hidden sm:block">
@@ -618,10 +618,10 @@ export function Header(props: Props): JSX.Element {
               />
             </div>
 
-            <div className="block sm:hidden">
+            <div className="block mx-6 sm:hidden">
               <UserContainer />
             </div>
-            <div className="hidden sm:block sm:self-center">
+            <div className="hidden mx-6 sm:block sm:self-center">
               <UserContainer />
             </div>
           </div>
@@ -650,12 +650,10 @@ export function Header(props: Props): JSX.Element {
       </button>
       <div
         className={
-          filterSide
-            ? ` text-gray-500 mt-2  p-4  bg-slate-400 border-b border-solid border-cyan-500`
-            : `hidden`
+          filterSide ? ` text-gray-500 mt-2  p-4 border-b border-solid pl-12 sm:pl-20` : `hidden`
         }
       >
-        <div className="mb-2 ">
+        <div className="mb-2 flex">
           <select
             className="pr-12  border-0 border-b-2 bg-transparent border-gray-500 "
             id="select-open"
@@ -694,7 +692,7 @@ export function Header(props: Props): JSX.Element {
           </div>
         )}
 
-        <div id="price-input-container" className="m-2">
+        <div id="price-input-container" className="m-2 flex">
           <input
             type="checkbox"
             id="price1"
@@ -758,7 +756,7 @@ export function Header(props: Props): JSX.Element {
         </div>
         <select
           id="select-sortBy"
-          className="mb-2 border-0 border-b-2 bg-transparent border-gray-500"
+          className="mb-2 flex border-0 border-b-2 bg-transparent border-gray-500"
           defaultValue={SORT_BY_SELECT.DEFAULT}
           name="sortBy"
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setSortByInput(e.target.value)}

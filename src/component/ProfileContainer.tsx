@@ -61,10 +61,10 @@ export const ProfileContainer = (): JSX.Element => {
         </Link>
       </div>
       <div id="remove-account-container">
-        <button className={isDelConf ? "hide" : "show"} onClick={() => setIsDelConf(!isDelConf)}>
+        <button className={isDelConf ? "hidden" : "block"} onClick={() => setIsDelConf(!isDelConf)}>
           REMOVE ACCOUNT
         </button>
-        <div id="delete-confirm-container" className={isDelConf ? "show" : "hide"}>
+        <div id="delete-confirm-container" className={isDelConf ? "block" : "hidden"}>
           <p>Are you sure ?</p>
           <Link to="/">
             <button onClick={deleteUser}>yes</button>

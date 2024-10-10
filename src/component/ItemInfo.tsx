@@ -104,24 +104,28 @@ export const ItemInfo = (props: Props): JSX.Element => {
           <p data-testid="is-open">{props.hours[0].is_open_now ? "It is Open" : "It is closed"}</p>
         )}
         {props?.hours && (
-          <div id="open-hours-el" onClick={() => setShowOpenHours(!showOpenHours)}>
+          <div
+            id="open-hours-el"
+            className="cursor-pointer"
+            onClick={() => setShowOpenHours(!showOpenHours)}
+          >
             Open hours
-            <div id="open-hours-ele" className={showOpenHours ? "show" : "hide"}>
+            <div id="open-hours-ele" className={showOpenHours ? "block" : "hidden"}>
               {getOpenHours(props.hours)}
             </div>
           </div>
         )}
         <div id="address-container">{props?.location_disp && getAddress(props.location_disp)}</div>
-        <div id="icon-container">
+        <div id="icon-container" className="w-full h-auto flex justify-center">
           {props?.url && (
             <a href={props.url}>
-              <i className="fas fa-link"></i>
+              <i className="fas fa-link m-2"></i>
             </a>
           )}
           {props?.phone && (
             <i
               data-testid="phone-element"
-              className="fas fa-phone-alt"
+              className="fas fa-phone-alt m-2"
               onClick={() => setShowPhone(!showPhone)}
             >
               {showPhone && <p>{props.phone}</p>}
@@ -132,6 +136,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
             src="/img/review.png"
             id="review-icon-img"
             alt="review icon"
+            className="w-6 h-auto cursor-pointer m-2"
             onClick={() => {
               setIdReviewData(props.id);
               setShowReview(!props.showReview);
@@ -139,20 +144,27 @@ export const ItemInfo = (props: Props): JSX.Element => {
           />
         </div>
       </div>
-      <div id="images-container">
-        <div id="main-img-container">
+      <div id="images-container" className="flex flex-col justify-center sm:flex-row ">
+        <div id="main-img-container" className="flex justify-center">
           {props?.photosArr && (
-            <img id="main-img" className="w-30 h-30 object-cover cursor-pointer" src={mainSrc} />
+            <img
+              id="main-img"
+              className="sm:w-96 sm:h-96 w-48 h-48 object-cover cursor-pointer"
+              src={mainSrc}
+            />
           )}
         </div>
-        <div id="img-carousel">
+        <div
+          id="img-carousel"
+          className="object-cover cursor-pointer flex flex-row  flex-wrap justify-center m-1 sm:flex-col"
+        >
           {props?.photosArr &&
             props.photosArr.map((item: string, index: number) => (
               <img
                 key={`photo${index}`}
                 onClick={() => setMainSrc(item)}
                 src={item}
-                className="w-40 h-40 object-cover cursor-pointer"
+                className="w-12 h-12 object-cover cursor-pointer m-1 sm:w-24 sm:h-24"
               />
             ))}
         </div>

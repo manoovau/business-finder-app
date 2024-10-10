@@ -68,35 +68,53 @@ export const ItemReview = (props: Props): JSX.Element => {
           })}
         </div>
       )}
-      <div id="reviews-container">
+      <div id="reviews-container" className="w-full">
         <h5>Review Highlights</h5>
         {props?.revArr &&
           props.revArr.map((item: reviewsType, index: number) => {
             return (
-              <div className="review" key={`review${index}`}>
-                <div className="review-user">
-                  {!item.user.profile_url ? (
-                    <h5>{item.user.name}</h5>
-                  ) : (
-                    <a data-testid="profile-url" href={item.user.profile_url}>
-                      <h5>{item.user.name}</h5>
-                    </a>
-                  )}
-                  {!item.user.image_url ? (
-                    <img className="img-user" src={"/img/nullUser.png"} alt="user image url" />
-                  ) : (
-                    <img className="img-user" src={item.user.image_url} alt="user image url" />
-                  )}
-                </div>
-                <div className="rating-time-container">
-                  {createIconReview(item.rating)}
-                  <p>{item.time_created}</p>
-                </div>
-                <div id="review-text-container">
-                  <p className="review-text">{item.text}</p>
-                  {item?.text?.substr(item?.text?.length - 3) === "..." && props.url && (
-                    <a href={props.url}>See more</a>
-                  )}
+              <div
+                className="review m-8 sm:flex sm:rating-time-container sm:flex-row ml-8 justify-center"
+                key={`review${index}`}
+              >
+                <div className="flex flex-row">
+                  <div className="flex flex-col mx-4 my-2 sm:mx-10 sm:my-4">
+                    {!item.user.image_url ? (
+                      <img
+                        className="mx-1 img-user w-12 h-12 sm:w-24 sm:h-24"
+                        src={"/img/nullUser.png"}
+                        alt="user image url"
+                      />
+                    ) : (
+                      <img
+                        className="mx-1 img-user w-12 h-12 sm:w-24 sm:h-24 object-cover"
+                        src={item.user.image_url}
+                        alt="user image url"
+                      />
+                    )}
+                    <div className="review-user font-semibold">
+                      {!item.user.profile_url ? (
+                        <h5 className="mx-1">{item.user.name}</h5>
+                      ) : (
+                        <a data-testid="profile-url" href={item.user.profile_url}>
+                          <h5 className="mx-1">{item.user.name}</h5>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col min-w-60 sm:w-[768px] sm:mx-10 sm:my-4">
+                    <div className="rating-time-container flex flex-col sm:flex-row justify-start">
+                      <div className="flex">{createIconReview(item.rating)}</div>
+                      <p className="ml-0 sm:ml-8 flex">{item.time_created}</p>
+                    </div>
+                    <div id="review-text-container" className="max-w-60 sm:max-w-screen-md">
+                      <p className="review-text text-left my-2">{item.text}</p>
+                      {item?.text?.substr(item?.text?.length - 3) === "..." && props.url && (
+                        <a href={props.url}>See more</a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             );
