@@ -4,7 +4,7 @@ export const Footer = (): JSX.Element => {
   return (
     <div
       id="footer-container"
-      className="text-sm text-xxs flex flex-col items-center p-6 bg-gray-500 text-white "
+      className="text-[0.55rem] flex flex-col items-center p-6 bg-gray-500 text-white sm:text-[1rem]"
     >
       <div>
         Icons made by{` `}

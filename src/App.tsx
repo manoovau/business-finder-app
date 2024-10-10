@@ -398,33 +398,36 @@ const App = (): JSX.Element => {
             {currentUsersId === userLocalInit ? <Redirect to="/" /> : <ProfileContainer />}
           </Route>
           <Route path={`/${selectedBusiness.id}`}>
-            <div className="mt-0 mx-auto mb-40 flex flex-col justify-center sm:w-screen-33vw w-screen-66vw ">
-              <Link to="/" id="title" className="flex justify-center my-4">
-                <h3>{`< Go Back `}</h3>
-              </Link>
-              <div className="flex justify-center">
-                <BasicInfoProd
-                  name={selectedBusiness.name}
-                  rating={selectedBusiness?.rating}
-                  review_count={selectedBusiness?.review_count}
-                  price={selectedBusiness?.price}
-                  categories={selectedBusiness?.categories}
-                  is_closed={selectedBusiness?.is_closed}
-                  is_item_info={true}
+            <div className="mt-0 mx-auto mb-4 flex flex-col justify-center  ">
+              <div className="flex flex-col justify-center">
+                {" "}
+                <Link to="/" id="title" className="lg:w-[1280px] flex justify-start mx-auto my-4">
+                  <h3>{`< Go Back `}</h3>
+                </Link>
+                <div className="flex justify-center">
+                  <BasicInfoProd
+                    name={selectedBusiness.name}
+                    rating={selectedBusiness?.rating}
+                    review_count={selectedBusiness?.review_count}
+                    price={selectedBusiness?.price}
+                    categories={selectedBusiness?.categories}
+                    is_closed={selectedBusiness?.is_closed}
+                    is_item_info={true}
+                  />
+                </div>
+                <ItemInfo
+                  id={selectedBusiness.id}
+                  hours={selectedBusiness?.hours}
+                  location_disp={selectedBusiness?.location?.display_address}
+                  url={selectedBusiness?.url}
+                  phone={selectedBusiness?.phone}
+                  photosArr={selectedBusiness?.photos}
+                  coordinates={selectedBusiness?.coordinates}
+                  showReview={showReview}
+                  setIdReviewData={setIdReviewData}
+                  setShowReview={setShowReview}
                 />
               </div>
-              <ItemInfo
-                id={selectedBusiness.id}
-                hours={selectedBusiness?.hours}
-                location_disp={selectedBusiness?.location?.display_address}
-                url={selectedBusiness?.url}
-                phone={selectedBusiness?.phone}
-                photosArr={selectedBusiness?.photos}
-                coordinates={selectedBusiness?.coordinates}
-                showReview={showReview}
-                setIdReviewData={setIdReviewData}
-                setShowReview={setShowReview}
-              />
 
               <div className={showReview ? "block" : "hidden"}>
                 <ItemReview

@@ -17,7 +17,7 @@ export const MapPageItem = (props: prop): JSX.Element => {
       id="map-item"
       center={[props.region.latitude, props.region.longitude]}
       zoom={15}
-      className="m-8 h-screen-25vh w-screen-50vw  sm:m-2 sm:h-screen-50vh sm:w-screen-33vw"
+      className="m-8 h-[25vh] w-full sm:m-2 sm:h-[50vh] sm:w-[50%]"
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
