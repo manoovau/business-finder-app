@@ -557,7 +557,7 @@ export function Header(props: Props): JSX.Element {
     return (
       <div className="m-3">
         {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
-          <div>
+          <div className="flex justify-center">
             <Link to="/login">
               <img className="h-5 mr-1" src="/img/nullUser.png" alt="avatar image" />
             </Link>
