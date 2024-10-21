@@ -52,9 +52,10 @@ export const getOpenHours = (itemInfo: HoursType[] | undefined) => {
   if (itemInfo) {
     itemInfo[0].open.map((item: OpenType, index: number) => {
       openHoursArr.push(
-        <p key={getDay(index)}>{`${getDay(index)} ${item.start.substring(0, 2)}:${item.start.slice(
+        <p key={getDay(index)}>{`${getDay(index).slice(0, 3)} ${item.start.substring(
+          0,
           2,
-        )} - ${item.end.substring(0, 2)}:${item.end.slice(2)}`}</p>,
+        )}:${item.start.slice(2)} - ${item.end.substring(0, 2)}:${item.end.slice(2)}`}</p>,
       );
     });
   }
@@ -106,7 +107,7 @@ export const ItemInfo = (props: Props): JSX.Element => {
         {props?.hours && (
           <div
             id="open-hours-el"
-            className="cursor-pointer"
+            className="cursor-pointer mb-4"
             onClick={() => setShowOpenHours(!showOpenHours)}
           >
             Open hours

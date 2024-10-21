@@ -6,3 +6,11 @@ body {
   font-family: "Roboto", sans-serif;
   font-weight: 300;
 }
+
+.error {
+  @apply relative;
+  @apply outline-none;
+  animation: shake 0.1s linear;
+  animation-iteration-count: 3;
+  border: 1px solid red;
+}

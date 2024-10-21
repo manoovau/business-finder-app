@@ -43,7 +43,7 @@ export const RegisterPage = (): JSX.Element => {
     setUser,
     setPassword,
     setEmail,
-    formHandler,
+    profilePictureHandler,
     registerUser,
     setProgress,
     setIsAddImg,
@@ -67,7 +67,7 @@ export const RegisterPage = (): JSX.Element => {
     if (data.avatarFile.length !== 0) isAvatarFilled = true;
 
     try {
-      formHandler(data.avatarFile[0]);
+      profilePictureHandler(data.avatarFile[0]);
       setEmail(data.emailIn);
       setUser(data.usernameIn);
       setPassword(data.passwordIn);
@@ -80,7 +80,7 @@ export const RegisterPage = (): JSX.Element => {
 
   useEffect(() => {
     setProgress(0);
-    formHandler(undefined);
+    profilePictureHandler(undefined);
     setEmail(EMPTY_STRING);
     setUser(EMPTY_STRING);
     setPassword(EMPTY_STRING);
@@ -88,19 +88,36 @@ export const RegisterPage = (): JSX.Element => {
     setIsAddImg(false);
   }, []);
 
+  console.log(isAvatarFilled);
   return (
-    <div>
-      <Link to="/">
+    <div className="flex flex-col">
+      <Link
+        to="/"
+        className={
+          user && password && email ? "hidden" : "lg:w-[1280px] flex justify-start mx-auto my-4"
+        }
+      >
         <h3>{`< Go Back `}</h3>
       </Link>
-      <div className={user && password && email ? "register-popup" : EMPTY_STRING}>
-        <div className={user && password && email ? "register-popup-inner" : EMPTY_STRING}>
+      <div
+        className={
+          user && password && email ? "relative cursor-pointer flex flex-col mt-16" : EMPTY_STRING
+        }
+      >
+        <div
+          className={
+            user && password && email
+              ? "register-popup-inner p-12 bg-gray-500 sm:w-[50%] w-[90%] h-[40%] my-auto mx-auto inset-0 text-white"
+              : EMPTY_STRING
+          }
+        >
           {user && password && email ? (
             <p>Your Details has been Succesfully Submitted. You are register. Thanks!</p>
           ) : null}
           {user && password && email ? (
             <button
               type="button"
+              className="m-auto w-24 my-3 bg-gray-500 text-white border border-solid border-white p-2 hover:bg-gray-400"
               onClick={registerUser}
               disabled={!((isAddImg && isAvatarFilled) || !isAvatarFilled)}
             >
@@ -110,38 +127,61 @@ export const RegisterPage = (): JSX.Element => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSub)}>
+      <form
+        onSubmit={handleSubmit(onSub)}
+        className={user && password && email ? "hidden" : "flex flex-col m-auto"}
+      >
         <input
           id="username-register"
           type="text"
           {...register("usernameIn")}
-          className={errors.usernameIn ? "error" : EMPTY_STRING}
+          className={
+            errors.usernameIn ? "error pl-1 w-60 border-b mt-5" : "pl-1 w-60 border-b mt-5"
+          }
           placeholder={errors.usernameIn ? "username is empty" : userInPlaceholder}
         />
-        <p className={errors.usernameIn ? "error" : EMPTY_STRING}>{errors.usernameIn?.message}</p>
+        <p className={errors.usernameIn ? "text-red-300 text-start mb-5 mt-1" : "mb-5 mt-1"}>
+          {errors.usernameIn?.message}
+        </p>
         <input
           id="password-register"
           type="text"
           {...register("passwordIn")}
-          className={errors.passwordIn ? "error" : EMPTY_STRING}
+          className={
+            errors.passwordIn ? "error pl-1 w-60 border-b mt-5" : "pl-1 w-60 border-b mt-5"
+          }
           placeholder={errors.passwordIn ? "password is empty" : pwInPlaceholder}
         />
-        <p className={errors.passwordIn ? "error" : EMPTY_STRING}>{errors.passwordIn?.message}</p>
+        <p className={errors.passwordIn ? "text-red-300 text-start mb-5 mt-1" : "mb-5 mt-1"}>
+          {errors.passwordIn?.message}
+        </p>
         <input
           id="email-register"
           type="email"
           {...register("emailIn")}
-          className={errors.emailIn ? "error" : EMPTY_STRING}
+          className={errors.emailIn ? "error pl-1 w-60 border-b mt-5" : "pl-1 w-60 border-b mt-5"}
           placeholder={errors.emailIn ? "email is empty" : emailInPlaceholder}
         />
-        <p className={errors.emailIn ? "error" : EMPTY_STRING}>{errors.emailIn?.message}</p>
+        <p className={errors.emailIn ? "text-red-300 text-start mb-5 mt-1" : "mb-5 mt-1"}>
+          {errors.emailIn?.message}
+        </p>
         <div id="add-img">
-          <input {...register("avatarFile")} type="file" className="input" />
-          <hr />
-          <h2>Uploading {progress}%</h2>
+          <p className="text-start mt-6"> Add your picture profile</p>
+          <input
+            {...register("avatarFile")}
+            type="file"
+            className="w-60 sm:w-96 my-3 p-2 file:hover:bg-gray-400 file:bg-gray-500 file:text-white file:border-none file:px-4 file:py-2"
+          />
+          <h2 className="text-start">Uploading {progress}%</h2>
         </div>
-        <p className={errors.avatarFile ? "error" : EMPTY_STRING}>{errors.avatarFile?.message}</p>
-        <button type="submit" disabled={isSubmitting}>
+        <p className={errors.avatarFile ? "text-red-300 text-start mb-5 mt-1" : "mb-5 mt-1"}>
+          {errors.avatarFile?.message}
+        </p>
+        <button
+          type="submit"
+          className="w-20 my-8 bg-gray-500 text-white border border-solid border-white p-2 hover:bg-gray-400"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Loading" : "Register"}
         </button>
       </form>
