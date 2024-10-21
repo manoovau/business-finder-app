@@ -557,38 +557,28 @@ export function Header(props: Props): JSX.Element {
     return (
       <div className="m-3">
         {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
-          <div className="flex justify-center">
-            <Link to="/login">
-              <img className="h-5 mr-1" src="/img/nullUser.png" alt="avatar image" />
+          <Link to="/login" className="flex flex-col">
+            <img className="h-5 w-5 m-auto" src="/img/nullUser.png" alt="avatar image" />
+            <h3>{`Log In`}</h3>
+          </Link>
+        ) : (
+          <div className="flex flex-col">
+            <Link to="/profile" id="profile" className="flex flex-col mb-3">
+              <img
+                className="h-7 w-7 m-auto mb-2"
+                src={
+                  currentUsersId.avatar !== DEFAULT_VALUES.EMPTY_STRING
+                    ? currentUsersId.avatar
+                    : "/img/nullUser.png"
+                }
+                alt="avatar image"
+              />
+              <p>{currentUsersId.username}</p>
+            </Link>
+            <Link to="/" onClick={logOut}>
+              <h3>{`Log Out`}</h3>
             </Link>
           </div>
-        ) : (
-          <Link to="/profile" id="profile">
-            <img
-              className="h-5 mr-1"
-              src={
-                currentUsersId.avatar !== DEFAULT_VALUES.EMPTY_STRING
-                  ? currentUsersId.avatar
-                  : "/img/nullUser.png"
-              }
-              alt="avatar image"
-            />
-            {currentUsersId.username}
-          </Link>
-        )}
-        {currentUsersId.password === DEFAULT_VALUES.EMPTY_STRING ? (
-          <div>
-            <Link to="/login" className="hidden sm:block">
-              <h3>{`Log In`}</h3>
-            </Link>
-            <Link to="/register" className="hidden">
-              <h3>{`Register`}</h3>
-            </Link>
-          </div>
-        ) : (
-          <Link to="/" onClick={logOut}>
-            <h3>{`Log Out`}</h3>
-          </Link>
         )}
       </div>
     );

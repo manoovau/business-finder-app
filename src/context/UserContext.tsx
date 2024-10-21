@@ -56,7 +56,7 @@ type UserContextType = {
   setPassword: (password: string) => void;
   setEmail: (email: string) => void;
   setIsAddImg: (isAddImg: boolean) => void;
-  formHandler: (file: File | undefined) => void;
+  profilePictureHandler: (file: File | undefined) => void;
   registerUser: () => void;
   loginUser: () => void;
   logOut: () => void;
@@ -114,7 +114,7 @@ const defaultContext = {
   setPassword: () => undefined,
   setEmail: () => undefined,
   setIsAddImg: () => undefined,
-  formHandler: () => undefined,
+  profilePictureHandler: () => undefined,
   registerUser: () => undefined,
   loginUser: () => undefined,
   logOut: () => undefined,
@@ -348,7 +348,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
    * extract file input and run firebase upload function
    * @param e file input value
    */
-  const formHandler = (file: File | undefined): void => {
+  const profilePictureHandler = (file: File | undefined): void => {
     if (file !== null && file !== undefined) {
       uploadFile(file);
     } else {
@@ -437,7 +437,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
         setPassword,
         setEmail,
         setIsAddImg,
-        formHandler,
+        profilePictureHandler,
         registerUser,
         loginUser,
         logOut,
