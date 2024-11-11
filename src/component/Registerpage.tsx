@@ -11,7 +11,7 @@ let isAvatarFilled = false;
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-const schema = z.object({
+const formInputs = z.object({
   usernameIn: z.string().min(4),
   passwordIn: z.string().min(8),
   emailIn: z.string().email(),
@@ -28,7 +28,7 @@ const schema = z.object({
     ),
 });
 
-type Inputs = z.infer<typeof schema>;
+type Inputs = z.infer<typeof formInputs>;
 
 export const RegisterPage = (): JSX.Element => {
   const {
@@ -47,6 +47,9 @@ export const RegisterPage = (): JSX.Element => {
     registerUser,
     setProgress,
     setIsAddImg,
+    setUserInPlaceholder,
+    setPwInPlaceholder,
+    setEmailInPlaceholder,
   } = useContext(UserContext);
 
   const {
@@ -60,7 +63,7 @@ export const RegisterPage = (): JSX.Element => {
       emailIn: EMPTY_STRING,
       avatarFile: undefined,
     },
-    resolver: zodResolver(schema),
+    resolver: zodResolver(formInputs),
   });
 
   const onSub: SubmitHandler<Inputs> = (data) => {
@@ -80,12 +83,11 @@ export const RegisterPage = (): JSX.Element => {
 
   useEffect(() => {
     setProgress(0);
-    profilePictureHandler(undefined);
-    setEmail(EMPTY_STRING);
-    setUser(EMPTY_STRING);
-    setPassword(EMPTY_STRING);
     isAvatarFilled = false;
     setIsAddImg(false);
+    setUserInPlaceholder("username");
+    setPwInPlaceholder("password");
+    setEmailInPlaceholder("e-mail");
   }, []);
 
   console.log(isAvatarFilled);
@@ -138,10 +140,12 @@ export const RegisterPage = (): JSX.Element => {
           className={
             errors.usernameIn ? "error pl-1 w-60 border-b mt-5" : "pl-1 w-60 border-b mt-5"
           }
-          placeholder={errors.usernameIn ? "username is empty" : userInPlaceholder}
+          placeholder={userInPlaceholder}
         />
         <p className={errors.usernameIn ? "text-red-300 text-start mb-5 mt-1" : "mb-5 mt-1"}>
-          {errors.usernameIn?.message}
+          {errors.usernameIn?.message?.length === 0
+            ? userInPlaceholder
+            : errors.usernameIn?.message}
         </p>
         <input
           id="password-register"

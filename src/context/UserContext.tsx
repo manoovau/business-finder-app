@@ -56,6 +56,11 @@ type UserContextType = {
   setPassword: (password: string) => void;
   setEmail: (email: string) => void;
   setIsAddImg: (isAddImg: boolean) => void;
+  setIsUserInError: (isUserErr: boolean) => void;
+  setIsPwInError: (isPwErr: boolean) => void;
+  setUserInPlaceholder: (newPw: string) => void;
+  setPwInPlaceholder: (newPw: string) => void;
+  setEmailInPlaceholder: (newPw: string) => void;
   profilePictureHandler: (file: File | undefined) => void;
   registerUser: () => void;
   loginUser: () => void;
@@ -114,6 +119,11 @@ const defaultContext = {
   setPassword: () => undefined,
   setEmail: () => undefined,
   setIsAddImg: () => undefined,
+  setIsUserInError: () => undefined,
+  setIsPwInError: () => undefined,
+  setUserInPlaceholder: () => undefined,
+  setPwInPlaceholder: () => undefined,
+  setEmailInPlaceholder: () => undefined,
   profilePictureHandler: () => undefined,
   registerUser: () => undefined,
   loginUser: () => undefined,
@@ -221,6 +231,8 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
     setIsUserInError(false);
     setIsPwInError(false);
 
+    console.log("LOGIN");
+    console.log(usersLocal);
     if (!password) {
       setPwInPlaceholder("password is empty");
       setIsPwInError(true);
@@ -254,12 +266,43 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
     setIsPwInError(false);
     setIsEmailInError(false);
 
-    if (!user) setIsUserInError(true);
+    console.log("Register button");
+    console.log(usersLocal);
+    console.log("user");
+    console.log(user);
+    console.log("!user");
+    console.log(!user);
 
-    if (!password) setIsPwInError(true);
+    // Validate user
+    if (!user) {
+      setIsUserInError(true);
+      setUserInPlaceholder("username is empty");
+      console.log("USER IS !user");
+    } else {
+      console.log("USER IS !user else");
+      const checkUsernameInput = usersLocal.find((item: userLocalType) => item.username === user);
+      console.log("checkUsernameInput");
+      console.log(checkUsernameInput);
+      console.log(checkUsernameInput !== undefined);
 
+      if (checkUsernameInput !== undefined) {
+        setUser(EMPTY_STRING);
+        setUserInPlaceholder("Please, use other username");
+        console.log("username in used");
+        setIsUserInError(true);
+      }
+    }
+
+    // Validate password
+    if (!password) {
+      setIsPwInError(true);
+      setPwInPlaceholder("Password is empty");
+    }
+
+    // Validate email
     if (!email) {
       setIsEmailInError(true);
+      setEmailInPlaceholder("Email is empty");
     } else {
       const existingUsersWithThisEmail = usersLocal.find(
         (item: userLocalType) => item.email === email,
@@ -283,7 +326,7 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
         }
       }
 
-      if (user && password && email)
+      if (user && password && email) {
         setCurrentUsersId({
           ...currentUsersId,
           username: user,
@@ -291,6 +334,12 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
           email: email,
           avatar: avatarUrl,
         });
+        setUserInPlaceholder("username");
+        setIsUserInError(false);
+        setPwInPlaceholder("password");
+        setIsPwInError(false);
+        setEmailInPlaceholder("e-mail");
+      }
     }
   };
 
@@ -437,6 +486,11 @@ const UserContextProvider = ({ children }: { children?: React.ReactNode }) => {
         setPassword,
         setEmail,
         setIsAddImg,
+        setUserInPlaceholder,
+        setPwInPlaceholder,
+        setIsUserInError,
+        setIsPwInError,
+        setEmailInPlaceholder,
         profilePictureHandler,
         registerUser,
         loginUser,

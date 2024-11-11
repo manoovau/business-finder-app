@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect } from "react";
 import { useContext } from "react";
 import { Link, Route, Switch } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -15,8 +15,19 @@ export const LoginPage = (): JSX.Element => {
     pwInPlaceholder,
     setUser,
     setPassword,
+    setIsUserInError,
+    setIsPwInError,
+    setUserInPlaceholder,
+    setPwInPlaceholder,
     loginUser,
   } = useContext(UserContext);
+
+  useEffect(() => {
+    setUserInPlaceholder("username");
+    setPwInPlaceholder("password");
+    setIsUserInError(false);
+    setIsPwInError(false);
+  }, []);
 
   return (
     <div className="flex flex-col">
